@@ -1,6 +1,8 @@
 const express = require("express");
+const dotenv = require("dotenv");
 
 const app = express();
+dotenv.config();
 
 app.get("/", (req, res) => {
     res.send("Hello Backend");
@@ -22,8 +24,15 @@ app.get("/skills",(req,res)=>{
     res.send("i have skilled frontend developer")
 })
 
-const PORT = 3000;
+app.get("/test", (req, res) => {
+    console.log("URL:", req.url);
+    console.log("Method:", req.method);
+       console.log(req.headers);
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    res.send("Check your terminal");
+});
+
+
+app.listen( process.env.PORT , () => {
+    console.log(`Server is running on port ${process.env.PORT}`);
 });
