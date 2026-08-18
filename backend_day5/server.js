@@ -32,6 +32,18 @@ app.put("/update:id",(req,res)=>{
    res.send("updated successfully");
 })
 
+//delete
+
+app.delete("/delete", ()=>{
+    const { id } = req.params;
+    user = users.filter((val)=>{
+       return val.id !== id 
+    }) 
+
+    res.send(user)
+
+})
+
 app.listen(PORT,()=>{
    console.log("running ");
 })
