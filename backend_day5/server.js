@@ -19,6 +19,19 @@ app.get("/read",(req,res)=>{
      res.send(users)
 })
 
+
+//update
+app.put("/update:id",(req,res)=>{
+   const { id } = req.params;
+   const { name } = req.body;
+
+   users = users.map((val)=>{
+    val.id === id ? { ...val ,name} : val
+   })
+
+   res.send("updated successfully");
+})
+
 app.listen(PORT,()=>{
    console.log("running ");
 })
