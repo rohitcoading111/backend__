@@ -14,7 +14,10 @@ app.post("/create",(req,res)=>{
     res.send("user created successfullly")
 })
 
-
+//read
+app.get("/read",(req,res)=>{
+     res.send(users)
+})
 
 app.listen(PORT,()=>{
    console.log("running ");
