@@ -16,6 +16,11 @@ const userSchema = new Schema({
     },
     address:{
         type:String,
+    },
+    gender:{
+        type:String,
+        enum: ["MALE","FEMALE","OTHERS"],
+        required: true
     }
 },{timestamps:true})
 
