@@ -18,3 +18,17 @@ const createNotesController = async (req,res)=> {
         })
     }
 }
+
+const getAllNotesController = async (req,res)=> {
+   try {
+     const allNotes = NotesModel.find();
+    res.status(200).json({
+        message:"all notes find has been successfully",
+        data:allNotes
+    })
+   } catch (error) {
+     res.status(500).json({
+        message:"internal server error your notes has been not find please try again",
+     });
+   }
+};
