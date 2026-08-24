@@ -32,3 +32,18 @@ const getAllNotesController = async (req,res)=> {
      });
    }
 };
+
+const singleNoteController = async (req,res)=> {
+   try {
+    let noteId = req.params.id;
+    let note = await NotesModel.findById(noteId);
+    res.status(200).json({
+        message:"your note has been successfully finded",
+        data:note
+    })
+   } catch (error) {
+    res.status(500).json({
+        message:"internal error your note has been note finded please try again after some time later"
+    })
+   }
+}
