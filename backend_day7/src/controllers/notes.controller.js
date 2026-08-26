@@ -67,3 +67,19 @@ const getUpdatedNoteController = async(req,res)=>{
     });
   }
 };
+
+const deleteNoteController = async (req, res) => {
+  try {
+    let noteId = req.params.id;
+
+    await NotesModel.findByIdAndDelete(noteId);
+
+    return res.status(200).json({
+      message: "Note deleted successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
