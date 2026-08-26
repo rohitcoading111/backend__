@@ -47,3 +47,23 @@ const singleNoteController = async (req,res)=> {
     })
    }
 }
+
+const getUpdatedNoteController = async(req,res)=>{
+     try {
+     let noteId = req.params.id;
+     let body = req.body;
+
+    let updatedNote = await NotesModel.findByIdAndUpdate(noteId, body, {
+      new: true,
+    });
+
+    return res.status(200).json({
+      message: "Note updated successfully",
+      data: updatedNote,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+}
