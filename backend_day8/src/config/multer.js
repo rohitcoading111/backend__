@@ -8,3 +8,6 @@ const StorageForLocal = multer.diskStorage({
         cb(null, Date.now() + file.originalname)
     },
 });
+
+
+module.exports = multer
