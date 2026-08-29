@@ -21,4 +21,4 @@ router.post("/", upload.single("image"), (req, res) => {
   }
 });
 
-module.exports = router;
+module.exports = router; 
