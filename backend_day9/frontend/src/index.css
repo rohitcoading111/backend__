@@ -77,3 +77,71 @@ html,body #root{
 .create-post-section button[type="submit"]:hover {
   background-color: #0056b3;
 }
+
+
+/* ==========================================================================
+   FEED COMPONENT STYLES (Globaal)
+   ========================================================================== */
+
+/* Container voor de hele feed */
+.feed-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Grid layout voor de posts */
+.feed-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 24px;
+}
+
+/* Styling voor de individuele post kaarten */
+.feed-section .post-card {
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.feed-section .post-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Zorgt dat afbeeldingen netjes schalen en dezelfde hoogte hebben */
+.feed-section .image-wrapper {
+  width: 100%;
+  height: 250px;
+  background-color: #f4f4f5;
+}
+
+.feed-section .image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Tekst sectie onder de afbeelding */
+.feed-section .post-content {
+  padding: 16px;
+}
+
+.feed-section .post-caption {
+  margin: 0;
+  font-size: 14px;
+  color: #18181b;
+  line-height: 1.5;
+}
+
+/* Styling voor de melding als er geen posts zijn */
+.feed-section .no-posts {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #71717a;
+  font-size: 16px;
+  padding: 60px 0;
+}
