@@ -51,7 +51,7 @@ const updatePost = async (req, res) => {
     id,
     {
         caption: caption,
-        image: image,
+        image: `${req.protocol}://${req.get("host")}/${req.file.path.replace(/\\/g, "/")}`,
     },
     { new: true }
 );
