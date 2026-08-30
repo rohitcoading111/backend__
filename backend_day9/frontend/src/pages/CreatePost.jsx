@@ -34,7 +34,7 @@ const CreatePost = () => {
         <h2>Postly</h2>
 
         <div className="nav-buttons">
-          <Link to="/create-post" className="nav-btn active">
+          <Link to="/" className="nav-btn active">
             Create Post
           </Link>
 

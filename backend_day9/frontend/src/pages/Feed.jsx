@@ -33,7 +33,7 @@ const Feed = () => {
 
         <div className="nav-buttons">
 
-          <Link to="/create-post" className="nav-btn">
+          <Link to="/" className="nav-btn">
             Create Post
           </Link>
 
@@ -80,7 +80,7 @@ const Feed = () => {
               <h2>No posts yet</h2>
               <p>Be the first one to create a post.</p>
 
-              <Link to="/create-post" className="publish-btn">
+              <Link to="/" className="publish-btn">
                 Create First Post
               </Link>
             </div>
