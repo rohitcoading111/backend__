@@ -1,8 +1,22 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from "react";
 
 const Feed = () => {
 
   const [posts, setPosts] = useState([]); 
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+        try {
+            const response = await fetch("http://localhost:3000/posts");
+            const data = await response.json();
+            setPosts(data.posts);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    fetchPosts();
+}, []);
 
   return (
     <div className="feed-container">

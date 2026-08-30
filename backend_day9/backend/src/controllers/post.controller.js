@@ -6,7 +6,7 @@ const createPost = async (req, res) => {
         const { caption } = req.body;
 
         const post = await Post.create({
-            image: req.file.path,
+            image: `${req.protocol}://${req.get("host")}/${req.file.path.replace(/\\/g, "/")}`,
             caption
         });
 
