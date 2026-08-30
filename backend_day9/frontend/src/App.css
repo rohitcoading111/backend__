@@ -251,3 +251,26 @@ a {
   }
 
 }
+
+.update-btn {
+  border: none;
+  padding: 10px 18px;
+  margin-top: 12px;
+
+  border-radius: 8px;
+
+  background: #171717;
+  color: white;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.update-btn:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}

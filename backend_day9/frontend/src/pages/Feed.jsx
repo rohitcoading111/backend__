@@ -4,17 +4,19 @@ import { Link } from "react-router-dom";
 const Feed = () => {
 
   const [posts, setPosts] = useState([]);
+  const [selectedPost, setSelectedPost] = useState(null);
+
+  const handleUpdate = (post) => {
+    setSelectedPost(post);
+  };
 
   useEffect(() => {
 
     const fetchPosts = async () => {
       try {
         const response = await fetch("http://localhost:3000/posts");
-
         const data = await response.json();
-
         setPosts(data.posts);
-
       } catch (error) {
         console.log(error);
       }
@@ -70,6 +72,13 @@ const Feed = () => {
                   <p>{post.caption}</p>
                 </div>
 
+                <Link
+                 to="/"
+                 state={{ post }}
+                 className="update-btn"
+                 >
+                  Update
+                </Link>
               </article>
 
             ))
