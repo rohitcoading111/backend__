@@ -2,6 +2,7 @@ import React from 'react'
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import CreatePost from './pages/CreatePost'
 import Feed from './pages/Feed' 
+import "./App.css";
 
 const App = () => {
   return (
