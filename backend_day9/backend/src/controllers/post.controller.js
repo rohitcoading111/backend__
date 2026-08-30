@@ -2,8 +2,6 @@ const Post = require("../models/post.model");
 
 const createPost = async (req, res) => {
     try {
-        console.log("BODY:", req.body);
-        console.log("FILE:", req.file);
 
         const { caption } = req.body;
 
