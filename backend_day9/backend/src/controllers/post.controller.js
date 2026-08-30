@@ -41,8 +41,36 @@ const getPosts = async (req, res) => {
     }
 };
 
+const updatePost = async (req, res) => {
+   try {
+     const { id } = req.params;
+     const { caption } = req.body;
+     const image = req.file.path;
+
+ const post = await Post.findByIdAndUpdate(
+    id,
+    {
+        caption: caption,
+        image: image,
+    },
+    { new: true }
+);
+
+res.status(200).json({
+    message: "Post updated successfully",
+    post
+});
+   } catch (error) {
+     res.status(500).json({
+        message: "Failed to update your data",
+        error: error.message,
+     })
+   }
+};
+
 
 module.exports = {
     createPost,
-    getPosts
+    getPosts,
+    updatePost
 };
