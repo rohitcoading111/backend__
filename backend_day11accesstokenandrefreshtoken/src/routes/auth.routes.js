@@ -46,11 +46,29 @@ router.post("/refresh", async (req, res) => {
       const decoded = await verifyRefreshToken(refreshToken);
       const user = await userModel.findById(decoded.userId);
 
-      if(refreshToken !== user.refreshToken ){
-        user.refreshToken = null;
-        await user.save();
-        return res.status(401).json({message:"Invalid refresh token"});
-      }
+      if (refreshToken !== user.refreshToken) {
+    user.refreshToken = null;
+    await user.save();
+
+    return res.status(401).json({
+        message: "Invalid refresh token"
+    });
+}
+
+const { accessToken, refreshToken: newRefreshToken } =
+    generateAccessToken({ userId: user._id });
+
+res.cookie("refreshToken", newRefreshToken, {
+    httpOnly: true,
+});
+
+user.refreshToken = newRefreshToken;
+await user.save();
+
+return res.status(200).json({
+    message: "Access token refreshed successfully",
+    accessToken
+});
     } 
     catch (error) {
         return res.status(401).json({message:"Invalid refresh token"});
