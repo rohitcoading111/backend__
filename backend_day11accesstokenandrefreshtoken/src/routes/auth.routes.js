@@ -1,7 +1,7 @@
 import { Router } from "express";
 import userModel from "../models/user.model.js";
 import bcrypt from "bcryptjs";
-import { generateAccessToken,verifyAccessToken } from "../utils/auth.js";
+import { generateAccessToken,verifyAccessToken,verifyRefreshToken } from "../utils/auth.js";
 const router = Router();
 
 router.post("/register",async(req,res)=>{
@@ -11,7 +11,7 @@ router.post("/register",async(req,res)=>{
         return res.status(400).json({message:"User already exists"});
         errors:[
            {
-            param: "email",
+            path: "email",
             msg: "User already exists"
            }
         ]
@@ -35,6 +35,27 @@ router.get("/me", async (req, res) => {
     } catch (error) {
         return res.status(401).json({message:"Invalid access token"});
     }
+});
+
+router.post("/refresh", async (req, res) => {
+    const refreshToken = req.cookies.refreshToken;
+    if(!refreshToken){
+        return res.status(401).json({message:"Refresh token not found"});
+    }
+    try {
+      const decoded = await verifyRefreshToken(refreshToken);
+      const user = await userModel.findById(decoded.userId);
+
+      if(refreshToken !== user.refreshToken ){
+        user.refreshToken = null;
+        await user.save();
+        return res.status(401).json({message:"Invalid refresh token"});
+      }
+    } 
+    catch (error) {
+        return res.status(401).json({message:"Invalid refresh token"});
+    }
+    
 });
 
 export default router;
