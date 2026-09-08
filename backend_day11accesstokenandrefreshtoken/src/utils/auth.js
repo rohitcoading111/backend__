@@ -6,3 +6,8 @@ export const generateAccessToken = ({userId}) => {
     const refreshToken = jwt.sign({userId}, config.REFRESH_TOKEN_SECRET, {expiresIn: '7d'});
     return {accessToken, refreshToken};
 }
+
+export const verifyAccessToken = (token) => {
+   const decoded = jwt.verify(token, config.ACCESS_TOKEN_SECRET);
+   return decoded;
+}

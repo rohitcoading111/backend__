@@ -1,7 +1,7 @@
 import { Router } from "express";
 import userModel from "../models/user.model.js";
 import bcrypt from "bcryptjs";
-import { generateAccessToken } from "../utils/auth.js";
+import { generateAccessToken,verifyAccessToken } from "../utils/auth.js";
 const router = Router();
 
 router.post("/register",async(req,res)=>{
@@ -23,7 +23,18 @@ router.post("/register",async(req,res)=>{
     user.refreshToken = refreshToken;
     await user.save();
     res.cookie("refreshToken", refreshToken, {httpOnly: true,});
-    return res.status(201).json({message:"User created successfully",user});
+    return res.status(201).json({message:"User created successfully",name:user.name,email:user.email,accessToken});
+});
+
+router.get("/me", async (req, res) => {
+    const accesstoken = req.headers.authorization?.split(" ")[1];
+    try {
+        const decoded = verifyAccessToken(accesstoken);
+        const user = await userModel.findById(decoded.userId)
+        res.status(200).json({message:"User fetched successfully",name:user.name,email:user.email});
+    } catch (error) {
+        return res.status(401).json({message:"Invalid access token"});
+    }
 });
 
 export default router;
