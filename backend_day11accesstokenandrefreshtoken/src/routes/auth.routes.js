@@ -8,13 +8,15 @@ router.post("/register",async(req,res)=>{
     const {name,email,password} = req.body;
     const isUser = await userModel.findOne({email});
     if(isUser){
-        return res.status(400).json({message:"User already exists"});
-        errors:[
+        return res.status(400).json({message:"User already exists",
+         errors:[
            {
             path: "email",
             msg: "User already exists"
            }
         ]
+
+        });
         
     }
     const user = await userModel.create({name,email,passwordHash: await bcrypt.hash(password,12)});
