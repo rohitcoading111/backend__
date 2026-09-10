@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import { useUserContext } from "../../../context/user.context";
+import useApi from "./shared/api";
 
 const initialFormData = {
   name: "",
@@ -10,6 +11,7 @@ const initialFormData = {
 
 const Register = () => {
   const navigate = useNavigate();
+  const api = useApi();
   const { setUser, setAccessToken } = useUserContext();
   const [formData, setFormData] = useState(initialFormData);
   const [loading, setLoading] = useState(false);
@@ -23,12 +25,25 @@ const Register = () => {
     }));
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    setError("");
-    setLoading(true);
-    
-   };
+const handleSubmit = async (event) => {
+  event.preventDefault();
+  setError("");
+  setLoading(true);
+
+  try {
+    const response = await api.post("/auth/register", formData);
+
+    // success logic yahan
+    console.log(response.data);
+
+  } catch (error) {
+    setError(
+      error.response?.data?.message || "An error occurred"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div style={{ maxWidth: "420px", margin: "40px auto", padding: "24px" }}>
