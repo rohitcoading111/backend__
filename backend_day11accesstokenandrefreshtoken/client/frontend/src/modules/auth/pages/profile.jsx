@@ -26,35 +26,6 @@ const Profile = () => {
     setLoading(true);
     setError("");
 
-    try {
-      const response = await fetch("/api/auth/me", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${currentToken}`,
-        },
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to fetch profile");
-      }
-
-      const nextUser = {
-        name: data.name,
-        email: data.email,
-      };
-
-      setProfile(nextUser);
-      setUser(nextUser);
-      setAccessToken(currentToken);
-      localStorage.setItem("userInfo", JSON.stringify(nextUser));
-      localStorage.setItem("accessToken", currentToken);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
   };
 
   useEffect(() => {
