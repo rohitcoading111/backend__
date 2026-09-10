@@ -27,39 +27,8 @@ const Register = () => {
     event.preventDefault();
     setError("");
     setLoading(true);
-
-    try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Registration failed");
-      }
-
-      const userInfo = {
-        name: data.name,
-        email: data.email,
-      };
-
-      localStorage.setItem("userInfo", JSON.stringify(userInfo));
-      localStorage.setItem("accessToken", data.accessToken);
-
-      setUser(userInfo);
-      setAccessToken(data.accessToken);
-      navigate("/profile");
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    
+   };
 
   return (
     <div style={{ maxWidth: "420px", margin: "40px auto", padding: "24px" }}>

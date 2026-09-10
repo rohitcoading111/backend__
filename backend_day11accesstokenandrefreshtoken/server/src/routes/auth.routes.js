@@ -1,6 +1,6 @@
 import { Router } from "express";
 import userModel from "../models/user.model.js";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import { generateAccessToken,verifyAccessToken,verifyRefreshToken } from "../utils/auth.js";
 const router = Router();
 
