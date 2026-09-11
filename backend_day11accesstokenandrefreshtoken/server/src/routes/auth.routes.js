@@ -25,7 +25,14 @@ router.post("/register",async(req,res)=>{
     user.refreshToken = refreshToken;
     await user.save();
     res.cookie("refreshToken", refreshToken, {httpOnly: true,});
-    return res.status(201).json({message:"User created successfully",name:user.name,email:user.email,accessToken});
+   return res.status(201).json({
+  message: "User created successfully",
+  user: {
+    name: user.name,
+    email: user.email
+  },
+  accessToken
+});
 });
 
 router.get("/me", async (req, res) => {

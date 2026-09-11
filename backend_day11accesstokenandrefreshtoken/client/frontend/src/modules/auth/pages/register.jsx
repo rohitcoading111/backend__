@@ -12,7 +12,7 @@ const initialFormData = {
 const Register = () => {
   const navigate = useNavigate();
   const api = useApi();
-  const { setUser, setAccessToken } = useUserContext();
+  const { accessToken, setAccessToken,user, setUser } = useUserContext();
   const [formData, setFormData] = useState(initialFormData);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -32,7 +32,10 @@ const handleSubmit = async (event) => {
 
   try {
     const response = await api.post("/auth/register", formData);
-    console.log(response.data);
+    setAccessToken(response.data.accessToken);
+    console.log(response.data.user)
+    setUser(response.data.user)
+    navigate("/profile");
   } catch (error) {
     setError(
       error.response?.data?.message || "An error occurred"
