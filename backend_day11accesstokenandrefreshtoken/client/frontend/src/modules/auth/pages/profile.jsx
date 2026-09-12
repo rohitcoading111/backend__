@@ -1,17 +1,30 @@
-import React ,{useEffect} from "react";
+import React, { useEffect } from "react";
 import { useUserContext } from "../../../context/user.context";
 import useApi from "./shared/api";
 
 const Profile = () => {
-  const { user,setUser } = useUserContext();
+  const { user, setUser } = useUserContext();
   const api = useApi();
+
   async function fetchProfile() {
-      const res = await api.get("/auth/me")
-      setUser(res.data.user);
+    try {
+      const res = await api.get("/auth/me");
+
+      console.log(res.data);
+
+      setUser({
+        name: res.data.name,
+        email: res.data.email,
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
- useEffect(()=>{
-  fetchProfile();
- },[])
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-12 text-white">
       <div className="mx-auto max-w-4xl">
@@ -32,12 +45,15 @@ const Profile = () => {
         <div className="overflow-hidden rounded-3xl border border-slate-800 bg-slate-900 shadow-2xl">
           <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 px-8 py-10">
             <div className="flex flex-col items-center gap-5 sm:flex-row">
+              
               <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-white/30 bg-white/20 text-3xl font-bold backdrop-blur">
                 {user?.name?.charAt(0).toUpperCase()}
               </div>
 
               <div>
-                <p className="text-sm text-white/70">Welcome back</p>
+                <p className="text-sm text-white/70">
+                  Welcome back
+                </p>
 
                 <h2 className="mt-1 text-3xl font-bold">
                   {user?.name}
@@ -56,8 +72,11 @@ const Profile = () => {
             </h3>
 
             <div className="grid gap-5 sm:grid-cols-2">
+              
               <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
-                <p className="text-sm text-slate-500">Full Name</p>
+                <p className="text-sm text-slate-500">
+                  Full Name
+                </p>
 
                 <p className="mt-2 text-lg font-medium text-slate-100">
                   {user?.name}
@@ -65,12 +84,15 @@ const Profile = () => {
               </div>
 
               <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
-                <p className="text-sm text-slate-500">Email Address</p>
+                <p className="text-sm text-slate-500">
+                  Email Address
+                </p>
 
                 <p className="mt-2 break-all text-lg font-medium text-slate-100">
                   {user?.email}
                 </p>
               </div>
+
             </div>
 
             <div className="mt-6 flex items-center gap-3 rounded-2xl border border-emerald-900/50 bg-emerald-950/30 p-5">
@@ -86,6 +108,7 @@ const Profile = () => {
                 </p>
               </div>
             </div>
+
           </div>
         </div>
       </div>
