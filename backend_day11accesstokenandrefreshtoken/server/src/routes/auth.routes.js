@@ -40,7 +40,11 @@ router.get("/me", async (req, res) => {
     try {
         const decoded = verifyAccessToken(accesstoken);
         const user = await userModel.findById(decoded.userId)
-        res.status(200).json({message:"User fetched successfully",name:user.name,email:user.email});
+       res.status(200).json({
+  message: "User fetched successfully",
+  name: user.name,
+  email: user.email
+});
     } catch (error) {
         return res.status(401).json({message:"Invalid access token"});
     }
