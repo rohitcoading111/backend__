@@ -21,5 +21,11 @@ app.get("/:code",async function(req,res){
     }
 
     res.redirect(302, url.originalUrl)
+
+    await Url.findOneAndUpdate({
+        shortCode:code
+    },{
+        $inc: {clicks:1}
+    })
 })
 export default app;
