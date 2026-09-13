@@ -37,6 +37,16 @@ router.post("/",async function(req,res){
    })
 })
 
+router.get("/",async function(req,res){
+    const urls = await Url.find()
+    return res.status(201).json({
+        message:"urls fetched successfully",
+        data:{
+            urls
+        }
+    })
+})
+
 
 
 
