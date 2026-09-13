@@ -1,3 +1,4 @@
+import { exec } from "child_process"
 import { log } from "console"
 import crypto from "crypto"
 
@@ -8,7 +9,8 @@ const generateCode = ()=>{
         shortCode += mainSting.charAt(Math.floor(Math.random() * 62))
      }
 
-    
+    return shortCode;
 }
 
-generateCode();
+
+export default generateCode;
