@@ -47,7 +47,20 @@ router.get("/",async function(req,res){
     })
 })
 
-
+router.delete("/:id", async function(req,res){
+     const{id} = req.params;
+     const url = await Url.findById(id)
+     if(!url){
+        return res.status(401).json({
+            message:"url not found"
+        })
+     }
+     await Url.findByIdAndDelete(id);
+     return res.status(200).json({
+        message:"url deleted successfully"
+     })
+     
+})
 
 
 export default router;
