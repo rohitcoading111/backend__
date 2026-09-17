@@ -1,6 +1,7 @@
 import urlmodel from "../models/url.models.js"
+import shortCode from "../utils/shortCode.js"
 
-const urlChecker = (req,res)=>{
+const urlChecker =async (req,res)=>{
     const {url} = req.body
     if(!url){
         return res.status(400).json({
@@ -18,6 +19,11 @@ const urlChecker = (req,res)=>{
         error:"url is too long"
     })
    }
+
+   await urlmodel.create({
+    originalUrl:url,
+    shortCode:shortCode
+   })
 
 }
 
