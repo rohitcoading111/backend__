@@ -1,5 +1,6 @@
 import urlmodel from "../models/url.models.js"
-import shortCode from "../utils/shortCode.js"
+import generateCode from "../utils/shortCode.js"
+
 
 const urlChecker =async (req,res)=>{
     const {url} = req.body
@@ -19,11 +20,26 @@ const urlChecker =async (req,res)=>{
         error:"url is too long"
     })
    }
-
-   await urlmodel.create({
+   const shortCode = generateCode();
+  try {
+    await urlmodel.create({
     originalUrl:url,
     shortCode:shortCode
    })
+
+   res.status(200).json({
+    message:"URL shortened successfully",
+    data:{
+        originalUrl:url,
+        shortCode:shortCode
+    }
+   })
+  } catch (error) {
+    res.status(500).json({
+        message:"some issue to this particular url not saved or fetched successfully",
+        error,
+    })
+  }
 
 }
 

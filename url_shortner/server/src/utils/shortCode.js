@@ -9,5 +9,4 @@ const generateCode = ()=>{
   return shortCode;
   
 }
-generateCode();
 export default generateCode;
