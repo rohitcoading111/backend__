@@ -164,7 +164,7 @@ function App() {
         </section>
 
         <section className="mt-10 overflow-x-auto border-t border-black/20 pt-3">
-          <table className="w-full min-w-[680px] border-collapse text-left text-sm">
+          <table className="w-full min-w[680px] border-collapse text-left text-sm">
             <thead className="bg-[#ddd8d0] text-xs uppercase tracking-wider text-black/65">
               <tr><th className="border border-black/15 px-3 py-2">Part</th><th className="border border-black/15 px-3 py-2">Component</th><th className="border border-black/15 px-3 py-2">What it does</th></tr>
             </thead>
