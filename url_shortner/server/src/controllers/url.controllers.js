@@ -114,8 +114,35 @@ const urlFind = async (req,res) =>{
    }
 }
 
+const urlDelete = async (req, res) => {
+  try {
+    const { code } = req.params;
+
+    const deletedUrl = await urlmodel.findOneAndDelete({
+      shortCode: code
+    });
+
+    if (!deletedUrl) {
+      return res.status(404).json({
+        message: "URL not found"
+      });
+    }
+
+    res.status(200).json({
+      message: "URL deleted successfully",
+      data: deletedUrl
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Internal server error"
+    });
+  }
+};
+
 export {
     urlChecker,
     urlRedirect,
-    urlFind
+    urlFind,
+    urlDelete
 }
