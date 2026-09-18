@@ -67,7 +67,18 @@ const urlRedirect = async (req,res)=>{
 }
 
 
+const urlFind = async (req,res) =>{
+   const allUrl = await urlmodel.find();
+   res.status(200).json({
+    message:"all url fetched successfully",
+    data:{
+        allUrl,
+    }
+   })
+}
+
 export {
     urlChecker,
-    urlRedirect
+    urlRedirect,
+    urlFind
 }
