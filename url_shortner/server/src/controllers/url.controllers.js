@@ -35,6 +35,12 @@ const urlChecker =async (req,res)=>{
     }
    })
   } catch (error) {
+    if(error.code === 11000){
+       return res.status(500).json({
+        message:"url has been already created ",
+        error,
+    })
+    }
     res.status(500).json({
         message:"some issue to this particular url not saved or fetched successfully",
         error,
