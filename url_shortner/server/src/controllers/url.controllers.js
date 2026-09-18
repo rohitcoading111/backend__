@@ -20,8 +20,15 @@ const urlChecker =async (req,res)=>{
         error:"url is too long"
     })
    }
+   try {
+    new URL(url);
+   } catch (error) {
+    return res.status(400).json({
+        message: "url is not valid, please enter a valid URL"
+    });
+   }
    const shortCode = generateCode();
-  try {
+   try {
     await urlmodel.create({
     originalUrl:url,
     shortCode:shortCode
