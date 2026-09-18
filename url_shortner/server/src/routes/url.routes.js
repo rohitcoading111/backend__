@@ -1,5 +1,5 @@
 import express from "express"
-import urlChecker from "../controllers/url.controllers.js";
+import { urlChecker } from "../controllers/url.controllers.js";
 
 const router = express.Router();
 

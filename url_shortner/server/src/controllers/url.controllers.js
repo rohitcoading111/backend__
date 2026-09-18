@@ -31,7 +31,7 @@ const urlChecker =async (req,res)=>{
     message:"URL shortened successfully",
     data:{
         originalUrl:url,
-        shortCode:shortCode
+        shortCode:shortCode,
     }
    })
   } catch (error) {
@@ -44,5 +44,30 @@ const urlChecker =async (req,res)=>{
 }
 
 
+const urlRedirect = async (req,res)=>{
+   const {code} = req.params;
+    const urlFind =  await urlmodel.findOne(
+        {
+            shortCode:code
+        }
+    );
+   if(!urlFind){
+    return res.status(400).json({
+        message:'url not found'
+    })
+   }
 
-export default urlChecker
+   res.redirect(302,urlFind.originalUrl);
+   
+   await urlmodel.findOneAndUpdate({
+      shortCode:code
+   },{
+    $inc :{clicks:1}
+   });
+}
+
+
+export {
+    urlChecker,
+    urlRedirect
+}
