@@ -8,7 +8,6 @@ app.use(express.json());
 
 app.use("/api/url",router)
 
-
 app.get("/:code" , urlRedirect)
 
 export default app;
