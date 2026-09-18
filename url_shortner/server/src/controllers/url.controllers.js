@@ -27,7 +27,24 @@ const urlChecker =async (req,res)=>{
         message: "url is not valid, please enter a valid URL"
     });
    }
+
+   const existingUrl =  await urlmodel.findOne({
+    originalUrl: url
+   })
+
+   if(existingUrl){
+    return res.status(200).json({
+        message:"url already creeated",
+        data: {
+        shortCode: existingUrl.shortCode,
+        clicks: existingUrl.clicks,
+        shortUrl : "http://localhost:3000" + "/" + existingUrl.shortCode
+      }
+    })
+   }
+
    const shortCode = generateCode();
+   const shortUrl ="http://localhost:3000" + "/" + shortCode
    try {
     await urlmodel.create({
     originalUrl:url,
@@ -39,6 +56,7 @@ const urlChecker =async (req,res)=>{
     data:{
         originalUrl:url,
         shortCode:shortCode,
+        shortUrl,
     }
    })
   } catch (error) {
