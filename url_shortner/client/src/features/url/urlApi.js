@@ -18,11 +18,15 @@ const shortUrl = async (longUrl) => {
 const getAllUrls = async ()=>{
     try {
         const res = await api.get("/allurls");
-        return res
+        return res.data
     } catch (error) {
-         console.error("Error shortening the URL:", error);
+         console.error("Error fetching URLs:", error);
          throw error;
     }
 }
 
+export {
+    shortUrl,
+    getAllUrls
+}
 export default api;

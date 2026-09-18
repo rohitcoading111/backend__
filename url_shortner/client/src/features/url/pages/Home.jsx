@@ -1,5 +1,7 @@
 import React from "react";
-
+import { shortenUrl } from "../urlSlice.js";
+import {useDispatch} from "react-redux"
+import { useState } from "react";
 const urls = [
   {
     shortCode: "SKiHRE",
@@ -23,6 +25,8 @@ const urls = [
   },
 ];
 
+ const dispatch = useDispatch();
+ const [url, seturl] = useState("")
 const Home = () => {
   return (
     <div className="min-h-screen bg-[#070b14] text-white">
@@ -85,13 +89,15 @@ const Home = () => {
               </span>
 
               <input
+                onChange={(e) => seturl(e.target.value)}
+                value={url}
                 type="text"
                 placeholder="Paste your long URL here..."
                 className="w-full bg-transparent py-4 text-sm outline-none placeholder:text-gray-600"
               />
             </div>
 
-            <button className="rounded-xl bg-gradient-to-r from-violet-600 to-blue-500 px-7 py-4 font-semibold shadow-lg shadow-violet-500/20 transition duration-300 hover:-translate-y-1 hover:shadow-violet-500/40 active:scale-95">
+            <button onClick={() => dispatch(shortenUrl(url))} className="rounded-xl bg-gradient-to-r from-violet-600 to-blue-500 px-7 py-4 font-semibold shadow-lg shadow-violet-500/20 transition duration-300 hover:-translate-y-1 hover:shadow-violet-500/40 active:scale-95">
               Shorten URL →
             </button>
 
