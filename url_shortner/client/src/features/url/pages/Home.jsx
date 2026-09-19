@@ -3,7 +3,6 @@ import { shortenUrl } from "../urlSlice.js";
 import {useDispatch,useSelector} from "react-redux"
 import { useState } from "react";
 
-
 const urls = [
   {
     shortCode: "SKiHRE",
@@ -33,6 +32,12 @@ const Home = () => {
   const [url, seturl] = useState("")
   const { loading, data, error } = useSelector((state) => state.url);
 
+
+
+
+console.log("Redux data:", data);
+console.log("Redux loading:", loading);
+console.log("Redux error:", error);
 console.log(data)
   return (
     <div className="min-h-screen bg-[#070b14] text-white">
