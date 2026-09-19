@@ -28,7 +28,15 @@ const urlSlice = createSlice({
     reducers:{
       urlValue: (state,action)=>{
       state.initialUrl = action.payload
+      },
+      increanmentClick: (state,action)=>{ 
+       const url = state.urls.find((item)=> item.shortCode === action.payload)
+       if(url){
+        console.log("FOUND URL:", url);
+        url.clicks += 1;
+       }
       }
+    
     },
     extraReducers:(builder)=>{
      builder.addCase(shortenUrl.pending,(state)=>{
@@ -55,5 +63,5 @@ const urlSlice = createSlice({
 
 
 
-export const {urlValue} = urlSlice.actions;
+export const { urlValue, increanmentClick } = urlSlice.actions;
 export default urlSlice.reducer;

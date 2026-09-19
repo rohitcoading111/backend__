@@ -1,5 +1,5 @@
 import React from "react";
-import { shortenUrl, allUrls } from "../urlSlice.js";
+import { shortenUrl, allUrls, increanmentClick } from "../urlSlice.js";
 import {useDispatch,useSelector} from "react-redux"
 import { useState } from "react";
 import { useEffect } from "react";
@@ -217,7 +217,10 @@ const Home = () => {
                     </button>
 
                     <button
-                     onClick={() => window.open(`http://localhost:3000/api/url/${item.shortCode}`, "_blank")}
+                     onClick={() => {
+                     dispatch(increanmentClick(item.shortCode));
+                     window.open(`http://localhost:3000/api/url/${item.shortCode}`, "_blank");
+                    }}
                       className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 transition hover:scale-105 hover:bg-blue-500/20"
                       title="Open"
                     >
