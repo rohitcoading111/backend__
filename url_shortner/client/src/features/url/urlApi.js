@@ -25,6 +25,16 @@ const getAllUrls = async ()=>{
     }
 }
 
+const deleteUrl = async (id)=>{
+  try {
+    const res = await api.delete(`/${id}`)
+    return res.data
+  } catch (error) {
+    console.error("Error deleting urls ", error)
+    throw error;
+  }
+}
+
 export {
     shortUrl,
     getAllUrls
