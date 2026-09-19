@@ -12,9 +12,9 @@ const Home = () => {
   const { loading, data, error } = useSelector((state) => state.url);
   const { urls } = useSelector((state) => state.url);
 
-useEffect(() => {
+    useEffect(() => {
   dispatch(allUrls());
-}, []);
+    }, []);
 
   return (
     <div className="min-h-screen bg-[#070b14] text-white">
@@ -217,6 +217,7 @@ useEffect(() => {
                     </button>
 
                     <button
+                     onClick={() => window.open(`http://localhost:3000/api/url/${item.shortCode}`, "_blank")}
                       className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 transition hover:scale-105 hover:bg-blue-500/20"
                       title="Open"
                     >
