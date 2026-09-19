@@ -1,5 +1,5 @@
 import { createSlice,createAsyncThunk, } from '@reduxjs/toolkit';
-import { shortUrl } from './urlApi';
+import { shortUrl, getAllUrls } from './urlApi';
 
 export const shortenUrl = createAsyncThunk(
    "url/shorten",
@@ -7,15 +7,23 @@ export const shortenUrl = createAsyncThunk(
     return shortUrl(longUrl)
    }
 );
+
+export const allUrls = createAsyncThunk(
+  "url/allUrl",
+  async ()=>{
+    return getAllUrls();
+  }
+);
 const initialState = {
   initialUrl: "",
   loading: false,
   data: null,
   error: null,
+  urls:[]
 };
 
 const urlSlice = createSlice({
-     initialState,
+    initialState,
     name:"url",
     reducers:{
       urlValue: (state,action)=>{
@@ -27,8 +35,17 @@ const urlSlice = createSlice({
       state.loading = true
      }).addCase(shortenUrl.fulfilled,(state,action)=>{
       state.data = action.payload
+      state.urls.unshift(action.payload.data)
       state.loading = false
      }).addCase(shortenUrl.rejected,(state)=>{
+      state.loading = false
+      state.error = "url has been rejected"
+     }).addCase(allUrls.pending,(state)=>{
+      state.loading = true
+     }).addCase(allUrls.fulfilled,(state,action)=>{
+      state.urls = action.payload.data.allUrl
+      state.loading = false
+     }).addCase(allUrls.rejected,(state)=>{
       state.loading = false
       state.error = "url has been rejected"
      })

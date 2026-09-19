@@ -1,44 +1,21 @@
 import React from "react";
-import { shortenUrl } from "../urlSlice.js";
+import { shortenUrl, allUrls } from "../urlSlice.js";
 import {useDispatch,useSelector} from "react-redux"
 import { useState } from "react";
+import { useEffect } from "react";
 
-const urls = [
-  {
-    shortCode: "SKiHRE",
-    originalUrl: "https://www.amazon.in/s?i=toys&rh=n%3A1378455031",
-    clicks: 245,
-  },
-  {
-    shortCode: "aB72Kx",
-    originalUrl: "https://github.com/rohitcoding111",
-    clicks: 128,
-  },
-  {
-    shortCode: "xY91Lp",
-    originalUrl: "https://www.youtube.com/",
-    clicks: 86,
-  },
-  {
-    shortCode: "Qw82Mn",
-    originalUrl: "https://www.google.com/",
-    clicks: 42,
-  },
-];
 
 
 const Home = () => {
    const dispatch = useDispatch();
   const [url, seturl] = useState("")
   const { loading, data, error } = useSelector((state) => state.url);
+  const { urls } = useSelector((state) => state.url);
 
+useEffect(() => {
+  dispatch(allUrls());
+}, []);
 
-
-
-console.log("Redux data:", data);
-console.log("Redux loading:", loading);
-console.log("Redux error:", error);
-console.log(data)
   return (
     <div className="min-h-screen bg-[#070b14] text-white">
 
@@ -111,9 +88,7 @@ console.log(data)
             <button onClick={() => dispatch(shortenUrl(url))} className="rounded-xl bg-gradient-to-r from-violet-600 to-blue-500 px-7 py-4 font-semibold shadow-lg shadow-violet-500/20 transition duration-300 hover:-translate-y-1 hover:shadow-violet-500/40 active:scale-95">
               Shorten URL →
             </button>
-
           </div>
-
         </div>
       </section>
       <section className="mx-auto grid max-w-7xl gap-4 px-5 sm:grid-cols-3">
@@ -186,7 +161,7 @@ console.log(data)
             {urls.map((item) => (
 
               <div
-                key={item.shortCode}
+               
                 className="group rounded-xl border border-white/10 bg-[#0b111d]/70 p-4 transition duration-300 hover:-translate-y-0.5 hover:border-violet-500/30 hover:bg-white/[0.05]"
               >
 
@@ -269,7 +244,7 @@ console.log(data)
 
       </section>
 
-      {/* Footer */}
+  
       <footer className="border-t border-white/10 py-8 text-center text-sm text-gray-600">
         © 2026 Linkly · Shorten. Share. Track.
       </footer>
