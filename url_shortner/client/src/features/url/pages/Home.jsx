@@ -3,7 +3,7 @@ import { shortenUrl, allUrls, increanmentClick,removeUrl } from "../urlSlice.js"
 import {useDispatch,useSelector} from "react-redux"
 import { useState } from "react";
 import { useEffect } from "react";
-
+import { toast } from "react-toastify";
 
 
 const Home = () => {
@@ -43,12 +43,7 @@ const totalClicks = urls.reduce(
               Home
             </a>
 
-            <a
-              href="/dashboard"
-              className="rounded-lg px-4 py-2 text-sm text-gray-400 transition hover:bg-white/5 hover:text-white"
-            >
-              Dashboard
-            </a>
+    
           </div>
 
         </div>
@@ -87,13 +82,20 @@ const totalClicks = urls.reduce(
                 className="w-full bg-transparent py-4 text-sm outline-none placeholder:text-gray-600"
               />
             </div>
-
-            <button onClick={() => dispatch(shortenUrl(url))} className="rounded-xl bg-gradient-to-r from-violet-600 to-blue-500 px-7 py-4 font-semibold shadow-lg shadow-violet-500/20 transition duration-300 hover:-translate-y-1 hover:shadow-violet-500/40 active:scale-95">
-              Shorten URL →
+          
+            <button
+             onClick={() => dispatch(shortenUrl(url))} className="rounded-xl bg-gradient-to-r from-violet-600 to-blue-500 px-7 py-4 font-semibold shadow-lg shadow-violet-500/20 transition duration-300 hover:-translate-y-1 hover:shadow-violet-500/40 active:scale-95">
+              {loading ? "Shortening..." : "Shorten URL →"}
             </button>
           </div>
         </div>
+        {error && (
+     <p className="mt-3 text-sm text-red-400">
+    {error}
+     </p>
+     )}
       </section>
+      
       <section className="mx-auto grid max-w-7xl gap-4 px-5 sm:grid-cols-3">
 
         <StatCard
@@ -213,7 +215,9 @@ const totalClicks = urls.reduce(
                   <div className="flex gap-2 md:col-span-2">
 
                     <button
-                     onClick={() =>navigator.clipboard.writeText(`http://localhost:3000/api/url/${item.shortCode}`)}
+                   onClick={() => {navigator.clipboard.writeText(`http://localhost:3000/api/url/${item.shortCode}`);
+                   toast.success("Short URL copied!");
+                   }}
                       className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 transition hover:scale-105 hover:bg-violet-500/20"
                       title="Copy"
                     >
@@ -224,6 +228,7 @@ const totalClicks = urls.reduce(
                      onClick={() => {
                      dispatch(increanmentClick(item.shortCode));
                      window.open(`http://localhost:3000/api/url/${item.shortCode}`, "_blank");
+                     toast.success("URL opened!");
                     }}
                       className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 transition hover:scale-105 hover:bg-blue-500/20"
                       title="Open"
@@ -232,7 +237,9 @@ const totalClicks = urls.reduce(
                     </button>
 
                     <button
-                      onClick={() => dispatch(removeUrl(item.shortCode))}
+                      onClick={() => {dispatch(removeUrl(item.shortCode))
+                      toast.success("URL deleted successfully!");
+                     }}
                       className="rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2 text-red-400 transition hover:scale-105 hover:bg-red-500/20"
                       title="Delete"
                     >
