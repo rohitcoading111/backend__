@@ -15,7 +15,10 @@ const Home = () => {
     useEffect(() => {
   dispatch(allUrls());
     }, []);
-
+const totalClicks = urls.reduce(
+  (total, item) => total + item.clicks,
+  0
+);
   return (
     <div className="min-h-screen bg-[#070b14] text-white">
 
@@ -95,19 +98,19 @@ const Home = () => {
 
         <StatCard
           icon="🔗"
-          value="12"
+          value={urls.length}
           label="Total Links"
         />
 
         <StatCard
           icon="📊"
-          value="1,482"
+          value={totalClicks}
           label="Total Clicks"
         />
 
         <StatCard
           icon="⚡"
-          value="8"
+          value={urls.length}
           label="Active Links"
         />
 
