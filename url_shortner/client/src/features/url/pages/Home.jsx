@@ -1,5 +1,5 @@
 import React from "react";
-import { shortenUrl, allUrls, increanmentClick } from "../urlSlice.js";
+import { shortenUrl, allUrls, increanmentClick,removeUrl } from "../urlSlice.js";
 import {useDispatch,useSelector} from "react-redux"
 import { useState } from "react";
 import { useEffect } from "react";
@@ -228,6 +228,7 @@ const Home = () => {
                     </button>
 
                     <button
+                      onClick={() => dispatch(removeUrl(item.shortCode))}
                       className="rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2 text-red-400 transition hover:scale-105 hover:bg-red-500/20"
                       title="Delete"
                     >

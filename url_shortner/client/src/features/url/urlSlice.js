@@ -50,7 +50,10 @@ const urlSlice = createSlice({
       state.loading = true
      }).addCase(shortenUrl.fulfilled,(state,action)=>{
       state.data = action.payload
-      state.urls.unshift(action.payload.data)
+     state.urls.unshift({
+  ...action.payload.data,
+  clicks: action.payload.data.clicks ?? 0
+})
       state.loading = false
      }).addCase(shortenUrl.rejected,(state)=>{
       state.loading = false

@@ -37,6 +37,7 @@ const deleteUrl = async (id)=>{
 
 export {
     shortUrl,
-    getAllUrls
+    getAllUrls,
+    deleteUrl
 }
 export default api;
