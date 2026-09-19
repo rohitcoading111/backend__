@@ -4,9 +4,9 @@ import {urlChecker,urlDelete, urlFind, urlRedirect} from "../controllers/url.con
 const router = express.Router();
 
 router.post('/shorten', urlChecker)
-app.get("/allurls" , urlFind)
-app.get("/:code" , urlRedirect)
-app.delete("/:code" ,urlDelete)
+router.get("/allurls" , urlFind)
+router.get("/:code" , urlRedirect)
+router.delete("/:code" ,urlDelete)
 
 
 export default router;
