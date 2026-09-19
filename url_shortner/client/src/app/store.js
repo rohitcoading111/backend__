@@ -5,3 +5,5 @@ const store = configureStore({
     url: urlReducer
   }
 });
+
+export default store

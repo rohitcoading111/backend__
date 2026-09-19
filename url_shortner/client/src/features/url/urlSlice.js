@@ -15,24 +15,27 @@ const initialState = {
 };
 
 const urlSlice = createSlice({
+     initialState,
     name:"url",
     reducers:{
       urlValue: (state,action)=>{
-      state.value = action.payload
+      state.initialUrl = action.payload
       }
-    }
-})
-
-extraReducers:(builder)=>{
+    },
+    extraReducers:(builder)=>{
      builder.addCase(shortenUrl.pending,(state)=>{
       state.loading = true
-     }).addCase(shortUrl.fulfilled,(state,action)=>{
+     }).addCase(shortenUrl.fulfilled,(state,action)=>{
       state.data = action.payload
-     }).addCase(shortUrl.rejected,(state)=>{
+      state.loading = false
+     }).addCase(shortenUrl.rejected,(state)=>{
       state.loading = false
       state.error = "url has been rejected"
      })
 }
+})
+
+
 
 
 export const {urlValue} = urlSlice.actions;
