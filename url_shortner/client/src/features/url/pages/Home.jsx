@@ -210,6 +210,7 @@ const Home = () => {
                   <div className="flex gap-2 md:col-span-2">
 
                     <button
+                     onClick={() =>navigator.clipboard.writeText(`http://localhost:3000/api/url/${item.shortCode}`)}
                       className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 transition hover:scale-105 hover:bg-violet-500/20"
                       title="Copy"
                     >
