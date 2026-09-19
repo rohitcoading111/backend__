@@ -9,16 +9,20 @@ import { toast } from "react-toastify";
 const Home = () => {
    const dispatch = useDispatch();
   const [url, seturl] = useState("")
+  const [search, setSearch] = useState("");
   const { loading, data, error } = useSelector((state) => state.url);
   const { urls } = useSelector((state) => state.url);
 
     useEffect(() => {
-  dispatch(allUrls());
+    dispatch(allUrls());
     }, []);
-const totalClicks = urls.reduce(
+  const totalClicks = urls.reduce(
   (total, item) => total + item.clicks,
   0
-);
+   );
+  const searchUrl = urls.filter((item)=>{
+    return item.originalUrl?.includes(search)
+  })
   return (
     <div className="min-h-screen bg-[#070b14] text-white">
 
@@ -84,7 +88,11 @@ const totalClicks = urls.reduce(
             </div>
           
             <button
-             onClick={() => dispatch(shortenUrl(url))} className="rounded-xl bg-gradient-to-r from-violet-600 to-blue-500 px-7 py-4 font-semibold shadow-lg shadow-violet-500/20 transition duration-300 hover:-translate-y-1 hover:shadow-violet-500/40 active:scale-95">
+             onClick={() =>
+              {dispatch(shortenUrl(url))
+              seturl("")
+              }} 
+              className="rounded-xl bg-gradient-to-r from-violet-600 to-blue-500 px-7 py-4 font-semibold shadow-lg shadow-violet-500/20 transition duration-300 hover:-translate-y-1 hover:shadow-violet-500/40 active:scale-95">
               {loading ? "Shortening..." : "Shorten URL →"}
             </button>
           </div>
@@ -133,12 +141,13 @@ const totalClicks = urls.reduce(
                 Manage and track all your links in one place.
               </p>
             </div>
-
-            <input
-              type="text"
-              placeholder="Search URLs..."
-              className="rounded-xl border border-white/10 bg-[#0b111d] px-4 py-3 text-sm outline-none transition focus:border-violet-500/50"
-            />
+          <input
+           type="text"
+           placeholder="Search URLs..."
+           value={search}
+           onChange={(e) => setSearch(e.target.value)}
+           className="rounded-xl border border-white/10 bg-[#0b111d] px-4 py-3 text-sm outline-none transition focus:border-violet-500/50"
+           />
 
           </div>
 
@@ -163,10 +172,8 @@ const totalClicks = urls.reduce(
           </div>
           <div className="space-y-3 pt-3">
 
-            {urls.map((item) => (
-
+            {searchUrl.map((item) => (
               <div
-               
                 className="group rounded-xl border border-white/10 bg-[#0b111d]/70 p-4 transition duration-300 hover:-translate-y-0.5 hover:border-violet-500/30 hover:bg-white/[0.05]"
               >
 
