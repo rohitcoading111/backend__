@@ -21,7 +21,7 @@ const Home = () => {
   0
    );
   const searchUrl = urls.filter((item)=>{
-    return item.originalUrl?.includes(search)
+    return item.originalUrl.toLowerCase()?.includes(search.toLowerCase())
   })
   return (
     <div className="min-h-screen bg-[#070b14] text-white">
