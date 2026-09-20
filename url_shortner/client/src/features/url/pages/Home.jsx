@@ -222,9 +222,12 @@ const Home = () => {
                   <div className="flex gap-2 md:col-span-2">
 
                     <button
-                   onClick={() => {navigator.clipboard.writeText(`http://localhost:3000/api/url/${item.shortCode}`);
-                   toast.success("Short URL copied!");
-                   }}
+                  onClick={() => {
+  navigator.clipboard.writeText(
+    `${import.meta.env.VITE_API_URL}/${item.shortCode}`
+  );
+  toast.success("Short URL copied!");
+}}
                       className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 transition hover:scale-105 hover:bg-violet-500/20"
                       title="Copy"
                     >
@@ -233,10 +236,13 @@ const Home = () => {
 
                     <button
                      onClick={() => {
-                     dispatch(increanmentClick(item.shortCode));
-                     window.open(`http://localhost:3000/api/url/${item.shortCode}`, "_blank");
-                     toast.success("URL opened!");
-                    }}
+  dispatch(increanmentClick(item.shortCode));
+  window.open(
+    `${import.meta.env.VITE_API_URL}/${item.shortCode}`,
+    "_blank"
+  );
+  toast.success("URL opened!");
+}}
                       className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 transition hover:scale-105 hover:bg-blue-500/20"
                       title="Open"
                     >
