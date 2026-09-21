@@ -1,4 +1,6 @@
+import bcrypt from "bcryptjs"
 import userModel from "../models/user.model.js"
+
 
 const register = async(req ,res)=>{
     const {email,name,password }  = req.body
@@ -16,6 +18,13 @@ const register = async(req ,res)=>{
             ]
         })
     }
+
+    const user = await userModel.create({
+        email,
+        name,
+        passwordHash  :await bcrypt.hash(password,12)
+    })
+    
 
 }
 
