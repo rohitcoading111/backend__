@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs"
 import userModel from "../models/user.model.js"
+import {createAccessToken,createRefreshToken} from "../utils/auth.utils.js"
 
 
 const register = async(req ,res)=>{
@@ -23,6 +24,15 @@ const register = async(req ,res)=>{
         email,
         name,
         passwordHash  :await bcrypt.hash(password,12)
+    })
+
+    const accessToken = createAccessToken({
+        userId:user._id,
+        role:user.role
+    })
+    const refreshToken = createRefreshToken({
+        userId:user._id,
+        role:user.role
     })
     
 
