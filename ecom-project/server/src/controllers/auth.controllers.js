@@ -80,31 +80,7 @@ const login  = async(req,res)=>{
         role: user.role
     })
 
-    const refreshToken = createRefreshToken({
-        userId: user._id,
-        role: user.role
-    })
-
-    await userModel.findOneAndUpdate({
-        email
-    },{
-        refreshToken
-    })
-
-    res.cookie("refreshToken",refreshToken,{
-        httpOnly:true
-    })
-    res.status(200).json({
-        message:"user logged in successfully",
-        data:{
-            user:{
-                userId : user._id,
-                email:user.email,
-                name:user.name
-            },
-            accessToken,
-        }
-    })
+  
 }
 
 export default register
