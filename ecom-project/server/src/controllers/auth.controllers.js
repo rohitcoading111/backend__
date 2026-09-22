@@ -38,7 +38,7 @@ const register = async(req ,res)=>{
     res.cookie("refreshToken",refreshToken,{
         httpOnly:true
     })
-    
+  
     res.status(201).json({
         message:"user reegister succcessfully",
         data:{
