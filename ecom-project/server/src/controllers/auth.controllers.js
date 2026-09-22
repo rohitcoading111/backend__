@@ -38,6 +38,10 @@ const register = async(req ,res)=>{
     res.cookie("refreshToken",refreshToken,{
         httpOnly:true
     })
+
+    await userModel.findByIdAndUpdate(user._id,{
+        refreshToken
+    })
   
     res.status(201).json({
         message:"user reegister succcessfully",
