@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs"
 import userModel from "../models/user.model.js"
 import {createAccessToken,createRefreshToken} from "../utils/auth.utils.js"
+import { useReducer } from "react"
 
 
 const register = async(req ,res)=>{
@@ -73,6 +74,11 @@ const login  = async(req,res)=>{
             message:"invalid email or password"
         })
     }
+
+    const accessToken = createAccessToken({
+        userId: user._id,
+        role: user.role
+    })
 }
 
 export default register
