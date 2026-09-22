@@ -34,6 +34,10 @@ const register = async(req ,res)=>{
         userId:user._id,
         role:user.role
     })
+
+    res.cookie("refreshToken",refreshToken,{
+        httpOnly:true
+    })
     
 
 }
