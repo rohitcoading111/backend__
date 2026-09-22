@@ -1,6 +1,6 @@
 import { body, validationResult } from "express-validator";
 
-const registerValidator = [
+export const registerValidator = [
     body("email")
         .trim()
         .exists()
@@ -43,4 +43,28 @@ const registerValidator = [
     }
 ];
 
-export default registerValidator;
+
+export const loginValidator = [
+    body("email")
+    .exists().withMessage("email is required").bail()
+    .isString().withMessage("email must be a string value").bail()
+    .trim()
+    .isEmail().withMessage("enter a valid email address"),
+    body("password")
+    .exists().withMessage("password is required").bail()
+    .isString().withMessage("password must be a string value ").bail()
+    .trim()
+    .isLength({min:6}).withMessage("password atleast 6 characters long"),
+
+    (req,res, next)=>{
+    const errors  = validationResult(req);
+    if(!errors.isEmpty()){
+        return res.status(400).json({
+            message:"invalid request",
+            errors:errors.array()
+        })
+    }
+    next();
+  }
+]
+
