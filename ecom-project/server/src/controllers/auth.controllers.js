@@ -67,7 +67,12 @@ const login  = async(req,res)=>{
             message:"invalid email or password"
         })
     }
-    
+    const isPasswordValid =await bcrypt.compare(password,user.passwordHash)
+    if(!isPasswordValid){
+        return res.status(400).json({
+            message:"invalid email or password"
+        })
+    }
 }
 
 export default register
