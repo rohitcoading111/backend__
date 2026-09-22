@@ -57,4 +57,17 @@ const register = async(req ,res)=>{
 
 }
 
+const login  = async(req,res)=>{
+    const {email,password} = req.body
+    const user = await userModel.findOne({
+        email
+    })
+    if(!user){
+        return res.status(400).json({
+            message:"invalid email or password"
+        })
+    }
+    
+}
+
 export default register
