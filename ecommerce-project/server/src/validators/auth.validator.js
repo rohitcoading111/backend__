@@ -40,3 +40,32 @@ export const registerValidation = [
         next();
     }
 ];
+
+export const loginValidator = [
+
+    body("email")
+        .trim()
+        .exists().withMessage("email is required")
+        .bail()
+        .isEmail().withMessage("please enter a valid email address")
+        .bail(),
+
+    body("password")
+        .isLength({ min: 6, max: 100 })
+        .withMessage("password must be between 6 and 100 characters")
+        .bail(),
+
+    (req, res, next) => {
+
+        const errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: "invalid request",
+                errors: errors.array()
+            });
+        }
+
+        next();
+    }
+];
