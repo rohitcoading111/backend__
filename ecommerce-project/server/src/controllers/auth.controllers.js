@@ -1,0 +1,27 @@
+import userModel from "../models/user.model.js";
+import bcrypt from "bcryptjs";
+export const registerController = async (req, res) => {
+    try {
+      const {name,email,password} = req.body
+      const user = await userModel.findOne({
+        email
+      })
+      if(user){
+        return res.status(409).json({
+            message:"user already exists",
+        })
+      }
+    const passwordHash = await bcrypt.hash(password, 12);
+
+     await userModel.create({
+        name,
+        email,
+        password: passwordHash
+      })
+
+    } catch (error) {
+        return res.status(500).json({
+            message: "Internal server error"
+        });
+    }
+};
