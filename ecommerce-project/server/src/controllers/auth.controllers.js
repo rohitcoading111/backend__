@@ -1,5 +1,6 @@
 import userModel from "../models/user.model.js";
 import bcrypt from "bcryptjs";
+import {generateAccessToken,generateRefreshToken} from "../utils/auth.utils.js"
 
 export const registerController = async (req, res) => {
     try {
@@ -22,6 +23,18 @@ export const registerController = async (req, res) => {
             email,
             password: passwordHash
         });
+    
+        const accessToken = generateAccessToken(newUser);
+        const refreshToken = generateRefreshToken(newUser);  
+
+        await userModel.findByIdAndUpdate(newUser._id,{
+           refreshToken
+         }   
+        )
+
+        res.cookie("refreshToken", refreshToken, {
+        httpOnly: true
+        });
 
         return res.status(201).json({
             message: "user created successfully",
@@ -29,7 +42,8 @@ export const registerController = async (req, res) => {
                 id: newUser._id,
                 name: newUser.name,
                 email: newUser.email
-            }
+            },
+            accessToken
         });
 
     } catch (error) {
@@ -64,13 +78,25 @@ export const loginController = async (req, res) => {
             });
         }
 
+       const accessToken = generateAccessToken(user);
+       const refreshToken = generateRefreshToken(user);
+
+       await userModel.findByIdAndUpdate(user._id, {
+         refreshToken
+       });
+
+       res.cookie("refreshToken", refreshToken, {
+         httpOnly: true
+      });
+
         return res.status(200).json({
             message: "user login successfully",
             data: {
                 id: user._id,
                 name: user.name,
                 email: user.email
-            }
+            },
+            accessToken
         });
 
     } catch (error) {
