@@ -155,3 +155,46 @@ export const refreshTokenController = async (req, res) => {
         });
     }
 };
+
+export const logoutController = async (req, res) => {
+    try {
+        const refreshToken = req.cookies.refreshToken;
+
+        if (!refreshToken) {
+            return res.status(401).json({
+                message: "Refresh token is not found"
+            });
+        }
+
+        const decoded = jwt.verify(
+            refreshToken,
+            config.REFRESH_TOKEN
+        );
+
+        const userId = decoded.userId;
+
+        const user = await userModel.findById(userId);
+
+        if (!user) {
+            return res.status(401).json({
+                message: "User not found"
+            });
+        }
+
+        user.refreshToken = null;
+        await user.save();
+
+        res.clearCookie("refreshToken");
+
+        return res.status(200).json({
+            message: "Logout has been successful"
+        });
+
+    } catch (error) {
+        console.log("LOGOUT ERROR:", error);
+
+        return res.status(401).json({
+            message: "Invalid or expired refresh token"
+        });
+    }
+};
