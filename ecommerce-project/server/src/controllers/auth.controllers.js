@@ -40,28 +40,42 @@ export const registerController = async (req, res) => {
         });
     }
 };
+
+
 export const loginController = async (req, res) => {
     try {
         const { email, password } = req.body;
+
         const user = await userModel.findOne({
-        email
+            email
         });
 
         if (!user) {
-    return res.status(401).json({
-        message: "user not found"
-    });
+            return res.status(401).json({
+                message: "user not found"
+            });
         }
 
         const pass = await bcrypt.compare(password, user.password);
 
         if (!pass) {
-        return res.status(401).json({
-        message: "password is incorrect"
-        });
+            return res.status(401).json({
+                message: "password is incorrect"
+            });
         }
 
-        } catch (error) {
+        return res.status(200).json({
+            message: "user login successfully",
+            data: {
+                id: user._id,
+                name: user.name,
+                email: user.email
+            }
+        });
+
+    } catch (error) {
+        console.log("LOGIN ERROR:", error);
+
         return res.status(500).json({
             message: "Internal server error"
         });
