@@ -20,3 +20,20 @@ export const createProductController = async (req, res) => {
     }
 };
 
+export const getAllProductsController = async (req, res) => {
+    try {
+        const products = await productModel.find();
+
+        return res.status(200).json({
+            message: "Products fetched successfully",
+            data: products
+        });
+
+    } catch (error) {
+        console.log("GET ALL PRODUCTS ERROR:", error);
+
+        return res.status(500).json({
+            message: "Internal server error"
+        });
+    }
+};
