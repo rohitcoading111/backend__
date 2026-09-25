@@ -54,7 +54,12 @@ export const loginValidator = [
         .isLength({ min: 6, max: 100 })
         .withMessage("password must be between 6 and 100 characters")
         .bail(),
-
+        
+    body("role")
+    .trim()
+    .exists().withMessage("role is required").bail()
+    .isIn(["user", "seller"]).withMessage("role must be either user or seller"),
+    
     (req, res, next) => {
 
         const errors = validationResult(req);

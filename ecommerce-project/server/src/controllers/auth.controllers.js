@@ -23,7 +23,8 @@ export const registerController = async (req, res) => {
         const newUser = await userModel.create({
             name,
             email,
-            password: passwordHash
+            password: passwordHash,
+            role:"user"
         });
     
         const accessToken = generateAccessToken(newUser);
