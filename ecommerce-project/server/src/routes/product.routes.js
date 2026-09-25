@@ -5,6 +5,6 @@ import { authMiddleware } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
-router.post("/products", productValidation,  createProductController);
+router.post("/products", productValidation, authMiddleware, createProductController);
 
 export default router;
