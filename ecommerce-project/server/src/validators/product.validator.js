@@ -1,5 +1,3 @@
-import {body} from "express-validator"
-
 import { body, validationResult } from "express-validator";
 
 export const productValidation = [
