@@ -1,7 +1,6 @@
 import { body, validationResult } from "express-validator";
 
 export const productValidation = [
-
     body("name")
         .trim()
         .exists()
@@ -60,20 +59,7 @@ export const productValidation = [
         .withMessage("stock must be 0 or greater")
         .bail(),
 
-    body("image")
-        .trim()
-        .exists()
-        .withMessage("image is required")
-        .bail()
-        .isString()
-        .withMessage("image must be a string")
-        .bail()
-        .notEmpty()
-        .withMessage("image cannot be an empty value")
-        .bail(),
-
     (req, res, next) => {
-
         const errors = validationResult(req);
 
         if (!errors.isEmpty()) {

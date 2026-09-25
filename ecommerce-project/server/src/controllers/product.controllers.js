@@ -1,10 +1,18 @@
 import productModel from "../models/product.model.js";
+import imagekit from "../config/imagekit.js";
 
 export const createProductController = async (req, res) => {
     try {
-        const { name, description, price, category, stock, image } = req.body;
+        const { name, description, price, category, stock } = req.body;
 
-        const product = await productModel.create({ name, description, price, category, stock, image });
+        const product = await productModel.create({
+            name,
+            description,
+            price,
+            category,
+            stock,
+            image: req.file.path
+        });
 
         return res.status(201).json({
             message: "Product created successfully",
