@@ -48,9 +48,20 @@ const LoginForm = () => {
                             id="email"
                             type="email"
                             placeholder="Enter your email"
-                            {...register("email")}
+                           {...register("email", {
+                                 required: "Email is required",
+                                 pattern:{
+                                       value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                                       message: "Please enter a valid email",
+                                 }
+                            })}
                             className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-black focus:ring-1 focus:ring-black"
                         />
+                        {errors.email && (
+                            <p className="mt-1 text-sm text-red-500">
+                            {errors.email.message}
+                            </p>
+                        )}
                     </div>
 
                     <div>
