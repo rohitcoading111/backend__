@@ -6,15 +6,19 @@ import config from "../config/config.js";
 
 export const registerController = async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, email, password, role } = req.body;
 
-        const user = await userModel.findOne({
-            email
-        });
+        const user = await userModel.findOne({ email });
 
         if (user) {
             return res.status(409).json({
-                message: "user already exists"
+                message: "User already exists"
+            });
+        }
+
+        if (role !== "user" && role !== "seller") {
+            return res.status(400).json({
+                message: "Role must be either user or seller"
             });
         }
 
@@ -24,27 +28,27 @@ export const registerController = async (req, res) => {
             name,
             email,
             password: passwordHash,
-            role:"user"
+            role
         });
-    
-        const accessToken = generateAccessToken(newUser);
-        const refreshToken = generateRefreshToken(newUser);  
 
-        await userModel.findByIdAndUpdate(newUser._id,{
-           refreshToken
-         }   
-        )
+        const accessToken = generateAccessToken(newUser);
+        const refreshToken = generateRefreshToken(newUser);
+
+        await userModel.findByIdAndUpdate(newUser._id, {
+            refreshToken
+        });
 
         res.cookie("refreshToken", refreshToken, {
-        httpOnly: true
+            httpOnly: true
         });
 
         return res.status(201).json({
-            message: "user created successfully",
+            message: "User created successfully",
             data: {
                 id: newUser._id,
                 name: newUser.name,
-                email: newUser.email
+                email: newUser.email,
+                role: newUser.role
             },
             accessToken
         });
@@ -57,7 +61,6 @@ export const registerController = async (req, res) => {
         });
     }
 };
-
 
 export const loginController = async (req, res) => {
     try {
