@@ -26,6 +26,14 @@ export const registerValidation = [
         .isLength({ min: 6, max: 50 })
         .withMessage("Password must be between 6 and 50 characters")
         .bail(),
+        
+    body("role")
+    .exists()
+    .withMessage("role is required")
+    .bail()
+    .isIn(["user", "seller"])
+    .withMessage("role must be either user or seller")
+    .bail(),
 
     (req, res, next) => {
         const errors = validationResult(req);
