@@ -21,8 +21,6 @@ const LoginForm = () => {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
             <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
-
-                {/* Header */}
                 <div className="mb-8 text-center">
                     <h1 className="text-3xl font-bold text-gray-900">
                         Welcome Back
@@ -33,13 +31,11 @@ const LoginForm = () => {
                     </p>
                 </div>
 
-                {/* Login Form */}
                 <form
                     onSubmit={handleSubmit(onSubmit)}
                     className="space-y-5"
                 >
 
-                    {/* Email */}
                     <div>
                         <label
                             htmlFor="email"
@@ -57,7 +53,6 @@ const LoginForm = () => {
                         />
                     </div>
 
-                    {/* Password */}
                     <div>
                         <label
                             htmlFor="password"
@@ -75,7 +70,6 @@ const LoginForm = () => {
                         />
                     </div>
 
-                    {/* Role */}
                     <div>
                         <label
                             htmlFor="role"
@@ -95,7 +89,6 @@ const LoginForm = () => {
                         </select>
                     </div>
 
-                    {/* Submit */}
                     <button
                         type="submit"
                         disabled={isSubmitting}
@@ -106,7 +99,6 @@ const LoginForm = () => {
 
                 </form>
 
-                {/* Register Navigation */}
                 <p className="mt-6 text-center text-sm text-gray-500">
                     Don't have an account?
 

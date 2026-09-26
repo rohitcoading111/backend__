@@ -1,15 +1,16 @@
 import { loginApi, registerApi } from "../apis/authApi.jsx";
+import {useDispatch} from "react-redux"
+import {loginSuccess} from "../state/authSlice.js"
 
 const useAuth = () => {
+    const dispatch = useDispatch()
+
     const login = async (data) => {
         const response = await loginApi(data);
-
-        console.log("LOGIN RESPONSE:", response);
+        dispatch(loginSuccess(response))
     };
-const registerUser = async (data) => {
+    const registerUser = async (data) => {
     const response = await registerApi(data);
-
-    console.log("REGISTER RESPONSE:", response);
 };
     return {
         login,
@@ -17,4 +18,4 @@ const registerUser = async (data) => {
     };
 };
 
-export default useAuth;
+export default useAuth; 
