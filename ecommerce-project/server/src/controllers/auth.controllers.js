@@ -6,19 +6,31 @@ import config from "../config/config.js";
 
 export const registerController = async (req, res) => {
     try {
-        const { name, email, password, role } = req.body;
+        const {
+            name,
+            email,
+            password,
+            confirmPassword,
+            role
+        } = req.body;
 
-        const user = await userModel.findOne({ email });
-
-        if (user) {
-            return res.status(409).json({
-                message: "User already exists"
+        if (password !== confirmPassword) {
+            return res.status(400).json({
+                message: "Passwords do not match"
             });
         }
 
         if (role !== "user" && role !== "seller") {
             return res.status(400).json({
                 message: "Role must be either user or seller"
+            });
+        }
+
+        const existingUser = await userModel.findOne({ email });
+
+        if (existingUser) {
+            return res.status(409).json({
+                message: "Email already registered"
             });
         }
 
@@ -31,26 +43,14 @@ export const registerController = async (req, res) => {
             role
         });
 
-        const accessToken = generateAccessToken(newUser);
-        const refreshToken = generateRefreshToken(newUser);
-
-        await userModel.findByIdAndUpdate(newUser._id, {
-            refreshToken
-        });
-
-        res.cookie("refreshToken", refreshToken, {
-            httpOnly: true
-        });
-
         return res.status(201).json({
-            message: "User created successfully",
+            message: "User registered successfully",
             data: {
                 id: newUser._id,
                 name: newUser.name,
                 email: newUser.email,
                 role: newUser.role
-            },
-            accessToken
+            }
         });
 
     } catch (error) {
@@ -66,41 +66,48 @@ export const loginController = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        const user = await userModel.findOne({
-            email
-        });
+        const user = await userModel.findOne({ email });
 
+        // Generic error message
         if (!user) {
             return res.status(401).json({
-                message: "user not found"
+                message: "Invalid email or password"
             });
         }
 
-        const pass = await bcrypt.compare(password, user.password);
+      
+        const isPasswordValid = await bcrypt.compare(
+            password,
+            user.password
+        );
 
-        if (!pass) {
+        if (!isPasswordValid) {
             return res.status(401).json({
-                message: "password is incorrect"
+                message: "Invalid email or password"
             });
         }
 
-       const accessToken = generateAccessToken(user);
-       const refreshToken = generateRefreshToken(user);
+        const accessToken = generateAccessToken(user);
+        const refreshToken = generateRefreshToken(user);
 
-       await userModel.findByIdAndUpdate(user._id, {
-         refreshToken
-       });
 
-       res.cookie("refreshToken", refreshToken, {
-         httpOnly: true
-      });
+        user.refreshToken = refreshToken;
+        await user.save();
+
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
 
         return res.status(200).json({
-            message: "user login successfully",
+            message: "Login successful",
             data: {
                 id: user._id,
                 name: user.name,
-                email: user.email
+                email: user.email,
+                role: user.role
             },
             accessToken
         });
