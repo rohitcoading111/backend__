@@ -3,6 +3,7 @@ import Products from "../features/products/ui/Products";
 import LoginForm from "../features/auth/components/LoginForm";
 import RegisterForm from "../features/auth/components/RegisterForm";
 import AddProduct from "../features/products/ui/AddProduct";
+import ProtectedRoutes from "../app/protectedRoutes/ProtectedRoute.jsx"
 
 const router = createBrowserRouter([
     {
@@ -20,9 +21,14 @@ const router = createBrowserRouter([
         element: <RegisterForm />,
     },
 
-    {
-    path: "/products",
-    element: <Products />,
+{
+    element: <ProtectedRoutes />,
+    children: [
+        {
+            path: "/products",
+            element: <Products />
+        }
+    ]
 },
 {
     path: "/products/add",
