@@ -76,9 +76,23 @@ const LoginForm = () => {
                             id="password"
                             type="password"
                             placeholder="Enter your password"
-                            {...register("password")}
+                            {...register("password",{
+                                 required:"password is required",
+                                 minLength:{
+                                    value:8,
+                                    message:"password atlest greater than 8 characters"
+                                 }
+                             })                 
+                            }
+                            
+
                             className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-black focus:ring-1 focus:ring-black"
                         />
+                           {errors.password && (
+                            <p className="mt-1 text-sm text-red-500">
+                            {errors.password.message}
+                            </p>
+                        )}
                     </div>
 
                     <div>
@@ -91,13 +105,24 @@ const LoginForm = () => {
 
                         <select
                             id="role"
-                            {...register("role")}
+                            {...register("role",{
+                                required:"role is required"
+                            })}
+                            
                             className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-black focus:ring-1 focus:ring-black"
                         >
+                            
                             <option value="">Select role</option>
                             <option value="user">User</option>
                             <option value="seller">Seller</option>
+                            
                         </select>
+                        {errors.role && (
+                        <p className="mt-1 text-sm text-red-500">
+                        {errors.role.message}
+                        </p>
+                        )}
+                        
                     </div>
 
                     <button
