@@ -1,5 +1,5 @@
 import {createSlice} from "@reduxjs/toolkit"
-
+import {useDispatch} from "react-redux"
 
 const initialState = {
     user:null,
@@ -22,9 +22,12 @@ const authSlice  = createSlice({
             state.accessToken = null;
             state.isAuthenticated = false;
         },
+      updateAccessToken: (state,action)=> {
+          state.accessToken = action.payload;
+      }
     }
 })
 
-export const {loginSuccess,logout} = authSlice.actions
+export const {loginSuccess,logout,updateAccessToken} = authSlice.actions
 
 export default authSlice.reducer

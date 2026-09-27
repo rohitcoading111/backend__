@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Search, SlidersHorizontal } from "lucide-react";
 import Navbar from "../components/Navbar";
-import ProductCard from "../co
+import ProductCard from "../components/ProductCard.jsx"
 
 const Products = () => {
 

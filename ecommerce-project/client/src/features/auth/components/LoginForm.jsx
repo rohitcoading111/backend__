@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import useAuth from "../hooks/useAuth";
@@ -14,8 +13,9 @@ const LoginForm = () => {
 
     const navigate = useNavigate();
 
-    const onSubmit = (data) => {
-        login(data);
+    const onSubmit = async (data) => {
+       await login(data);
+        navigate("/products")
     };
 
     return (
