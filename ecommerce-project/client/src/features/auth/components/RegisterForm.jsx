@@ -4,15 +4,21 @@ import useAuth from "../hooks/useAuth";
 
 const RegisterForm = () => {
     const { registerUser } = useAuth();
-    const usenavigate = useNavigate()
+    const navigate = useNavigate();
+
     const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-} = useForm();
-const onSubmit = (data) => {
-    registerUser(data);
-};
+        register,
+        handleSubmit,
+        watch,
+        formState: { errors, isSubmitting },
+    } = useForm();
+
+    const onSubmit = (data) => {
+        registerUser(data);
+    };
+
+    const password = watch("password");
+
     return (
         <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4 py-10">
             <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
@@ -27,7 +33,10 @@ const onSubmit = (data) => {
                     </p>
                 </div>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                <form
+                    onSubmit={handleSubmit(onSubmit)}
+                    className="space-y-5"
+                >
 
                     <div>
                         <label
@@ -38,13 +47,20 @@ const onSubmit = (data) => {
                         </label>
 
                         <input
-                        {...register("name")}
+                            {...register("name", {
+                                required: "Name is required",
+                            })}
                             id="name"
-                            name="name"
                             type="text"
                             placeholder="Enter your name"
                             className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-black focus:ring-1 focus:ring-black"
                         />
+
+                        {errors.name && (
+                            <p className="mt-1 text-sm text-red-500">
+                                {errors.name.message}
+                            </p>
+                        )}
                     </div>
 
                     <div>
@@ -56,13 +72,24 @@ const onSubmit = (data) => {
                         </label>
 
                         <input
-                        {...register("email")}
+                            {...register("email", {
+                                required: "Email is required",
+                                pattern: {
+                                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                                    message: "Please enter a valid email",
+                                },
+                            })}
                             id="email"
-                            name="email"
                             type="email"
                             placeholder="Enter your email"
                             className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-black focus:ring-1 focus:ring-black"
                         />
+
+                        {errors.email && (
+                            <p className="mt-1 text-sm text-red-500">
+                                {errors.email.message}
+                            </p>
+                        )}
                     </div>
 
                     <div>
@@ -74,13 +101,25 @@ const onSubmit = (data) => {
                         </label>
 
                         <input
-                            {...register("password")}
+                            {...register("password", {
+                                required: "Password is required",
+                                minLength: {
+                                    value: 8,
+                                    message:
+                                        "Password must be at least 8 characters",
+                                },
+                            })}
                             id="password"
-                            name="password"
                             type="password"
                             placeholder="Create a password"
                             className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-black focus:ring-1 focus:ring-black"
                         />
+
+                        {errors.password && (
+                            <p className="mt-1 text-sm text-red-500">
+                                {errors.password.message}
+                            </p>
+                        )}
                     </div>
 
                     <div>
@@ -92,13 +131,23 @@ const onSubmit = (data) => {
                         </label>
 
                         <input
-                            {...register("confirmPassword")}
+                            {...register("confirmPassword", {
+                                required: "Please confirm your password",
+                                validate: (value) =>
+                                    value === password ||
+                                    "Passwords do not match",
+                            })}
                             id="confirmPassword"
-                            name="confirmPassword"
                             type="password"
                             placeholder="Confirm your password"
                             className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-black focus:ring-1 focus:ring-black"
                         />
+
+                        {errors.confirmPassword && (
+                            <p className="mt-1 text-sm text-red-500">
+                                {errors.confirmPassword.message}
+                            </p>
+                        )}
                     </div>
 
                     <div>
@@ -109,32 +158,44 @@ const onSubmit = (data) => {
                             Account Type
                         </label>
 
-                       <select {...register("role")}>
-    <option value="">Select role</option>
-    <option value="user">User</option>
-    <option value="seller">Seller</option>
-</select>
-                    </div>
+                        <select
+                            {...register("role", {
+                                required: "Role is required",
+                            })}
+                            id="role"
+                            className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-black focus:ring-1 focus:ring-black"
+                        >
+                            <option value="">Select role</option>
+                            <option value="user">User</option>
+                            <option value="seller">Seller</option>
+                        </select>
 
+                        {errors.role && (
+                            <p className="mt-1 text-sm text-red-500">
+                                {errors.role.message}
+                            </p>
+                        )}
+                    </div>
 
                     <button
                         type="submit"
-                        className="w-full rounded-lg bg-black py-3 font-semibold text-white transition hover:bg-gray-800"
+                        disabled={isSubmitting}
+                        className="w-full rounded-lg bg-black py-3 font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         Create Account
                     </button>
 
                 </form>
 
-         
                 <p className="mt-6 text-center text-sm text-gray-500">
                     Already have an account?
+
                     <span
-             onClick={() => usenavigate("/login")}
-            className="ml-1 cursor-pointer font-semibold text-black"
->  
-    login
-</span>
+                        onClick={() => navigate("/login")}
+                        className="ml-1 cursor-pointer font-semibold text-black"
+                    >
+                        Login
+                    </span>
                 </p>
 
             </div>
