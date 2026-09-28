@@ -1,13 +1,9 @@
 import axiosInstance from "../../../config/axiosInstance";
 
+const getAllProduct = async () => {
+    const response = await axiosInstance.get("/allproducts");
 
+    return response.data;
+};
 
-const products = async ()=>{
-   const getAllProducts = await axiosInstance.get(
-    "/allproducts"
-   )
-
-   return getAllProducts.data
-}
-
-export default products
+export default getAllProduct;
