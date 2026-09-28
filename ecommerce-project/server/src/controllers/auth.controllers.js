@@ -227,7 +227,8 @@ export const meController = async (req, res) => {
             data: {
                 id: user._id,
                 name: user.name,
-                email: user.email
+                email: user.email,
+                role:user.role
             }
         });
 

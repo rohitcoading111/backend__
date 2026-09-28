@@ -26,5 +26,13 @@ const refreshApi = async ()=>{
     return response.data;
 }
 
+const meApi = async () => {
+    const response = await axiosInstance.get(
+        "/auth/me"
+    );
 
-export { loginApi, registerApi ,refreshApi };
+    return response.data;
+};
+
+
+export { loginApi, registerApi ,refreshApi ,meApi};

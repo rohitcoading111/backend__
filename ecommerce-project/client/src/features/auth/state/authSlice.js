@@ -5,6 +5,7 @@ const initialState = {
     user:null,
     accessToken:null,
     isAuthenticated:false,
+    isLoading: true,
 };
 
 const authSlice  = createSlice({
@@ -24,10 +25,17 @@ const authSlice  = createSlice({
         },
       updateAccessToken: (state,action)=> {
           state.accessToken = action.payload;
-      }
+      },
+      setUser: (state, action) => {
+    state.user = action.payload;
+    state.isAuthenticated = true;
+     },
+     finishAuthLoading: (state) => {
+    state.isLoading = false;
+}
     }
 })
 
-export const {loginSuccess,logout,updateAccessToken} = authSlice.actions
+export const {loginSuccess,logout,updateAccessToken,setUser} = authSlice.actions
 
 export default authSlice.reducer
