@@ -1,6 +1,6 @@
 import { loginApi, registerApi,refreshApi,meApi } from "../apis/authApi.jsx";
 import {useDispatch} from "react-redux"
-import {loginSuccess,updateAccessToken} from "../state/authSlice.js"
+import {loginSuccess,updateAccessToken,finishAuthLoading,setUser} from "../state/authSlice.js"
 
 
 const useAuth = () => {
@@ -34,6 +34,9 @@ const useAuth = () => {
 
     } catch (error) {
         console.log("RESTORE SESSION ERROR:", error);
+
+    } finally {
+        dispatch(finishAuthLoading());
     }
 };
     return {

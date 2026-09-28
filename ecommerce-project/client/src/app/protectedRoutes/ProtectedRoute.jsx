@@ -1,14 +1,29 @@
-import { useSelector } from 'react-redux';
-import { Outlet, Navigate } from 'react-router-dom';
+import { useSelector } from "react-redux";
+import { Outlet, Navigate } from "react-router-dom";
 
+const ProtectedRoute = () => {
 
+    const isAuthenticated = useSelector(
+        (state) => state.auth.isAuthenticated
+    );
 
- const ProtectedRoute = () => {
-      const isAuthenticated = useSelector((state)=>state.auth.isAuthenticated)
-        if(!isAuthenticated){
-           return <Navigate to={"/login"} />
-        }
-       return <Outlet/>
-  }
+    const isLoading = useSelector(
+        (state) => state.auth.isLoading
+    );
 
-export default ProtectedRoute
+    if (isLoading) {
+        return (
+            <div className="flex min-h-screen items-center justify-center">
+                <p>Checking session...</p>
+            </div>
+        );
+    }
+
+    if (!isAuthenticated) {
+        return <Navigate to="/login" replace />;
+    }
+
+    return <Outlet />;
+};
+
+export default ProtectedRoute;
