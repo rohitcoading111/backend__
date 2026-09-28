@@ -56,6 +56,9 @@ const Products = () => {
         });
     }, [products, search, category]);
 
+
+    const role = useSelector((state) => state.auth.user?.role);
+
     return (
         <>
             <Navbar />
@@ -152,6 +155,7 @@ const Products = () => {
                                 <ProductCard
                                     key={product._id}
                                     product={product}
+                                    role={role}
                                 />
 
                             ))}
