@@ -2,9 +2,10 @@ import { useMemo, useState } from "react";
 import { Search, SlidersHorizontal } from "lucide-react";
 import Navbar from "../components/Navbar";
 import ProductCard from "../components/ProductCard.jsx"
+import { useEffect } from "react";
+import getAllProduct from "../apis/productApi.js"
 
 const Products = () => {
-
 
     const [search, setSearch] = useState("");
     const [category, setCategory] = useState("All");
@@ -78,7 +79,21 @@ const Products = () => {
             image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600",
         },
     ];
+   useEffect(() => {
 
+        const fetchProducts = async () => {
+            try {
+                const response = await getAllProduct();
+
+                console.log("PRODUCTS RESPONSE:", response);
+            } catch (error) {
+                console.log("PRODUCTS ERROR:", error);
+            }
+        };
+
+        fetchProducts();
+
+    }, []);
     const categories = [
         "All",
         ...new Set(products.map((product) => product.category)),

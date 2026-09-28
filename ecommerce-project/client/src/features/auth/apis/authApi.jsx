@@ -3,7 +3,7 @@ import axiosInstance from "../../../config/axiosInstance";
 
 const loginApi = async (data) => {
     const response = await axiosInstance.post(
-        "/login",
+        "/auth/login",
         data
     );
 
@@ -12,7 +12,7 @@ const loginApi = async (data) => {
 
 const registerApi = async (data) => {
     const response = await axiosInstance.post(
-        "/register",
+        "/auth/register",
         data
     );
 
@@ -21,7 +21,7 @@ const registerApi = async (data) => {
 
 const refreshApi = async ()=>{
      const response = await axiosInstance.post(
-        "/refresh",
+        "/auth/refresh",
      )
     return response.data;
 }

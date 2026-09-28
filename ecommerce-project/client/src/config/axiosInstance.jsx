@@ -3,9 +3,11 @@ import store from "../app/store.js"
 import { refreshApi } from "../features/auth/apis/authApi.jsx";
 
 const axiosInstance = axios.create({
-    baseURL: "http://localhost:3000/api/auth",
+    baseURL: "http://localhost:3000/api",
     withCredentials: true,
 });
+
+
 
 axiosInstance.interceptors.request.use((config)=>{
    const token =  store.getState().auth.accessToken;
