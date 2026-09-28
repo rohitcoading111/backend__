@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { ArrowLeft, ImagePlus } from "lucide-react";
+import {createProduct} from "../apis/productApi";
 
 const AddProduct = () => {
     const navigate = useNavigate();
@@ -11,16 +12,33 @@ const AddProduct = () => {
         formState: { errors, isSubmitting },
     } = useForm();
 
-    const onSubmit = (data) => {
-        console.log("PRODUCT DATA:", data);
-    };
+    const onSubmit = async (data) => {
+    try {
+        const formData = new FormData();
 
+        formData.append("name", data.name);
+        formData.append("description", data.description);
+        formData.append("price", data.price);
+        formData.append("category", data.category);
+        formData.append("stock", data.stock);
+        formData.append("image", data.image[0]);
+
+        const response = await createProduct(formData);
+
+        console.log("PRODUCT CREATED:", response);
+        navigate("/products");
+
+    } catch (error) {
+        console.log("CREATE PRODUCT ERROR:", error);
+    }
+};
+
+    
     return (
         <div className="min-h-screen bg-gray-50 px-4 py-8 sm:px-6 lg:px-8">
 
             <div className="mx-auto max-w-3xl">
 
-                {/* Header */}
                 <div className="mb-8 flex items-center gap-4">
 
                     <button
@@ -43,13 +61,11 @@ const AddProduct = () => {
 
                 </div>
 
-                {/* Form */}
                 <form
                     onSubmit={handleSubmit(onSubmit)}
                     className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8"
                 >
 
-                    {/* Product Image */}
                     <div className="mb-6">
 
                         <label className="mb-2 block text-sm font-medium text-gray-700">
@@ -90,7 +106,6 @@ const AddProduct = () => {
 
                     </div>
 
-                    {/* Product Name */}
                     <div className="mb-5">
 
                         <label
@@ -118,7 +133,6 @@ const AddProduct = () => {
 
                     </div>
 
-                    {/* Description */}
                     <div className="mb-5">
 
                         <label
@@ -146,7 +160,6 @@ const AddProduct = () => {
 
                     </div>
 
-                    {/* Price + Stock */}
                     <div className="mb-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
 
                         <div>
@@ -215,7 +228,6 @@ const AddProduct = () => {
 
                     </div>
 
-                    {/* Category */}
                     <div className="mb-8">
 
                         <label
@@ -259,7 +271,6 @@ const AddProduct = () => {
 
                     </div>
 
-                    {/* Buttons */}
                     <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
 
                         <button

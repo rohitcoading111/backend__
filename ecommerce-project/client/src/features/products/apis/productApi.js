@@ -6,4 +6,12 @@ const getAllProduct = async () => {
     return response.data;
 };
 
+export const createProduct = async (formData) => {
+    const response = await axiosInstance.post(
+        "/products",
+        formData
+    );
+
+    return response.data;
+};
 export default getAllProduct;
