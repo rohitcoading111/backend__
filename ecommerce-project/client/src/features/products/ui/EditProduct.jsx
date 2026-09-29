@@ -1,4 +1,25 @@
+
+import { useParams } from "react-router-dom";
+import { useEffect } from "react";
+import { getProductById } from "../apis/productApi";
+
 const EditProduct = () => {
+
+    const { id } = useParams();
+
+ useEffect(() => {
+    const fetchProduct = async () => {
+        try {
+            const response = await getProductById(id);
+
+            console.log("PRODUCT:", response);
+        } catch (error) {
+            console.log("GET PRODUCT ERROR:", error);
+        }
+    };
+
+    fetchProduct();
+}, [id]);
     return (
         <div className="min-h-screen bg-gray-50 p-6">
             <div className="mx-auto max-w-2xl rounded-xl bg-white p-6 shadow-sm">
