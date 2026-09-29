@@ -1,7 +1,8 @@
 import { loginApi, registerApi,refreshApi,meApi } from "../apis/authApi.jsx";
 import {useDispatch} from "react-redux"
 import {loginSuccess,updateAccessToken,finishAuthLoading,setUser} from "../state/authSlice.js"
-
+import { logoutApi } from "../apis/authApi.jsx";
+import { logout } from "../state/authSlice.js";
 
 const useAuth = () => {
     const dispatch = useDispatch()
@@ -39,11 +40,24 @@ const useAuth = () => {
         dispatch(finishAuthLoading());
     }
 };
+
+const logoutUser = async () => {
+    try {
+        await logoutApi();
+
+        dispatch(logout());
+
+    } catch (error) {
+        console.log("LOGOUT ERROR:", error);
+    }
+};
+
     return {
         login,
         registerUser,
         refresh,
-        restoreSession
+        restoreSession,
+        logoutUser
     };
 };
 

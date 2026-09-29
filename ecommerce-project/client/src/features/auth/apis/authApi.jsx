@@ -34,5 +34,9 @@ const meApi = async () => {
     return response.data;
 };
 
+const logoutApi = async () => {
+    const response = await axiosInstance.post("/logout");
+    return response.data;
+};
 
-export { loginApi, registerApi ,refreshApi ,meApi};
+export { loginApi, registerApi, refreshApi, meApi, logoutApi };
