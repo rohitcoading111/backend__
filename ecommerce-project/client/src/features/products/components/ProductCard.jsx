@@ -8,8 +8,11 @@ import {
 import { deleteProduct } from "../apis/productApi";
 import { removeProduct } from "../state/productSlice";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
 const ProductCard = ({ product, role }) => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 const handleDelete = async () => {
     try {
         const response = await deleteProduct(product._id);
@@ -124,22 +127,23 @@ const handleDelete = async () => {
                 {role === "seller" && (
                     <div className="mt-3 flex gap-2">
 
-                        <button
-                            type="button"
-                            className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-100"
-                        >
-                            <Edit size={16} />
-                            Edit
-                        </button>
+                        <button 
+    type="button"
+    onClick={() => navigate(`/products/edit/${product._id}`)}
+    className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-100"
+>
+    <Edit size={16} /> 
+    Edit 
+</button>
 
                         <button
-    type="button"
-    onClick={handleDelete}
-    className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-600"
->
-    <Trash2 size={16} />
-    Delete
-</button>
+                     type="button"
+                     onClick={handleDelete}
+                     className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-600"
+                        >
+                          <Trash2 size={16} />
+                       Delete
+                    </button>
 
                     </div>
                 )}
