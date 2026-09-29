@@ -8,7 +8,7 @@ const app = express();
 
 app.use(
     cors({
-        origin: "https://backend-3-5swr.onrender.com/",
+        origin: "https://backend-3-5swr.onrender.com",
         credentials: true,
     })
 );
