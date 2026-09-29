@@ -6,13 +6,17 @@ import {
     Eye,
 } from "lucide-react";
 import { deleteProduct } from "../apis/productApi";
+import { removeProduct } from "../state/productSlice";
+import { useDispatch } from "react-redux";
 const ProductCard = ({ product, role }) => {
+    const dispatch = useDispatch();
 const handleDelete = async () => {
     try {
         const response = await deleteProduct(product._id);
 
         console.log("PRODUCT DELETED:", response);
 
+        dispatch(removeProduct(product._id))
 
     } catch (error) {
         console.log("DELETE ERROR:", error);
