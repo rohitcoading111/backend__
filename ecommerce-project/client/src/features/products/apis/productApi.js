@@ -14,4 +14,14 @@ export const createProduct = async (formData) => {
 
     return response.data;
 };
+
+export const updateProduct = async (id, formData) => {
+    const response = await axiosInstance.put(
+        `/update/${id}`,
+        formData
+    );
+
+    return response.data;
+};
+
 export default getAllProduct;
