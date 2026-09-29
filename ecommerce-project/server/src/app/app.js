@@ -8,7 +8,7 @@ const app = express();
 
 app.use(
     cors({
-        origin: "http://localhost:5173",
+        origin: "https://backend-2-jt42.onrender.com/api",
         credentials: true,
     })
 );
