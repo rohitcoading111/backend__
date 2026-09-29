@@ -3,13 +3,13 @@ import Products from "../features/products/ui/Products";
 import LoginForm from "../features/auth/components/LoginForm";
 import RegisterForm from "../features/auth/components/RegisterForm";
 import AddProduct from "../features/products/ui/AddProduct";
-import ProtectedRoutes from "../app/protectedRoutes/ProtectedRoute.jsx"
+import ProtectedRoutes from "../app/protectedRoutes/ProtectedRoute.jsx";
 import EditProduct from "../features/products/ui/EditProduct";
 
 const router = createBrowserRouter([
     {
         path: "/",
-        element: <h1>Home Page</h1>,
+        element: <LoginForm />,
     },
 
     {
@@ -22,23 +22,25 @@ const router = createBrowserRouter([
         element: <RegisterForm />,
     },
 
-{
-    element: <ProtectedRoutes />,
-    children: [
-        {
-            path: "/products",
-            element: <Products />
-        }
-    ]
-},
-{
-    path: "/products/add",
-    element: <AddProduct />,
-},
-{
-    path: "/products/edit/:id",
-    element: <EditProduct />
-}
+    {
+        element: <ProtectedRoutes />,
+        children: [
+            {
+                path: "/products",
+                element: <Products />
+            }
+        ]
+    },
+
+    {
+        path: "/products/add",
+        element: <AddProduct />,
+    },
+
+    {
+        path: "/products/edit/:id",
+        element: <EditProduct />
+    }
 ]);
 
 export default router;
