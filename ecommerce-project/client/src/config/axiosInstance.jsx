@@ -3,7 +3,7 @@ import store from "../app/store.js"
 import { refreshApi } from "../features/auth/apis/authApi.jsx";
 
 const axiosInstance = axios.create({
-    baseURL: "http://localhost:3000/api",
+    baseURL: "https://backend-2-jt42.onrender.com/api",
     withCredentials: true,
 });
 
@@ -30,6 +30,11 @@ axiosInstance.interceptors.response.use(
         }
     }
 );
+
+export const refreshInstance = axios.create({
+    baseURL: "https://backend-2-jt42.onrender.com/api",
+    withCredentials: true,
+});
 
 
 export default axiosInstance; 

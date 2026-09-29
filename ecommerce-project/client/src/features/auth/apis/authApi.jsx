@@ -1,5 +1,5 @@
 import axiosInstance from "../../../config/axiosInstance";
-
+import{refreshInstance} from "../../../config/axiosInstance.jsx"
 
 const loginApi = async (data) => {
     const response = await axiosInstance.post(
@@ -19,13 +19,11 @@ const registerApi = async (data) => {
     return response.data;
 };
 
-const refreshApi = async ()=>{
-     const response = await axiosInstance.post(
-        "/auth/refresh",
-     )
-    return response.data;
-}
+const refreshApi = async () => {
+    const response = await refreshInstance.post("/auth/refresh");
 
+    return response.data;
+};
 const meApi = async () => {
     const response = await axiosInstance.get(
         "/auth/me"
