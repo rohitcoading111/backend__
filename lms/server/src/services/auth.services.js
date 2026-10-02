@@ -23,3 +23,18 @@ export const registerUser = async (user)=>{
     await savedUser.save();
     return { accessToken, refreshToken };
 }
+
+export const LoginUser = async (user)=>{
+    const { email, password } = user;
+    const existingUser = await userModel.findOne({email});
+    if(!existingUser ){
+        throw new Error("Invalid email or password");
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, existingUser.password);
+    if(!isPasswordValid){
+        throw new Error("Invalid email or password");
+    }
+
+    
+}
