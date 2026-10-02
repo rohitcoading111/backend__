@@ -9,3 +9,10 @@ export const generateAccessToken = (user) => {
     return accessToken;
 }
 
+export const generateRefreshToken = (user) =>{
+    const refreshToken = jwt.sign({
+        id:user._id,
+        email:user.email,
+    },config.REFRESH_TOKEN_SECRET,{expiresIn :config.REFRESH_TOKEN_EXPIRES_IN})
+    return refreshToken;
+}
