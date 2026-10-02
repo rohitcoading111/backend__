@@ -1,50 +1,34 @@
-import bcrypt from "bcryptjs";
-import User from "../models/user.models.js";
+import { registerUser as registerUserService } from "../services/auth.service.js";
 
 const registerUser = async (req, res) => {
-  const { name, email, password, avatar } = req.body;
-
   try {
-    const existingUser = await User.findOne({ email });
+    const result = await registerUserService(req.body);
 
-    if (existingUser) {
-      return res.status(409).json({
-        success: false,
-        message: "User with this email already exists",
-      });
-    }
+    const { accessToken, refreshToken } = result;
 
-    const hashedPassword = await bcrypt.hash(password, 12);
-
-    const newUser = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-      avatar,
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: false, 
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return res.status(201).json({
       success: true,
       message: "User registered successfully",
       data: {
-        id: newUser._id,
-        name: newUser.name,
-        email: newUser.email,
-        role: newUser.role,
-        avatar: newUser.avatar,
-        isVerified: newUser.isVerified,
-        createdAt: newUser.createdAt,
+        accessToken,
       },
     });
   } catch (error) {
-    if (error?.code === 11000) {
+    if (error.message === "User already exists") {
       return res.status(409).json({
         success: false,
-        message: "User with this email already exists",
+        message: error.message,
       });
     }
 
-    console.error("Register User Error:", error);
+    console.error("Register Controller Error:", error);
 
     return res.status(500).json({
       success: false,
