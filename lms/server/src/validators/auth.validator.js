@@ -51,4 +51,30 @@ const userValidation = [
     }
 ];
 
+export const LoginValidation = [
+    body("email").trim()
+    .exists().withMessage("Email is required").bail()
+    .isEmail().withMessage("please enter a valid emil ").bail()
+    .normalizeEmail(),
+
+    body("password").trim()
+    .exists().withMessage("paassword is required").bail()
+    .isString().withMessage("password must be aa string").bail()
+    .isLength({ min: 8 }).withMessage("password must be at least 8 characters long").bail(),
+    
+
+    (req,res,next)=>{
+       const errors = validationResult(req);
+       if(!errors.isEmpty()){
+        return res.status(400).json({
+          message: "validation error",
+          errors: errors.array()
+        })
+       }
+       next();
+    }
+
+
+]
+
 export default userValidation;
