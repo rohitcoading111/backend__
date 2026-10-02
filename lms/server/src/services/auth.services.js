@@ -36,5 +36,8 @@ export const LoginUser = async (user)=>{
         throw new Error("Invalid email or password");
     }
 
-    
+    const accessToken = generateAccessToken(existingUser);
+    const refreshToken = generateRefreshToken(existingUser);
+
+    return { accessToken, refreshToken };
 }
