@@ -1,5 +1,5 @@
 import userModel from "../models/user.models.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { generateAccessToken, generateRefreshToken } from "../utils/auth.utils.js";
 
 export const registerUser = async (user)=>{
