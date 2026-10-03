@@ -77,8 +77,7 @@ export const Login = async (req, res) => {
   }
 };
 
-import jwt from "jsonwebtoken";
-import config from "../config/config.js";
+
 
 export const RefreshToken = async (req, res) => {
   try {
@@ -95,6 +94,8 @@ export const RefreshToken = async (req, res) => {
       refreshToken,
       config.REFRESH_TOKEN_SECRET
     );
+
+ 
 
     return res.status(200).json({
       success: true,
