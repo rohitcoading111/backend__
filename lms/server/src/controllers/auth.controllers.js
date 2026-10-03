@@ -1,5 +1,7 @@
 import { registerUser as registerUserService } from "../services/auth.services.js";
 import { LoginUser } from "../services/auth.services.js";
+import config from "../config/config.js";
+import jwt from "jsonwebtoken";
 
 const registerUser = async (req, res) => {
   try {
@@ -74,4 +76,43 @@ export const Login = async (req, res) => {
     });
   }
 };
+
+import jwt from "jsonwebtoken";
+import config from "../config/config.js";
+
+export const RefreshToken = async (req, res) => {
+  try {
+    const { refreshToken } = req.cookies;
+
+    if (!refreshToken) {
+      return res.status(401).json({
+        success: false,
+        message: "Refresh token not found",
+      });
+    }
+
+    const decoded = jwt.verify(
+      refreshToken,
+      config.REFRESH_TOKEN_SECRET
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Refresh token verified",
+      data: {
+        id: decoded.id,
+        email: decoded.email,
+      },
+    });
+
+  } catch (error) {
+    console.error("Refresh token error:", error);
+
+    return res.status(401).json({
+      success: false,
+      message: "Invalid or expired refresh token",
+    });
+  }
+};
+
 export default registerUser;
