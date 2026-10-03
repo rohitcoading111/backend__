@@ -2,6 +2,7 @@ import { registerUser as registerUserService } from "../services/auth.services.j
 import { LoginUser } from "../services/auth.services.js";
 import config from "../config/config.js";
 import jwt from "jsonwebtoken";
+import {logoutUser} from "../services/auth.services.js";
 import { refreshTokenService } from "../services/auth.services.js";
 
 const registerUser = async (req, res) => {
@@ -116,5 +117,18 @@ export const RefreshToken = async (req, res) => {
     });
   }
 };
+
+export const Logout = async (req,res)=>{
+   const {refreshToken} = req.cookies;
+   if(!refreshToken){
+    return res.status(400).json({
+        success:false,
+        message:"Refresh token not found"
+    })
+   }
+  
+   const logoutuser = await logoutUser(refreshToken);
+
+}
 
 export default registerUser;
