@@ -39,10 +39,13 @@ export const LoginUser = async (user)=>{
     const accessToken = generateAccessToken(existingUser);
     const refreshToken = generateRefreshToken(existingUser);
 
+    existingUser.refreshToken = refreshToken;
+    await existingUser.save();
+
     return { accessToken, refreshToken };
 }
 
-export const refreshTokenService = async (decoded) => {
+export const refreshTokenService = async (decoded, refreshToken) => {
   const { id, email } = decoded;
 
   const existingUser = await userModel.findById(id);
