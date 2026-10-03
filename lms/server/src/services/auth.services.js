@@ -41,3 +41,21 @@ export const LoginUser = async (user)=>{
 
     return { accessToken, refreshToken };
 }
+
+export const refreshTokenService = async (decoded) => {
+  const { id, email } = decoded;
+
+  const existingUser = await userModel.findById(id);
+
+  if (!existingUser || existingUser.email !== email) {
+    throw new Error("Invalid refresh token");
+  }
+
+  if (existingUser.refreshToken !== refreshToken) {
+    throw new Error("Invalid refresh token");
+  }
+
+  const accessToken = generateAccessToken(existingUser);
+
+  return accessToken;
+};

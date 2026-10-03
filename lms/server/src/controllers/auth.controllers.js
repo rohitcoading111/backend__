@@ -2,6 +2,7 @@ import { registerUser as registerUserService } from "../services/auth.services.j
 import { LoginUser } from "../services/auth.services.js";
 import config from "../config/config.js";
 import jwt from "jsonwebtoken";
+import { refreshTokenService } from "../services/auth.services.js";
 
 const registerUser = async (req, res) => {
   try {
@@ -77,8 +78,6 @@ export const Login = async (req, res) => {
   }
 };
 
-
-
 export const RefreshToken = async (req, res) => {
   try {
     const { refreshToken } = req.cookies;
@@ -95,14 +94,16 @@ export const RefreshToken = async (req, res) => {
       config.REFRESH_TOKEN_SECRET
     );
 
- 
+    const accessToken = await refreshTokenService(
+      decoded,
+      refreshToken
+    );
 
     return res.status(200).json({
       success: true,
       message: "Refresh token verified",
       data: {
-        id: decoded.id,
-        email: decoded.email,
+        accessToken,
       },
     });
 
