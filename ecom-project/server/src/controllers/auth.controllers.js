@@ -1,112 +1,107 @@
-import bcrypt from "bcryptjs"
-import userModel from "../models/user.model.js"
-import {createAccessToken,createRefreshToken} from "../utils/auth.utils.js"
-import { useReducer } from "react"
+import bcrypt from "bcryptjs";
+import userModel from "../models/user.model.js";
+import { createAccessToken, createRefreshToken } from "../utils/auth.utils.js";
 
+export const register = async (req, res) => {
+    const { email, name, password } = req.body;
+    const isUserAlreadyExist = await userModel.findOne({ email });
 
-const register = async(req ,res)=>{
-    const {email,name,password }  = req.body
-    const isUserAlreadyExist = await userModel.findOne({
-        email
-    })
-    if(isUserAlreadyExist){
+    if (isUserAlreadyExist) {
         return res.status(400).json({
-            message:"user already exists",
-            errors:[
+            message: "user already exists",
+            errors: [
                 {
-                    field:"email",
-                    message:"user already eexists "
+                    field: "email",
+                    message: "user already exists"
                 }
             ]
-        })
+        });
     }
 
     const user = await userModel.create({
         email,
         name,
-        passwordHash  :await bcrypt.hash(password,12)
-    })
+        passwordHash: await bcrypt.hash(password, 12)
+    });
 
     const accessToken = createAccessToken({
-        userId:user._id,
-        role:user.role
-    })
+        userId: user._id,
+        role: user.role
+    });
     const refreshToken = createRefreshToken({
-        userId:user._id,
-        role:user.role
-    })
+        userId: user._id,
+        role: user.role
+    });
 
-    res.cookie("refreshToken",refreshToken,{
-        httpOnly:true
-    })
+    res.cookie("refreshToken", refreshToken, {
+        httpOnly: true
+    });
 
-    await userModel.findByIdAndUpdate(user._id,{
+    await userModel.findByIdAndUpdate(user._id, {
         refreshToken
-    })
-  
-    res.status(201).json({
-        message:"user reegister succcessfully",
-        data:{
-            user:{
-                email:user.email,
-                name:user.name,
-                id:user._id
+    });
+
+    return res.status(201).json({
+        message: "user registered successfully",
+        data: {
+            user: {
+                email: user.email,
+                name: user.name,
+                id: user._id
             },
             accessToken
         }
-    })
+    });
+};
 
-}
+export const login = async (req, res) => {
+    const { email, password } = req.body;
+    const user = await userModel.findOne({ email });
 
-const login  = async(req,res)=>{
-    const {email,password} = req.body
-    const user = await userModel.findOne({
-        email
-    })
-    if(!user){
+    if (!user) {
         return res.status(400).json({
-            message:"invalid email or password"
-        })
+            message: "invalid email or password"
+        });
     }
-    const isPasswordValid =await bcrypt.compare(password,user.passwordHash)
-    if(!isPasswordValid){
+
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+
+    if (!isPasswordValid) {
         return res.status(400).json({
-            message:"invalid email or password"
-        })
+            message: "invalid email or password"
+        });
     }
 
     const accessToken = createAccessToken({
         userId: user._id,
         role: user.role
-    })
-    
+    });
 
-      const refreshToken = createRefreshToken({
+    const refreshToken = createRefreshToken({
         userId: user._id,
         role: user.role
-    })
+    });
 
-    await userModel.findOneAndUpdate({
-        email
-    },{
-        refreshToken
-    })
+    await userModel.findOneAndUpdate(
+        { email },
+        { refreshToken }
+    );
 
-    res.cookie("refreshToken",refreshToken,{
-        httpOnly:true
-    })
-    res.status(200).json({
-        message:"user logged in successfully",
-        data:{
-            user:{
-                userId : user._id,
-                email:user.email,
-                name:user.name
+    res.cookie("refreshToken", refreshToken, {
+        httpOnly: true
+    });
+
+    return res.status(200).json({
+        message: "user logged in successfully",
+        data: {
+            user: {
+                userId: user._id,
+                email: user.email,
+                name: user.name
             },
-            accessToken,
+            accessToken
         }
-    })
-  
-}
+    });
+};
 
-export default register
+export default { register, login };
