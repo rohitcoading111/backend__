@@ -139,4 +139,16 @@ export const Logout = async (req, res) => {
 };
 
 
+export const getMe = async (req, res) => {
+  return res.status(200).json({
+    success: true,
+    message: "Authenticated user",
+    data: {
+      user: req.user,
+    },
+  });
+};
+
+
+
 export default registerUser;
