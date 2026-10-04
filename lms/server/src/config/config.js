@@ -7,6 +7,9 @@ const config = {
     REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET,
     ACCESS_TOKEN_EXPIRES_IN: process.env.ACCESS_TOKEN_EXPIRES_IN,
     REFRESH_TOKEN_EXPIRES_IN: process.env.REFRESH_TOKEN_EXPIRES_IN,
+    ADMIN_NAME: process.env.ADMIN_NAME,
+    ADMIN_EMAIL:process.env.ADMIN_EMAIL,
+    ADMIN_PASSWORD:process.env.ADMIN_PASSWORD
 };
 
 export default config;
