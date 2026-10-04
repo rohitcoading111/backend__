@@ -149,6 +149,16 @@ export const getMe = async (req, res) => {
   });
 };
 
+export const adminTest = async (req, res) => {
+  return res.status(200).json({
+    success: true,
+    message: "Admin access granted",
+    data: {
+      user: req.user,
+    },
+  });
+};
+
 
 
 export default registerUser;
