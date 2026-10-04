@@ -18,8 +18,7 @@ router.post("/login", LoginValidation, Login);
 router.post("/refresh", RefreshToken);
 router.post("/logout", Logout);
 router.get("/me", authMiddleware, getMe);
-router.get( "/admin-test",authMiddleware, roleMiddleware("ADMIN"),
-  adminTest
-);
+router.get( "/admin-test",authMiddleware, roleMiddleware("ADMIN"),adminTest);
+
 
 export default router;
