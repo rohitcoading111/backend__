@@ -31,10 +31,17 @@ const userSchema = new mongoose.Schema(
       default: "STUDENT",
     },
 
-    avatar: {
-      type: String,
-      default: null,
-    },
+   avatar: {
+    url: {
+    type: String,
+    default: null,
+   },
+
+   fileId: {
+    type: String,
+    default: null,
+   },
+  },
 
     isVerified: {
       type: Boolean,

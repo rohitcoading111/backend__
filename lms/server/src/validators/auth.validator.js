@@ -35,11 +35,31 @@ const userValidation = [
     .withMessage("Password must be at least 8 characters long")
     .bail(),
 
-  body("avatar")
-    .optional({ checkFalsy: true })
-    .trim()
-    .isURL()
-    .withMessage("Avatar must be a valid URL"),
+ body("avatar")
+  .optional({ checkFalsy: true })
+  .isObject()
+  .withMessage("Avatar must be an object")
+  .bail(),
+
+body("avatar.url")
+  .if(body("avatar").exists())
+  .exists()
+  .withMessage("Avatar URL is required")
+  .bail()
+  .isURL()
+  .withMessage("Avatar URL must be a valid URL")
+  .bail(),
+
+body("avatar.fileId")
+  .if(body("avatar").exists())
+  .exists()
+  .withMessage("Avatar fileId is required")
+  .bail()
+  .isString()
+  .withMessage("Avatar fileId must be a string")
+  .bail()
+  .notEmpty()
+  .withMessage("Avatar fileId cannot be empty"),
 
 
     (req,res,next)=>{
