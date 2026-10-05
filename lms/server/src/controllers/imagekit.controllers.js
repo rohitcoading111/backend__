@@ -11,12 +11,21 @@ export const getImageKitAuth = (req, res) => {
       folder = "/lms/avatars";
     }
 
-    if (type === "COURSE_THUMBNAIL") {
-      folder = "/lms/course-thumbnails";
-    }
+    if(type === "COURSE_THUMBNAIL" || type === "COURSE_VIDEO") {
+      if (req.user.role !== "INSTRUCTOR") {
+        return res.status(403).json({
+          success: false,
+          message: "Only instructors can upload course media",
+        });
+      }
 
-    if (type === "COURSE_VIDEO") {
-      folder = "/lms/course-videos";
+      if (type === "COURSE_THUMBNAIL") {
+        folder = "/lms/course-thumbnails";
+      }
+
+      if (type === "COURSE_VIDEO") {
+        folder = "/lms/course-videos";
+      }
     }
 
     const { token, expire, signature } =
