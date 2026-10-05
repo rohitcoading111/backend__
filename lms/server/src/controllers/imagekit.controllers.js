@@ -3,6 +3,22 @@ import config from "../config/config.js";
 
 export const getImageKitAuth = (req, res) => {
   try {
+    const { type } = req.body;
+
+    let folder;
+
+    if (type === "AVATAR") {
+      folder = "/lms/avatars";
+    }
+
+    if (type === "COURSE_THUMBNAIL") {
+      folder = "/lms/course-thumbnails";
+    }
+
+    if (type === "COURSE_VIDEO") {
+      folder = "/lms/course-videos";
+    }
+
     const { token, expire, signature } =
       imagekit.helper.getAuthenticationParameters();
 
@@ -13,6 +29,7 @@ export const getImageKitAuth = (req, res) => {
         expire,
         signature,
         publicKey: config.IMAGEKIT_PUBLIC_KEY,
+        folder,
       },
     });
   } catch (error) {
