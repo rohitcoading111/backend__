@@ -9,7 +9,7 @@ import { getMe } from "../controllers/auth.controllers.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { adminTest } from "../controllers/auth.controllers.js";
 import { roleMiddleware } from "../middleware/role.middleware.js";
-import upload from "../middleware/upload.middleawre.js";
+import upload from "../middleware/upload.middleware.js";
 
 const router = express.Router();
 
