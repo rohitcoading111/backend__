@@ -7,9 +7,13 @@ import { refreshTokenService } from "../services/auth.services.js";
 
 const registerUser = async (req, res) => {
   try {
-    const result = await registerUserService(req.body);
 
-    const { accessToken, refreshToken } = result;
+    const result = await registerUserService({
+  ...req.body,
+  file: req.file,
+});
+       
+    const { accessToken, refreshToken} = result;
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,

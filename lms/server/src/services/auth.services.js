@@ -6,6 +6,7 @@ import imagekit from "../config/imagekit.js";
 
 export const registerUser = async (user) => {
   const { email, password, name, avatar, file } = user;
+console.log("FILE IN SERVICE:", file);
 
   const existingUser = await userModel.findOne({ email });
 
@@ -20,19 +21,22 @@ export const registerUser = async (user) => {
     fileId: null,
   };
 
-  if (file) {
+if (file) {
+    console.log("Uploading file to ImageKit...");
+
     const uploadResponse = await imagekit.files.upload({
-      file: file.buffer,
+      file: file.buffer.toString("base64"),
       fileName: `${Date.now()}-${file.originalname}`,
       folder: "/lms/avatars",
     });
+
+    console.log("ImageKit response:", uploadResponse);
 
     avatarData = {
       url: uploadResponse.url,
       fileId: uploadResponse.fileId,
     };
   }
-
   const newUser = await userModel.create({
     name,
     email,
@@ -50,6 +54,7 @@ export const registerUser = async (user) => {
   return {
     accessToken,
     refreshToken,
+    newUser
   };
 };
 export const LoginUser = async (user)=>{

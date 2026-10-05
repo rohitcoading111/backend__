@@ -9,11 +9,12 @@ import { getMe } from "../controllers/auth.controllers.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { adminTest } from "../controllers/auth.controllers.js";
 import { roleMiddleware } from "../middleware/role.middleware.js";
+import upload from "../middleware/upload.middleawre.js";
 
 const router = express.Router();
 
 
-router.post("/register", userValidation, registerUser);
+router.post("/register", upload.single("avatar"), userValidation, registerUser);
 router.post("/login", LoginValidation, Login);
 router.post("/refresh", RefreshToken);
 router.post("/logout", Logout);
