@@ -70,3 +70,54 @@ export const getSingleCourse = async (courseId, instructorId) => {
 
   return course;
 };
+
+export const updateCourse = async ({
+  courseId,
+  instructorId,
+  updateData,
+  file,
+}) => {
+  if (!courseId || !instructorId) {
+    throw new Error("Invalid course or instructor ID");
+  }
+
+  const course = await courseModel.findOne({
+    _id: courseId,
+    instructor: instructorId,
+  });
+
+  if (!course) {
+    throw new Error("Course not found or access denied");
+  }
+
+  const allowedFields = [
+    "title",
+    "description",
+    "price",
+    "category",
+    "level",
+  ];
+
+  allowedFields.forEach((field) => {
+    if (updateData[field] !== undefined) {
+      course[field] = updateData[field];
+    }
+  });
+
+  if (file) {
+    const uploadResponse = await imagekit.files.upload({
+      file: file.buffer.toString("base64"),
+      fileName: `${Date.now()}-${file.originalname}`,
+      folder: "/lms/course-thumbnails",
+    });
+
+    course.thumbnail = {
+      url: uploadResponse.url,
+      fileId: uploadResponse.fileId,
+    };
+  }
+
+  await course.save();
+
+  return course;
+};
