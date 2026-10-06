@@ -41,3 +41,15 @@ export const createCourse = async ({ courseData, instructorId, file }) => {
 
   return course;
 };
+
+export const getCourse = async (instructorId) => {
+  if (!instructorId) {
+    throw new Error("Invalid instructor ID");
+  }
+
+  const matchingData = await courseModel.find({
+    instructor: instructorId,
+  });
+
+  return matchingData;
+};
