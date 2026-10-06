@@ -121,3 +121,20 @@ export const updateCourse = async ({
 
   return course;
 };
+
+export const deleteCourse = async (courseId, instructorId) => {
+  if (!courseId || !instructorId) {
+    throw new Error("Invalid course or instructor ID");
+  }
+
+  const deletedCourse = await courseModel.findOneAndDelete({
+    _id: courseId,
+    instructor: instructorId,
+  });
+
+  if (!deletedCourse) {
+    throw new Error("Course not found or access denied");
+  }
+
+  return deletedCourse;
+};
