@@ -1,4 +1,4 @@
-import { createCourse,getCourse } from "../services/course.services.js";
+import { createCourse,getCourse,getSingleCourse } from "../services/course.services.js";
 
 export const createCourseController = async (req, res) => {
   try {
@@ -42,6 +42,40 @@ export const getMyCourses = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to fetch courses",
+    });
+  }
+};
+
+
+export const getSingleCourseController = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+
+    const course = await getSingleCourse(
+      courseId,
+      req.user.id
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Course fetched successfully",
+      data: {
+        course,
+      },
+    });
+  } catch (error) {
+    console.error("Get Single Course Error:", error);
+
+    if (error.message === "Course not found or access denied") {
+      return res.status(404).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch course",
     });
   }
 };
