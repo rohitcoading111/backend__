@@ -1,4 +1,4 @@
-import { createCourse,getCourse,getSingleCourse,updateCourse,deleteCourse } from "../services/course.services.js";
+import { createCourse,getCourse,getSingleCourse,updateCourse,deleteCourse,publishCourse } from "../services/course.services.js";
 
 export const createCourseController = async (req, res) => {
   try {
@@ -145,6 +145,42 @@ export const deleteCourseController = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to delete course",
+    });
+  }
+};
+
+export const publishCourseController = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+
+    const course = await publishCourse(
+      courseId,
+      req.user.id
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Course published successfully",
+      data: {
+        course,
+      },
+    });
+  } catch (error) {
+    console.error("Publish Course Error:", error);
+
+    if (
+      error.message === "Course not found or access denied" ||
+      error.message === "Course is already published"
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to publish course",
     });
   }
 };
