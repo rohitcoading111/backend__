@@ -138,3 +138,28 @@ export const deleteCourse = async (courseId, instructorId) => {
 
   return deletedCourse;
 };
+
+export const publishCourse = async (courseId, instructorId) => {
+  if (!courseId || !instructorId) {
+    throw new Error("Invalid course or instructor ID");
+  }
+
+  const course = await courseModel.findOne({
+    _id: courseId,
+    instructor: instructorId,
+  });
+
+  if (!course) {
+    throw new Error("Course not found or access denied");
+  }
+
+  if (course.status === "PUBLISHED") {
+    throw new Error("Course is already published");
+  }
+
+  course.status = "PUBLISHED";
+
+  await course.save();
+
+  return course;
+};
