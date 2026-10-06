@@ -1,10 +1,17 @@
 import express from "express";
-import { createCourseController } from "../controllers/course.controllers.js";
+
+import {
+  createCourseController,
+  getMyCourses,
+  getSingleCourseController,
+  updateCourseController,
+} from "../controllers/course.controllers.js";
+
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { roleMiddleware } from "../middleware/role.middleware.js";
-import { courseValidation } from "../validators/course.validator.js";
 import upload from "../middleware/upload.middleware.js";
-import {getMyCourses,getSingleCourseController} from "../controllers/course.controllers.js"
+
+import { courseValidation } from "../validators/course.validator.js";
 
 const router = express.Router();
 
@@ -31,5 +38,12 @@ router.get(
   getSingleCourseController
 );
 
+router.patch(
+  "/:courseId",
+  authMiddleware,
+  roleMiddleware("INSTRUCTOR"),
+  upload.single("thumbnail"),
+  updateCourseController
+);
 
 export default router;
