@@ -2,6 +2,7 @@ import express from "express";
 import {
   createModuleController,
   updateModuleController,
+  deleteModuleController,
 } from "../controllers/module.controllers.js";
 
 import { authMiddleware } from "../middleware/auth.middleware.js";
@@ -21,6 +22,13 @@ router.patch(
   authMiddleware,
   roleMiddleware("INSTRUCTOR"),
   updateModuleController
+);
+
+router.delete(
+  "/:moduleId",
+  authMiddleware,
+  roleMiddleware("INSTRUCTOR"),
+  deleteModuleController
 );
 
 export default router;
