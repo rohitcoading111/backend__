@@ -39,3 +39,46 @@ export const createModule = async ({
 
   return module;
 };
+
+export const updateModule = async ({
+  moduleId,
+  instructorId,
+  title,
+  description,
+  order,
+}) => {
+  if (!moduleId || !instructorId) {
+    throw new Error("Invalid module or instructor ID");
+  }
+
+  const module = await Module.findById(moduleId);
+
+  if (!module) {
+    throw new Error("Module not found");
+  }
+
+  const course = await courseModel.findOne({
+    _id: module.course,
+    instructor: instructorId,
+  });
+
+  if (!course) {
+    throw new Error("Access denied");
+  }
+
+  if (title !== undefined) {
+    module.title = title;
+  }
+
+  if (description !== undefined) {
+    module.description = description;
+  }
+
+  if (order !== undefined) {
+    module.order = order;
+  }
+
+  await module.save();
+
+  return module;
+};
