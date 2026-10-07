@@ -82,3 +82,28 @@ export const updateModule = async ({
 
   return module;
 };
+
+export const deleteModule = async (moduleId, instructorId) => {
+  if (!moduleId || !instructorId) {
+    throw new Error("Invalid module or instructor ID");
+  }
+
+  const module = await Module.findById(moduleId);
+
+  if (!module) {
+    throw new Error("Module not found");
+  }
+
+  const course = await courseModel.findOne({
+    _id: module.course,
+    instructor: instructorId,
+  });
+
+  if (!course) {
+    throw new Error("Access denied");
+  }
+
+  const deletedModule = await Module.findByIdAndDelete(moduleId);
+
+  return deletedModule;
+};
