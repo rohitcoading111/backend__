@@ -6,7 +6,8 @@ import {
   getSingleCourseController,
   updateCourseController,
   deleteCourseController,
-  publishCourseController
+  publishCourseController,
+  unpublishCourseController,
 } from "../controllers/course.controllers.js";
 
 import { authMiddleware } from "../middleware/auth.middleware.js";
@@ -59,6 +60,13 @@ router.patch(
   authMiddleware,
   roleMiddleware("INSTRUCTOR"),
   publishCourseController
+);
+
+router.patch(
+  "/:courseId/unpublish",
+  authMiddleware,
+  roleMiddleware("INSTRUCTOR"),
+  unpublishCourseController
 );
 
 export default router;
