@@ -1,5 +1,9 @@
 import express from "express";
-import { createModuleController } from "../controllers/module.controllers.js";
+import {
+  createModuleController,
+  updateModuleController,
+} from "../controllers/module.controllers.js";
+
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { roleMiddleware } from "../middleware/role.middleware.js";
 
@@ -10,6 +14,13 @@ router.post(
   authMiddleware,
   roleMiddleware("INSTRUCTOR"),
   createModuleController
+);
+
+router.patch(
+  "/:moduleId",
+  authMiddleware,
+  roleMiddleware("INSTRUCTOR"),
+  updateModuleController
 );
 
 export default router;
