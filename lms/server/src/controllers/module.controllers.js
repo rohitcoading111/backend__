@@ -1,4 +1,4 @@
-import { createModule,updateModule } from "../services/module.services.js";
+import { createModule,updateModule,deleteModule } from "../services/module.services.js";
 
 export const createModuleController = async (req, res) => {
   try {
@@ -82,6 +82,47 @@ export const updateModuleController = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to update module",
+    });
+  }
+};
+
+
+export const deleteModuleController = async (req, res) => {
+  try {
+    const { moduleId } = req.params;
+
+    const deletedModule = await deleteModule(
+      moduleId,
+      req.user.id
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Module deleted successfully",
+      data: {
+        module: deletedModule,
+      },
+    });
+  } catch (error) {
+    console.error("Delete Module Error:", error);
+
+    if (error.message === "Module not found") {
+      return res.status(404).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    if (error.message === "Access denied") {
+      return res.status(403).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to delete module",
     });
   }
 };
