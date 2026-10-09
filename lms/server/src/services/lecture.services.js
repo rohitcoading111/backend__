@@ -86,25 +86,29 @@ export const updateLecture = async ({
   title,
   notes,
   order,
+  videoFile,
 }) => {
   if (!lectureId || !instructorId) {
     throw new Error("Invalid lecture or instructor ID");
   }
 
+  // 1. Find lecture
   const lecture = await Lecture.findById(lectureId);
 
   if (!lecture) {
     throw new Error("Lecture not found");
   }
 
-  const module = await Module.findById(lecture.module);
+  // 2. Find module
+  const existingModule = await Module.findById(lecture.module);
 
-  if (!module) {
+  if (!existingModule) {
     throw new Error("Module not found");
   }
 
+  // 3. Verify course ownership
   const course = await courseModel.findOne({
-    _id: module.course,
+    _id: existingModule.course,
     instructor: instructorId,
   });
 
@@ -112,6 +116,7 @@ export const updateLecture = async ({
     throw new Error("Access denied");
   }
 
+  // 4. Check duplicate order
   if (order !== undefined) {
     const existingLecture = await Lecture.findOne({
       module: lecture.module,
@@ -126,6 +131,7 @@ export const updateLecture = async ({
     lecture.order = order;
   }
 
+  // 5. Update text fields
   if (title !== undefined) {
     lecture.title = title;
   }
@@ -134,6 +140,26 @@ export const updateLecture = async ({
     lecture.notes = notes;
   }
 
+  // 6. Upload new video only if provided
+  if (videoFile) {
+    const safeFileName = videoFile.originalname.replace(
+      /[^a-zA-Z0-9._-]/g,
+      "_"
+    );
+
+    const uploadedVideo = await imagekit.files.upload({
+      file: await toFile(videoFile.buffer, safeFileName),
+      fileName: `${Date.now()}-${safeFileName}`,
+      folder: "/lms/course-videos",
+    });
+
+    lecture.video = {
+      url: uploadedVideo.url,
+      fileId: uploadedVideo.fileId,
+    };
+  }
+
+  // 7. Save changes
   await lecture.save();
 
   return lecture;
