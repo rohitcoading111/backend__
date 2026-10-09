@@ -4,6 +4,7 @@ import {
   updateModuleController,
   deleteModuleController,
 } from "../controllers/module.controllers.js";
+import { createLectureController } from "../controllers/lecture.controllers.js";
 
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { roleMiddleware } from "../middleware/role.middleware.js";
@@ -29,6 +30,14 @@ router.delete(
   authMiddleware,
   roleMiddleware("INSTRUCTOR"),
   deleteModuleController
+);
+
+
+router.post(
+  "/:moduleId/lectures",
+  authMiddleware,
+  roleMiddleware("INSTRUCTOR"),
+  createLectureController
 );
 
 export default router;
