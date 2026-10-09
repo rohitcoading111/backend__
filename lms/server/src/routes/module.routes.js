@@ -4,7 +4,7 @@ import {
   updateModuleController,
   deleteModuleController,
 } from "../controllers/module.controllers.js";
-import { createLectureController } from "../controllers/lecture.controllers.js";
+import { createLectureController,updateLectureController } from "../controllers/lecture.controllers.js";
 import { uploadVideo } from "../middleware/upload.middleware.js";
 
 import { authMiddleware } from "../middleware/auth.middleware.js";
@@ -40,6 +40,14 @@ router.post(
   roleMiddleware("INSTRUCTOR"),
   uploadVideo.single("video"),
   createLectureController
+);
+
+router.patch(
+  "/lectures/:lectureId",
+  authMiddleware,
+  roleMiddleware("INSTRUCTOR"),
+  uploadVideo.single("video"),
+  updateLectureController
 );
 
 export default router;

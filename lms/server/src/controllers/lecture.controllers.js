@@ -1,4 +1,4 @@
-import { createLecture } from "../services/lecture.services.js";
+import { createLecture,updateLecture } from "../services/lecture.services.js";
 
 export const createLectureController = async (req, res) => {
   try {
@@ -54,6 +54,80 @@ export const createLectureController = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to create lecture",
+    });
+  }
+};
+
+export const updateLectureController = async (req, res) => {
+  try {
+    const { lectureId } = req.params;
+
+    let order;
+
+    if (req.body.order !== undefined) {
+      order = Number(req.body.order);
+
+      if (!Number.isInteger(order) || order < 1) {
+        return res.status(400).json({
+          success: false,
+          message: "Order must be a positive integer",
+        });
+      }
+    }
+
+   const lecture = await updateLecture({
+  lectureId,
+  instructorId: req.user.id,
+  title: req.body.title,
+  notes: req.body.notes,
+  order,
+  videoFile: req.file,
+});
+
+    return res.status(200).json({
+      success: true,
+      message: "Lecture updated successfully",
+      data: {
+        lecture,
+      },
+    });
+  } catch (error) {
+    console.error("Update Lecture Error:", error);
+
+    if (error.message === "Invalid lecture or instructor ID") {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    if (
+      error.message === "Lecture not found" ||
+      error.message === "Module not found"
+    ) {
+      return res.status(404).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    if (error.message === "Access denied") {
+      return res.status(403).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    if (error.message === "Lecture order already exists") {
+      return res.status(409).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update lecture",
     });
   }
 };
