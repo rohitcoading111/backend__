@@ -10,7 +10,7 @@ import { roleMiddleware } from "../middleware/role.middleware.js";
 
 const router = express.Router();
 
-router.post(
+router.post(  
   "/courses/:courseId/modules",
   authMiddleware,
   roleMiddleware("INSTRUCTOR"),
