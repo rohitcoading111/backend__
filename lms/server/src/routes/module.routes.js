@@ -5,6 +5,7 @@ import {
   deleteModuleController,
 } from "../controllers/module.controllers.js";
 import { createLectureController } from "../controllers/lecture.controllers.js";
+import { uploadVideo } from "../middleware/upload.middleware.js";
 
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { roleMiddleware } from "../middleware/role.middleware.js";
@@ -37,6 +38,7 @@ router.post(
   "/:moduleId/lectures",
   authMiddleware,
   roleMiddleware("INSTRUCTOR"),
+  uploadVideo.single("video"),
   createLectureController
 );
 

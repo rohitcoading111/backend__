@@ -9,7 +9,8 @@ export const createLectureController = async (req, res) => {
       instructorId: req.user.id,
       title: req.body.title,
       notes: req.body.notes,
-      order: req.body.order,
+      order: Number(req.body.order),
+      videoFile: req.file,
     });
 
     return res.status(201).json({

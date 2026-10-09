@@ -9,4 +9,21 @@ const upload = multer({
   },
 });
 
+
+export const uploadVideo = multer({
+  storage: multer.memoryStorage(),
+
+  limits: {
+    fileSize: 100 * 1024 * 1024, // 100 MB limit for now
+  },
+
+  fileFilter: (req, file, callback) => {
+    if (!file.mimetype.startsWith("video/")) {
+      return callback(new Error("Only video files are allowed"));
+    }
+
+    callback(null, true);
+  },
+});
+
 export default upload;

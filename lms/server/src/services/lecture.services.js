@@ -1,6 +1,8 @@
 import Lecture from "../models/lecture.models.js";
 import Module from "../models/module.models.js";
 import courseModel from "../models/course.models.js";
+import imagekit from "../config/imagekit.js";
+import { toFile } from "@imagekit/nodejs";
 
 export const createLecture = async ({
   moduleId,
@@ -8,6 +10,7 @@ export const createLecture = async ({
   title,
   notes,
   order,
+  videoFile,
 }) => {
   if (!moduleId || !instructorId) {
     throw new Error("Invalid module or instructor ID");
@@ -20,7 +23,7 @@ export const createLecture = async ({
     throw new Error("Module not found");
   }
 
-  // 2. Verify that the instructor owns the course
+  // 2. Verify course ownership
   const course = await courseModel.findOne({
     _id: existingModule.course,
     instructor: instructorId,
@@ -30,7 +33,7 @@ export const createLecture = async ({
     throw new Error("Access denied");
   }
 
-  // 3. Prevent duplicate lecture order in the same module
+  // 3. Prevent duplicate lecture order
   const existingLecture = await Lecture.findOne({
     module: moduleId,
     order,
@@ -40,12 +43,38 @@ export const createLecture = async ({
     throw new Error("Lecture order already exists");
   }
 
-  // 4. Create the lecture
+  // 4. Default video fields
+  let video = {
+    url: null,
+    fileId: null,
+  };
+
+  // 5. Upload video only if instructor provided one
+  if (videoFile) {
+    const safeFileName = videoFile.originalname.replace(
+      /[^a-zA-Z0-9._-]/g,
+      "_"
+    );
+
+    const uploadedVideo = await imagekit.files.upload({
+      file: await toFile(videoFile.buffer, safeFileName),
+      fileName: `${Date.now()}-${safeFileName}`,
+      folder: "/lms/course-videos",
+    });
+
+    video = {
+      url: uploadedVideo.url,
+      fileId: uploadedVideo.fileId,
+    };
+  }
+
+  // 6. Create lecture with notes and video details
   const lecture = await Lecture.create({
     title,
     notes,
     module: moduleId,
     order,
+    video,
   });
 
   return lecture;
