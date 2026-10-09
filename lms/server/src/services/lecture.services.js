@@ -164,3 +164,60 @@ export const updateLecture = async ({
 
   return lecture;
 };
+
+export const deleteLecture = async ({
+  lectureId,
+  instructorId,
+}) => {
+  if (!lectureId || !instructorId) {
+    throw new Error("Invalid lecture or instructor ID");
+  }
+
+  // 1. Find lecture
+  const lecture = await Lecture.findById(lectureId);
+
+  if (!lecture) {
+    throw new Error("Lecture not found");
+  }
+
+  // 2. Find its module
+  const existingModule = await Module.findById(lecture.module);
+
+  if (!existingModule) {
+    throw new Error("Module not found");
+  }
+
+  // 3. Verify course ownership
+  const course = await courseModel.findOne({
+    _id: existingModule.course,
+    instructor: instructorId,
+  });
+
+  if (!course) {
+    throw new Error("Access denied");
+  }
+
+  // 4. Delete lecture from MongoDB
+  const deletedLecture = await Lecture.findByIdAndDelete(lectureId);
+
+  // 5. Delete its ImageKit video, if available
+  let videoCleanupFailed = false;
+
+  if (lecture.video?.fileId) {
+    try {
+      await imagekit.files.delete(lecture.video.fileId);
+    } catch (error) {
+      videoCleanupFailed = true;
+
+      console.error(
+        "ImageKit video cleanup failed:",
+        error.message
+      );
+    }
+  }
+
+  return {
+    lecture: deletedLecture,
+    videoCleanupFailed,
+  };
+};
