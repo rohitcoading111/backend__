@@ -221,3 +221,57 @@ export const deleteLecture = async ({
     videoCleanupFailed,
   };
 };
+
+export const getLectures = async ({
+  moduleId,
+  userId,
+  userRole,
+}) => {
+  if (!moduleId || !userId) {
+    throw new Error("Invalid module or user ID");
+  }
+
+  // 1. Find the module
+  const existingModule = await Module.findById(moduleId);
+
+  if (!existingModule) {
+    throw new Error("Module not found");
+  }
+
+  // 2. Find the course of this module
+  const course = await courseModel.findById(
+    existingModule.course
+  );
+
+  if (!course) {
+    throw new Error("Course not found");
+  }
+
+  // 3. Allow only valid roles
+  if (!["STUDENT", "INSTRUCTOR", "ADMIN"].includes(userRole)) {
+    throw new Error("Access denied");
+  }
+
+  // 4. Students can access published courses
+  if (
+    userRole === "STUDENT" &&
+    course.status !== "PUBLISHED"
+  ) {
+    throw new Error("Course is not available");
+  }
+
+  // 5. Instructors can access only their own courses
+  if (
+    userRole === "INSTRUCTOR" &&
+    course.instructor.toString() !== userId
+  ) {
+    throw new Error("Access denied");
+  }
+
+  // 6. Get all lectures of this module
+  const lectures = await Lecture.find({
+    module: moduleId,
+  }).sort({ order: 1 });
+
+  return lectures;
+};
