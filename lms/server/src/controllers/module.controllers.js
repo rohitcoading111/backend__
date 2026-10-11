@@ -1,4 +1,4 @@
-import { createModule,updateModule,deleteModule } from "../services/module.services.js";
+import { createModule,updateModule,deleteModule,getModules } from "../services/module.services.js";
 
 export const createModuleController = async (req, res) => {
   try {
@@ -123,6 +123,57 @@ export const deleteModuleController = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to delete module",
+    });
+  }
+};
+
+export const getModulesController = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+
+    const modules = await getModules({
+      courseId,
+      userId: req.user.id,
+      userRole: req.user.role,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Modules fetched successfully",
+      data: {
+        modules,
+      },
+    });
+  } catch (error) {
+    console.error("Get Modules Error:", error);
+
+    if (error.message === "Invalid course or user ID") {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    if (
+      error.message === "Course not found" ||
+      error.message === "Course is not available"
+    ) {
+      return res.status(404).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    if (error.message === "Access denied") {
+      return res.status(403).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch modules",
     });
   }
 };
