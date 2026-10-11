@@ -3,6 +3,7 @@ import {
   createModuleController,
   updateModuleController,
   deleteModuleController,
+  getModulesController
 } from "../controllers/module.controllers.js";
 import { createLectureController,updateLectureController,deleteLectureController } from "../controllers/lecture.controllers.js";
 import { uploadVideo } from "../middleware/upload.middleware.js";
@@ -54,6 +55,13 @@ router.delete(
   authMiddleware,
   roleMiddleware("INSTRUCTOR"),
   deleteLectureController
+);
+
+
+router.get(
+  "/courses/:courseId/modules",
+  authMiddleware,
+  getModulesController
 );
 
 export default router;
