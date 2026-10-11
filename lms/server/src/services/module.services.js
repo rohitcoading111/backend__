@@ -1,5 +1,6 @@
 import Module from "../models/module.models.js";
 import courseModel from "../models/course.models.js";
+import Lecture from "../models/lecture.models.js";
 
 export const createModule = async ({
   courseId,
@@ -117,14 +118,12 @@ export const getModules = async ({
     throw new Error("Invalid course or user ID");
   }
 
-  // 1. Find the course
   const course = await courseModel.findById(courseId);
 
   if (!course) {
     throw new Error("Course not found");
   }
 
-  // 2. Check student access
   if (
     userRole === "STUDENT" &&
     course.status !== "PUBLISHED"
@@ -132,7 +131,6 @@ export const getModules = async ({
     throw new Error("Course is not available");
   }
 
-  // 3. Check instructor ownership
   if (
     userRole === "INSTRUCTOR" &&
     course.instructor.toString() !== userId
@@ -140,15 +138,26 @@ export const getModules = async ({
     throw new Error("Access denied");
   }
 
-  // 4. Allow only valid roles
   if (!["STUDENT", "INSTRUCTOR", "ADMIN"].includes(userRole)) {
     throw new Error("Access denied");
   }
 
-  // 5. Get all modules of this course
   const modules = await Module.find({
     course: courseId,
   }).sort({ order: 1 });
 
-  return modules;
+  const modulesWithLectureCount = await Promise.all(
+    modules.map(async (module) => {
+      const lectureCount = await Lecture.countDocuments({
+        module: module._id,
+      });
+
+      return {
+        ...module.toObject(),
+        lectureCount,
+      };
+    })
+  );
+
+  return modulesWithLectureCount;
 };
