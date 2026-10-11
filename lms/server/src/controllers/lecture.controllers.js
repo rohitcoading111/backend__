@@ -1,4 +1,4 @@
-import { createLecture,updateLecture,deleteLecture } from "../services/lecture.services.js";
+import { createLecture,updateLecture,deleteLecture,getLectures } from "../services/lecture.services.js";
 
 export const createLectureController = async (req, res) => {
   try {
@@ -189,6 +189,75 @@ export const deleteLectureController = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to delete lecture",
+    });
+  }
+};
+
+export const getLecturesController = async (req, res) => {
+  try {
+    const { moduleId } = req.params;
+
+    const lectures = await getLectures({
+      moduleId,
+      userId: req.user.id,
+      userRole: req.user.role,
+    });
+
+    // Do not send raw ImageKit video URLs yet
+    const lectureData = lectures.map((lecture) => ({
+      _id: lecture._id,
+      title: lecture.title,
+      notes: lecture.notes,
+      module: lecture.module,
+      order: lecture.order,
+
+      videoAvailable: Boolean(lecture.video?.fileId),
+
+      createdAt: lecture.createdAt,
+      updatedAt: lecture.updatedAt,
+    }));
+
+    return res.status(200).json({
+      success: true,
+      message: "Lectures fetched successfully",
+      data: {
+        lectures: lectureData,
+      },
+    });
+  } catch (error) {
+    console.error("Get Lectures Error:", error);
+
+    if (
+      error.message === "Invalid module or user ID" ||
+      error.name === "CastError"
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid module or user ID",
+      });
+    }
+
+    if (
+      error.message === "Module not found" ||
+      error.message === "Course not found" ||
+      error.message === "Course is not available"
+    ) {
+      return res.status(404).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    if (error.message === "Access denied") {
+      return res.status(403).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch lectures",
     });
   }
 };
