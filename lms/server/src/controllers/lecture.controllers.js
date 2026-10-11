@@ -1,4 +1,4 @@
-import { createLecture,updateLecture } from "../services/lecture.services.js";
+import { createLecture,updateLecture,deleteLecture } from "../services/lecture.services.js";
 
 export const createLectureController = async (req, res) => {
   try {
@@ -128,6 +128,67 @@ export const updateLectureController = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to update lecture",
+    });
+  }
+};
+
+export const deleteLectureController = async (req, res) => {
+  try {
+    const { lectureId } = req.params;
+
+    const result = await deleteLecture({
+      lectureId,
+      instructorId: req.user.id,
+    });
+
+    if (result.videoCleanupFailed) {
+      return res.status(200).json({
+        success: true,
+        message: "Lecture deleted, but video cleanup failed",
+        data: {
+          lecture: result.lecture,
+        },
+        warning: "Video may still exist in ImageKit",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Lecture deleted successfully",
+      data: {
+        lecture: result.lecture,
+      },
+    });
+  } catch (error) {
+    console.error("Delete Lecture Error:", error);
+
+    if (error.message === "Invalid lecture or instructor ID") {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    if (
+      error.message === "Lecture not found" ||
+      error.message === "Module not found"
+    ) {
+      return res.status(404).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    if (error.message === "Access denied") {
+      return res.status(403).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to delete lecture",
     });
   }
 };
