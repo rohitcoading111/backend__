@@ -107,3 +107,48 @@ export const deleteModule = async (moduleId, instructorId) => {
 
   return deletedModule;
 };
+
+export const getModules = async ({
+  courseId,
+  userId,
+  userRole,
+}) => {
+  if (!courseId || !userId) {
+    throw new Error("Invalid course or user ID");
+  }
+
+  // 1. Find the course
+  const course = await courseModel.findById(courseId);
+
+  if (!course) {
+    throw new Error("Course not found");
+  }
+
+  // 2. Check student access
+  if (
+    userRole === "STUDENT" &&
+    course.status !== "PUBLISHED"
+  ) {
+    throw new Error("Course is not available");
+  }
+
+  // 3. Check instructor ownership
+  if (
+    userRole === "INSTRUCTOR" &&
+    course.instructor.toString() !== userId
+  ) {
+    throw new Error("Access denied");
+  }
+
+  // 4. Allow only valid roles
+  if (!["STUDENT", "INSTRUCTOR", "ADMIN"].includes(userRole)) {
+    throw new Error("Access denied");
+  }
+
+  // 5. Get all modules of this course
+  const modules = await Module.find({
+    course: courseId,
+  }).sort({ order: 1 });
+
+  return modules;
+};
