@@ -1,5 +1,7 @@
 import courseModel from "../models/course.models.js";
 import imagekit from "../config/imagekit.js";
+import Module from "../models/module.models.js";
+import Lecture from "../models/lecture.models.js";
 
 export const createCourse = async ({ courseData, instructorId, file }) => {
   const {
@@ -127,6 +129,37 @@ export const deleteCourse = async (courseId, instructorId) => {
     throw new Error("Invalid course or instructor ID");
   }
 
+  // 1. Check course ownership
+  const course = await courseModel.findOne({
+    _id: courseId,
+    instructor: instructorId,
+  });
+
+  if (!course) {
+    throw new Error("Course not found or access denied");
+  }
+
+  // 2. Find all modules of this course
+  const modules = await Module.find({ course: courseId });
+
+  const moduleIds = modules.map((module) => module._id);
+
+  // 3. Find all lectures inside these modules
+  const lectures = await Lecture.find({
+    module: { $in: moduleIds },
+  });
+
+  // 4. Delete lectures from database
+  await Lecture.deleteMany({
+    module: { $in: moduleIds },
+  });
+
+  // 5. Delete modules from database
+  await Module.deleteMany({
+    course: courseId,
+  });
+
+  // 6. Delete the course itself
   const deletedCourse = await courseModel.findOneAndDelete({
     _id: courseId,
     instructor: instructorId,
@@ -136,7 +169,35 @@ export const deleteCourse = async (courseId, instructorId) => {
     throw new Error("Course not found or access denied");
   }
 
-  return deletedCourse;
+  // 7. Collect ImageKit file IDs
+  const fileIds = [];
+
+  if (deletedCourse.thumbnail?.fileId) {
+    fileIds.push(deletedCourse.thumbnail.fileId);
+  }
+
+  for (const lecture of lectures) {
+    if (lecture.video?.fileId) {
+      fileIds.push(lecture.video.fileId);
+    }
+  }
+
+  // 8. Clean up uploaded files from ImageKit
+  const cleanupResults = await Promise.allSettled(
+    fileIds.map((fileId) => imagekit.files.delete(fileId))
+  );
+
+  const imageCleanupFailed = cleanupResults.some(
+    (result) => result.status === "rejected"
+  );
+
+  // 9. Return deletion summary
+  return {
+    course: deletedCourse,
+    deletedModules: modules.length,
+    deletedLectures: lectures.length,
+    imageCleanupFailed,
+  };
 };
 
 export const publishCourse = async (courseId, instructorId) => {
