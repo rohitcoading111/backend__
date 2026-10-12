@@ -6,6 +6,8 @@ import courseRoutes from "../routes/cource.routes.js";
 import moduleRoutes from "../routes/module.routes.js";
 import lectureRoutes from "../routes/lecture.routes.js";
 import enrollmentRoutes from "../routes/enrollment.routes.js";
+app.use("/api/payments", paymentRoutes);
+
 
 const app = express();
 app.use(cookieParser());
@@ -29,5 +31,7 @@ app.use("/api", lectureRoutes);
 
 // enrollenment routes
 app.use("/api/enrollments", enrollmentRoutes);
+
+app.use("/api/payments", paymentRoutes);
 
 export default app;
