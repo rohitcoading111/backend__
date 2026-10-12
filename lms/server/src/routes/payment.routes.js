@@ -2,6 +2,7 @@ import express from "express";
 
 import {
   createPaymentRequestController,
+  getMyPaymentController,
 } from "../controllers/payment.controllers.js";
 
 import { authMiddleware } from "../middleware/auth.middleware.js";
@@ -14,6 +15,13 @@ router.post(
   authMiddleware,
   roleMiddleware("STUDENT"),
   createPaymentRequestController
+);
+
+router.get(
+  "/:paymentId",
+  authMiddleware,
+  roleMiddleware("STUDENT"),
+  getMyPaymentController
 );
 
 export default router;

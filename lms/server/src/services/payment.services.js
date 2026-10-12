@@ -49,3 +49,20 @@ export const createPaymentRequest = async (studentId, courseId) => {
 
   return payment;
 };
+
+export const getMyPayment = async (studentId, paymentId) => {
+  if (!studentId || !paymentId) {
+    throw new Error("Student ID and Payment ID are required");
+  }
+
+  const payment = await Payment.findOne({
+    _id: paymentId,
+    student: studentId,
+  }).populate("course", "title thumbnail price");
+
+  if (!payment) {
+    throw new Error("Payment not found");
+  }
+
+  return payment;
+};
