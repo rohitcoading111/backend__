@@ -120,7 +120,7 @@ export const deleteCourseController = async (req, res) => {
   try {
     const { courseId } = req.params;
 
-    const deletedCourse = await deleteCourse(
+    const result = await deleteCourse(
       courseId,
       req.user.id
     );
@@ -129,7 +129,10 @@ export const deleteCourseController = async (req, res) => {
       success: true,
       message: "Course deleted successfully",
       data: {
-        course: deletedCourse,
+        course: result.course,
+        deletedModules: result.deletedModules,
+        deletedLectures: result.deletedLectures,
+        imageCleanupFailed: result.imageCleanupFailed,
       },
     });
   } catch (error) {
