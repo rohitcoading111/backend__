@@ -1,6 +1,7 @@
 import Module from "../models/module.models.js";
 import courseModel from "../models/course.models.js";
-import Lecture from "../models/lecture.models.js";
+import Lecture from "../models/lecture.models.js"
+import imagekit from "../config/imagekit.js";
 
 export const createModule = async ({
   courseId,
@@ -89,12 +90,14 @@ export const deleteModule = async (moduleId, instructorId) => {
     throw new Error("Invalid module or instructor ID");
   }
 
+  // 1. Find module
   const module = await Module.findById(moduleId);
 
   if (!module) {
     throw new Error("Module not found");
   }
 
+  // 2. Check course ownership
   const course = await courseModel.findOne({
     _id: module.course,
     instructor: instructorId,
@@ -104,9 +107,39 @@ export const deleteModule = async (moduleId, instructorId) => {
     throw new Error("Access denied");
   }
 
+  // 3. Find lectures inside this module
+  const lectures = await Lecture.find({
+    module: moduleId,
+  });
+
+  // 4. Delete lectures from database
+  await Lecture.deleteMany({
+    module: moduleId,
+  });
+
+  // 5. Delete the module
   const deletedModule = await Module.findByIdAndDelete(moduleId);
 
-  return deletedModule;
+  // 6. Collect uploaded video IDs
+  const fileIds = lectures
+    .map((lecture) => lecture.video?.fileId)
+    .filter(Boolean);
+
+  // 7. Delete videos from ImageKit
+  const cleanupResults = await Promise.allSettled(
+    fileIds.map((fileId) => imagekit.files.delete(fileId))
+  );
+
+  const videoCleanupFailed = cleanupResults.some(
+    (result) => result.status === "rejected"
+  );
+
+  // 8. Return deletion details
+  return {
+    module: deletedModule,
+    deletedLectures: lectures.length,
+    videoCleanupFailed,
+  };
 };
 
 export const getModules = async ({
