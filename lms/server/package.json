@@ -24,7 +24,8 @@
     "express-validator": "^7.3.2",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.10.3",
-    "multer": "^2.4.0"
+    "multer": "^2.4.0",
+    "razorpay": "^2.9.8"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
