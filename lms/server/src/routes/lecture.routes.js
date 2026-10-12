@@ -27,9 +27,9 @@ router.post(
   authMiddleware,
   roleMiddleware("INSTRUCTOR"),
   validateModuleId,
+  uploadVideo.single("video"),
   validateLecture,
   checkValidation,
-  uploadVideo.single("video"),
   createLectureController
 );
 
@@ -48,12 +48,11 @@ router.patch(
   authMiddleware,
   roleMiddleware("INSTRUCTOR"),
   validateLectureId,
+  uploadVideo.single("video"),
   validateUpdateLecture,
   checkValidation,
-  uploadVideo.single("video"),
   updateLectureController
 );
-
 // Delete lecture
 router.delete(
   "/lectures/:lectureId",
