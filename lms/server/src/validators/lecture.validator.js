@@ -35,6 +35,29 @@ export const validateModuleId = [
     .withMessage("Invalid module ID"),
 ];
 
+export const validateUpdateLecture = [
+  body("title")
+    .optional()
+    .trim()
+    .notEmpty()
+    .withMessage("Lecture title cannot be empty")
+    .isLength({ max: 150 })
+    .withMessage("Lecture title cannot exceed 150 characters"),
+
+  body("notes")
+    .optional()
+    .isString()
+    .withMessage("Notes must be text")
+    .isLength({ max: 5000 })
+    .withMessage("Notes cannot exceed 5000 characters"),
+
+  body("order")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("Lecture order must be a positive integer")
+    .toInt(),
+];
+
 export const checkValidation = (req, res, next) => {
   const errors = validationResult(req);
 
