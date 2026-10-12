@@ -91,7 +91,7 @@ export const deleteModuleController = async (req, res) => {
   try {
     const { moduleId } = req.params;
 
-    const deletedModule = await deleteModule(
+    const result = await deleteModule(
       moduleId,
       req.user.id
     );
@@ -100,7 +100,9 @@ export const deleteModuleController = async (req, res) => {
       success: true,
       message: "Module deleted successfully",
       data: {
-        module: deletedModule,
+        module: result.module,
+        deletedLectures: result.deletedLectures,
+        videoCleanupFailed: result.videoCleanupFailed,
       },
     });
   } catch (error) {
@@ -115,6 +117,13 @@ export const deleteModuleController = async (req, res) => {
 
     if (error.message === "Access denied") {
       return res.status(403).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    if (error.message === "Invalid module or instructor ID") {
+      return res.status(400).json({
         success: false,
         message: error.message,
       });
