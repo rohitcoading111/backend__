@@ -66,6 +66,7 @@ export const verifyPayment = async ({
     throw new Error("All payment verification fields are required");
   }
 
+  // 1. Fetch local payment record from DB
   const payment = await Payment.findOne({
     student: studentId,
     orderId,
@@ -79,7 +80,7 @@ export const verifyPayment = async ({
     throw new Error("Payment already verified");
   }
 
-  // Razorpay payment signature verify karo
+  // 2. Local Signature Verification (Crypto)
   const expectedSignature = crypto
     .createHmac("sha256", config.razorpayKeySecret)
     .update(`${orderId}|${paymentId}`)
@@ -95,7 +96,28 @@ export const verifyPayment = async ({
     throw new Error("Invalid payment signature");
   }
 
-  // Signature valid hone par payment record update karo
+  // 3. Razorpay API Call Verification (Before DB updates)
+  const razorpayPayment = await razorpay.payments.fetch(paymentId);
+
+  // Confirm payment belongs to this order
+  if (razorpayPayment.order_id !== orderId) {
+    throw new Error("Payment order mismatch");
+  }
+
+  // Confirm status is 'captured'
+  if (razorpayPayment.status !== "captured") {
+    throw new Error("Payment is not captured");
+  }
+
+  // Confirm amount and currency match DB record
+  if (
+    razorpayPayment.amount !== Math.round(payment.amount * 100) ||
+    razorpayPayment.currency !== payment.currency
+  ) {
+    throw new Error("Payment amount or currency mismatch");
+  }
+
+  // 4. Update DB Payment Record (Only after all validations pass)
   payment.razorpayPaymentId = paymentId;
   payment.signatureVerified = true;
   payment.status = "PAID";
@@ -103,9 +125,33 @@ export const verifyPayment = async ({
 
   await payment.save();
 
-  return payment;
-};
+  // 5. Activate Course Enrollment
+  const enrollment = await Enrollment.findOneAndUpdate(
+    {
+      student: payment.student,
+      course: payment.course,
+    },
+    {
+      $set: {
+        status: "ACTIVE",
+        paymentId: payment._id.toString(),
+        enrolledAt: new Date(),
+      },
+      $setOnInsert: {
+        student: payment.student,
+        course: payment.course,
+      },
+    },
+    {
+      new: true,
+      upsert: true,
+      runValidators: true,
+      setDefaultsOnInsert: true,
+    }
+  );
 
+  return { payment, enrollment };
+};
 
 export const getMyPayment = async (studentId, paymentId) => {
   if (!studentId || !paymentId) {
