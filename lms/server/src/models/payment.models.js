@@ -20,22 +20,37 @@ const paymentSchema = new mongoose.Schema(
       min: 1,
     },
 
+    currency: {
+      type: String,
+      default: "INR",
+    },
+
     status: {
       type: String,
-      enum: ["PENDING", "APPROVED", "REJECTED"],
-      default: "PENDING",
+      enum: ["CREATED", "PENDING", "PAID", "FAILED"],
+      default: "CREATED",
     },
 
-    transactionReference: {
+    provider: {
       type: String,
-      trim: true,
+      enum: ["RAZORPAY"],
+      default: "RAZORPAY",
+    },
+
+    orderId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+
+    razorpayPaymentId: {
+      type: String,
       default: null,
     },
 
-    verifiedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      default: null,
+    signatureVerified: {
+      type: Boolean,
+      default: false,
     },
 
     verifiedAt: {
@@ -46,10 +61,7 @@ const paymentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-paymentSchema.index(
-  { transactionReference: 1 },
-  { unique: true, sparse: true }
-);
+paymentSchema.index({ student: 1, course: 1, status: 1 });
 
 const Payment = mongoose.model("Payment", paymentSchema);
 

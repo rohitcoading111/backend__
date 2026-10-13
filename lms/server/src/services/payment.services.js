@@ -1,3 +1,9 @@
+import razorpay from "../config/razorpay.js";
+import Payment from "../models/payment.models.js";
+import Course from "../models/course.models.js";
+import Enrollment from "../models/enrollment.models.js";
+
+import razorpay from "../config/razorpay.js";
 import Payment from "../models/payment.models.js";
 import Course from "../models/course.models.js";
 import Enrollment from "../models/enrollment.models.js";
@@ -7,7 +13,6 @@ export const createPaymentRequest = async (studentId, courseId) => {
     throw new Error("Student ID and Course ID are required");
   }
 
-  // Course check karo
   const course = await Course.findById(courseId);
 
   if (!course) {
@@ -18,7 +23,6 @@ export const createPaymentRequest = async (studentId, courseId) => {
     throw new Error("Course is not available");
   }
 
-  // Pehle check karo student already enrolled toh nahi
   const existingEnrollment = await Enrollment.findOne({
     student: studentId,
     course: courseId,
@@ -29,27 +33,31 @@ export const createPaymentRequest = async (studentId, courseId) => {
     throw new Error("You are already enrolled in this course");
   }
 
-  // Pending payment pehle se hai toh wahi return karo
-  const existingPayment = await Payment.findOne({
-    student: studentId,
-    course: courseId,
-    status: "PENDING",
+  // Razorpay ke liye amount paise mein hoga
+  const amountInPaise = Math.round(course.price * 100);
+
+  const order = await razorpay.orders.create({
+    amount: amountInPaise,
+    currency: "INR",
+    receipt: `course_${course._id}_${Date.now()}`,
   });
 
-  if (existingPayment) {
-    return existingPayment;
-  }
-
-  // Amount database se lo, request body se nahi
+  // Order ko apne database mein save karo
   const payment = await Payment.create({
     student: studentId,
-    course: courseId,
+    course: course._id,
     amount: course.price,
+    currency: "INR",
+    status: "CREATED",
+    provider: "RAZORPAY",
+    orderId: order.id,
   });
 
-  return payment;
+  return {
+    payment,
+    order,
+  };
 };
-
 export const getMyPayment = async (studentId, paymentId) => {
   if (!studentId || !paymentId) {
     throw new Error("Student ID and Payment ID are required");
