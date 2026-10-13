@@ -3,10 +3,6 @@ import Payment from "../models/payment.models.js";
 import Course from "../models/course.models.js";
 import Enrollment from "../models/enrollment.models.js";
 
-import razorpay from "../config/razorpay.js";
-import Payment from "../models/payment.models.js";
-import Course from "../models/course.models.js";
-import Enrollment from "../models/enrollment.models.js";
 
 export const createPaymentRequest = async (studentId, courseId) => {
   if (!studentId || !courseId) {

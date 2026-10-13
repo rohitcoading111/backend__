@@ -6,7 +6,7 @@ import courseRoutes from "../routes/cource.routes.js";
 import moduleRoutes from "../routes/module.routes.js";
 import lectureRoutes from "../routes/lecture.routes.js";
 import enrollmentRoutes from "../routes/enrollment.routes.js";
-app.use("/api/payments", paymentRoutes);
+import paymentRoutes from "../routes/payment.routes.js"
 
 
 const app = express();
@@ -33,5 +33,7 @@ app.use("/api", lectureRoutes);
 app.use("/api/enrollments", enrollmentRoutes);
 
 app.use("/api/payments", paymentRoutes);
+
+
 
 export default app;
