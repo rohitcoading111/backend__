@@ -7,12 +7,21 @@ import moduleRoutes from "../routes/module.routes.js";
 import lectureRoutes from "../routes/lecture.routes.js";
 import enrollmentRoutes from "../routes/enrollment.routes.js";
 import paymentRoutes from "../routes/payment.routes.js"
-
+import cors from "cors";
 
 const app = express();
 app.use(cookieParser());
 app.use(express.json());
 
+app.use(
+  cors({
+    origin: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+app.use(express.json());
 
 // auth apis 
 app.use('/api/auth', authRoutes);

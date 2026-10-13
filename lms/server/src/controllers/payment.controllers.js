@@ -63,7 +63,6 @@ export const createPaymentRequestController = async (req, res) => {
 };
 
 
-;
 
 export const verifyPaymentController = async (req, res) => {
   try {

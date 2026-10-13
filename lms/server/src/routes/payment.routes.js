@@ -3,6 +3,7 @@ import express from "express";
 import {
   createPaymentRequestController,
   getMyPaymentController,
+  verifyPaymentController
 } from "../controllers/payment.controllers.js";
 
 import { authMiddleware } from "../middleware/auth.middleware.js";
@@ -15,6 +16,13 @@ router.post(
   authMiddleware,
   roleMiddleware("STUDENT"),
   createPaymentRequestController
+);
+
+router.post(
+  "/verify",
+  authMiddleware,
+  roleMiddleware("STUDENT"),
+  verifyPaymentController
 );
 
 router.get(

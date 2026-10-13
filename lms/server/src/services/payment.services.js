@@ -3,6 +3,7 @@ import Payment from "../models/payment.models.js";
 import Course from "../models/course.models.js";
 import Enrollment from "../models/enrollment.models.js";
 import crypto from "crypto";
+import config from "../config/config.js";
 
 export const createPaymentRequest = async (studentId, courseId) => {
   if (!studentId || !courseId) {
