@@ -2,23 +2,27 @@ import {
   createPaymentRequest,
   getMyPayment,
 } from "../services/payment.services.js";
+import { config } from "../config/config.js";
 
 export const createPaymentRequestController = async (req, res) => {
   try {
     const { courseId } = req.body;
 
-    const payment = await createPaymentRequest(
+    const { payment, order } = await createPaymentRequest(
       req.user.id,
       courseId
     );
 
     return res.status(201).json({
       success: true,
-      message: "Payment request created successfully",
+      message: "Razorpay order created successfully",
       data: {
         paymentId: payment._id,
-        course: payment.course,
-        amount: payment.amount,
+        courseId: payment.course,
+        amount: order.amount,
+        currency: order.currency,
+        orderId: order.id,
+        keyId: config.razorpayKeyId,
         status: payment.status,
       },
     });
@@ -47,15 +51,14 @@ export const createPaymentRequestController = async (req, res) => {
       });
     }
 
-    console.error("Create Payment Request Error:", error);
+    console.error("Create Razorpay Order Error:", error);
 
     return res.status(500).json({
       success: false,
-      message: "Failed to create payment request",
+      message: "Failed to create Razorpay order",
     });
   }
 };
-
 
 export const getMyPaymentController = async (req, res) => {
   try {
