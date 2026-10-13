@@ -1,9 +1,10 @@
 import {
   createPaymentRequest,
   getMyPayment,
+  verifyPayment
 } from "../services/payment.services.js";
 import config  from "../config/config.js";
-import crypto from "crypto";
+
 
 export const createPaymentRequestController = async (req, res) => {
   try {
@@ -61,55 +62,68 @@ export const createPaymentRequestController = async (req, res) => {
   }
 };
 
-export const verifyPayment = async ({
-  studentId,
-  orderId,
-  paymentId,
-  signature,
-}) => {
-  if (!studentId || !orderId || !paymentId || !signature) {
-    throw new Error("All payment verification fields are required");
+
+;
+
+export const verifyPaymentController = async (req, res) => {
+  try {
+    const { orderId, paymentId, signature } = req.body;
+
+    // Logged-in student ki ID JWT middleware se milegi
+    const studentId = req.user.id;
+
+    const payment = await verifyPayment({
+      studentId,
+      orderId,
+      paymentId,
+      signature,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Payment verified successfully",
+      data: {
+        paymentId: payment._id,
+        courseId: payment.course,
+        orderId: payment.orderId,
+        razorpayPaymentId: payment.razorpayPaymentId,
+        status: payment.status,
+      },
+    });
+  } catch (error) {
+    if (error.message === "All payment verification fields are required") {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    if (
+      error.message === "Payment order not found" ||
+      error.message === "Payment already verified"
+    ) {
+      return res.status(404).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    if (error.message === "Invalid payment signature") {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    console.error("Payment Verification Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Payment verification failed",
+    });
   }
-
-  const payment = await Payment.findOne({
-    student: studentId,
-    orderId,
-  });
-
-  if (!payment) {
-    throw new Error("Payment order not found");
-  }
-
-  if (payment.status === "PAID") {
-    throw new Error("Payment already verified");
-  }
-
-  // Razorpay payment signature verify karo
-  const expectedSignature = crypto
-    .createHmac("sha256", config.razorpayKeySecret)
-    .update(`${orderId}|${paymentId}`)
-    .digest("hex");
-
-  const signatureBuffer = Buffer.from(signature, "hex");
-  const expectedBuffer = Buffer.from(expectedSignature, "hex");
-
-  if (
-    signatureBuffer.length !== expectedBuffer.length ||
-    !crypto.timingSafeEqual(signatureBuffer, expectedBuffer)
-  ) {
-    throw new Error("Invalid payment signature");
-  }
-
-  // Signature valid hone par payment record update karo
-  payment.razorpayPaymentId = paymentId;
-  payment.signatureVerified = true;
-  payment.status = "PAID";
-  payment.verifiedAt = new Date();
-
-  await payment.save();
-
-  return payment;
 };
+
 
 export const getMyPaymentController = async (req, res) => {
   try {

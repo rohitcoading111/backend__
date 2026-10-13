@@ -2,7 +2,7 @@ import razorpay from "../config/razorpay.js";
 import Payment from "../models/payment.models.js";
 import Course from "../models/course.models.js";
 import Enrollment from "../models/enrollment.models.js";
-
+import crypto from "crypto";
 
 export const createPaymentRequest = async (studentId, courseId) => {
   if (!studentId || !courseId) {
@@ -54,6 +54,58 @@ export const createPaymentRequest = async (studentId, courseId) => {
     order,
   };
 };
+
+export const verifyPayment = async ({
+  studentId,
+  orderId,
+  paymentId,
+  signature,
+}) => {
+  if (!studentId || !orderId || !paymentId || !signature) {
+    throw new Error("All payment verification fields are required");
+  }
+
+  const payment = await Payment.findOne({
+    student: studentId,
+    orderId,
+  });
+
+  if (!payment) {
+    throw new Error("Payment order not found");
+  }
+
+  if (payment.status === "PAID") {
+    throw new Error("Payment already verified");
+  }
+
+  // Razorpay payment signature verify karo
+  const expectedSignature = crypto
+    .createHmac("sha256", config.razorpayKeySecret)
+    .update(`${orderId}|${paymentId}`)
+    .digest("hex");
+
+  const signatureBuffer = Buffer.from(signature, "hex");
+  const expectedBuffer = Buffer.from(expectedSignature, "hex");
+
+  if (
+    signatureBuffer.length !== expectedBuffer.length ||
+    !crypto.timingSafeEqual(signatureBuffer, expectedBuffer)
+  ) {
+    throw new Error("Invalid payment signature");
+  }
+
+  // Signature valid hone par payment record update karo
+  payment.razorpayPaymentId = paymentId;
+  payment.signatureVerified = true;
+  payment.status = "PAID";
+  payment.verifiedAt = new Date();
+
+  await payment.save();
+
+  return payment;
+};
+
+
 export const getMyPayment = async (studentId, paymentId) => {
   if (!studentId || !paymentId) {
     throw new Error("Student ID and Payment ID are required");
