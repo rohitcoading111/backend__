@@ -4,59 +4,82 @@ import { generateAccessToken, generateRefreshToken } from "../utils/auth.utils.j
 import imagekit from "../config/imagekit.js";
 
 
+
 export const registerUser = async (user) => {
-  const { email, password, name, avatar, file } = user;
-console.log("FILE IN SERVICE:", file);
+  // 1. Extract registration data from the request
+  const { email, mobile, password, name, avatar, file } = user;
 
-  const existingUser = await userModel.findOne({ email });
+  // 2. Normalize identifiers before checking the database
+  const normalizedEmail = email?.trim().toLowerCase() || undefined;
+  const normalizedMobile = mobile?.trim() || undefined;
 
-  if (existingUser) {
-    throw new Error("User already exists");
+  // 3. At least one identifier must be provided
+  if (!normalizedEmail && !normalizedMobile) {
+    throw new Error("Email or mobile number is required");
   }
 
+  // 4. Check whether this email or mobile is already registered
+  const existingUser = await userModel.findOne({
+    $or: [
+      ...(normalizedEmail ? [{ email: normalizedEmail }] : []),
+      ...(normalizedMobile ? [{ mobile: normalizedMobile }] : []),
+    ],
+  });
+
+  if (existingUser) {
+    throw new Error("Email or mobile number already exists");
+  }
+
+  // 5. Hash the password before saving it
   const hashedPassword = await bcrypt.hash(password, 10);
 
+  // 6. Set default avatar values
   let avatarData = {
     url: null,
     fileId: null,
   };
 
-if (file) {
-    console.log("Uploading file to ImageKit...");
-
+  // 7. Upload the avatar to ImageKit if a file was provided
+  if (file) {
     const uploadResponse = await imagekit.files.upload({
       file: file.buffer.toString("base64"),
       fileName: `${Date.now()}-${file.originalname}`,
       folder: "/lms/avatars",
     });
 
-    console.log("ImageKit response:", uploadResponse);
-
+    // Save the uploaded avatar's URL and file ID
     avatarData = {
       url: uploadResponse.url,
       fileId: uploadResponse.fileId,
     };
   }
+
+  // 8. Create the user in MongoDB
   const newUser = await userModel.create({
     name,
-    email,
+    email: normalizedEmail,
+    mobile: normalizedMobile,
     password: hashedPassword,
     avatar: avatarData,
   });
 
+  // 9. Generate JWT access and refresh tokens
   const accessToken = generateAccessToken(newUser);
   const refreshToken = generateRefreshToken(newUser);
 
+  // 10. Save the refresh token on the user document
   newUser.refreshToken = refreshToken;
-
   await newUser.save();
 
+  // 11. Return the registration result
   return {
     accessToken,
     refreshToken,
-    newUser
+    newUser,
   };
 };
+
+
 export const LoginUser = async (user)=>{
     const { email, password } = user;
     const existingUser = await userModel.findOne({email});
