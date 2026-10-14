@@ -19,6 +19,7 @@ export const createPaymentRequest = async (studentId, courseId) => {
   if (course.status !== "PUBLISHED") {
     throw new Error("Course is not available");
   }
+  
 
   const existingEnrollment = await Enrollment.findOne({
     student: studentId,
@@ -28,6 +29,29 @@ export const createPaymentRequest = async (studentId, courseId) => {
 
   if (existingEnrollment) {
     throw new Error("You are already enrolled in this course");
+  }
+
+
+  
+  // Check if an existing payment order is available
+  const existingPayment = await Payment.findOne({
+    student: studentId,
+    course: courseId,
+    status: { $in: ["CREATED", "PENDING"] },
+  }).sort({ createdAt: -1 });
+
+  // Reuse the existing order if it is still open
+  if (existingPayment) {
+    const existingOrder = await razorpay.orders.fetch(
+      existingPayment.orderId
+    );
+
+    if (existingOrder.status === "created") {
+      return {
+        payment: existingPayment,
+        order: existingOrder,
+      };
+    }
   }
 
   // Razorpay ke liye amount paise mein hoga
