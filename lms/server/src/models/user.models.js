@@ -1,3 +1,4 @@
+
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
@@ -12,11 +13,15 @@ const userSchema = new mongoose.Schema(
 
     email: {
       type: String,
-      required: true,
-      unique: true,
       lowercase: true,
       trim: true,
       match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    },
+
+    mobile: {
+      type: String,
+      trim: true,
+      match: /^\+[1-9]\d{7,14}$/,
     },
 
     password: {
@@ -31,22 +36,22 @@ const userSchema = new mongoose.Schema(
       default: "STUDENT",
     },
 
-   avatar: {
-    url: {
-    type: String,
-    default: null,
-   },
-
-   fileId: {
-    type: String,
-    default: null,
-   },
-  },
+    avatar: {
+      url: {
+        type: String,
+        default: null,
+      },
+      fileId: {
+        type: String,
+        default: null,
+      },
+    },
 
     isVerified: {
       type: Boolean,
       default: false,
     },
+
     refreshToken: {
       type: String,
       default: null,
@@ -54,6 +59,33 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+  }
+);
+
+// At least one login identifier is required
+userSchema.pre("validate", function () {
+  if (!this.email && !this.mobile) {
+    this.invalidate(
+      "email",
+      "Email or mobile number is required"
+    );
+  }
+});
+
+// Unique indexes for identifiers when present
+userSchema.index(
+  { email: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { email: { $type: "string" } },
+  }
+);
+
+userSchema.index(
+  { mobile: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { mobile: { $type: "string" } },
   }
 );
 
