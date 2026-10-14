@@ -80,26 +80,59 @@ export const registerUser = async (user) => {
 };
 
 
-export const LoginUser = async (user)=>{
-    const { email, password } = user;
-    const existingUser = await userModel.findOne({email});
-    if(!existingUser ){
-        throw new Error("Invalid email or password");
-    }
 
-    const isPasswordValid = await bcrypt.compare(password, existingUser.password);
-    if(!isPasswordValid){
-        throw new Error("Invalid email or password");
-    }
+export const LoginUser = async (user) => {
+  // 1. Extract email, mobile number and password
+  const { email, mobile, password } = user;
 
-    const accessToken = generateAccessToken(existingUser);
-    const refreshToken = generateRefreshToken(existingUser);
+  // 2. Normalize the email and mobile number
+  const normalizedEmail = email?.trim().toLowerCase();
+  const normalizedMobile = mobile?.trim();
 
-    existingUser.refreshToken = refreshToken;
-    await existingUser.save();
+  // 3. Require either email or mobile number
+  if (!normalizedEmail && !normalizedMobile) {
+    throw new Error("Email or mobile number is required");
+  }
 
-    return { accessToken, refreshToken };
-}
+  // 4. Find the user using email OR mobile number
+  const existingUser = await userModel.findOne({
+    $or: [
+      ...(normalizedEmail ? [{ email: normalizedEmail }] : []),
+      ...(normalizedMobile ? [{ mobile: normalizedMobile }] : []),
+    ],
+  });
+
+  // 5. Reject login if the user does not exist
+  if (!existingUser) {
+    throw new Error("Invalid email or password");
+  }
+
+  // 6. Compare the entered password with the stored password hash
+  const isPasswordValid = await bcrypt.compare(
+    password,
+    existingUser.password
+  );
+
+  // 7. Reject login if the password is incorrect
+  if (!isPasswordValid) {
+    throw new Error("Invalid email or password");
+  }
+
+  // 8. Generate JWT access and refresh tokens
+  const accessToken = generateAccessToken(existingUser);
+  const refreshToken = generateRefreshToken(existingUser);
+
+  // 9. Save the refresh token on the user document
+  existingUser.refreshToken = refreshToken;
+  await existingUser.save();
+
+  // 10. Return tokens to the controller
+  return {
+    accessToken,
+    refreshToken,
+  };
+};
+
 
 export const refreshTokenService = async (decoded, refreshToken) => {
   const { id, email } = decoded;
