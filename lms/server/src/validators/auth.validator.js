@@ -1,7 +1,7 @@
+
 import { body, validationResult } from "express-validator";
 
-const userValidation = [
-
+export const userValidation = [
   body("name")
     .trim()
     .exists()
@@ -15,14 +15,18 @@ const userValidation = [
     .bail(),
 
   body("email")
+    .optional({ checkFalsy: true })
     .trim()
-    .exists()
-    .withMessage("Email is required")
-    .bail()
     .isEmail()
     .withMessage("Please enter a valid email")
     .bail()
     .normalizeEmail(),
+
+  body("mobile")
+    .optional({ checkFalsy: true })
+    .trim()
+    .matches(/^\+[1-9]\d{7,14}$/)
+    .withMessage("Enter a valid mobile number with country code"),
 
   body("password")
     .exists()
@@ -35,40 +39,57 @@ const userValidation = [
     .withMessage("Password must be at least 8 characters long")
     .bail(),
 
- body("avatar")
-  .optional({ checkFalsy: true })
-  .isObject()
-  .withMessage("Avatar must be an object")
-  .bail(),
+  body("avatar")
+    .optional({ checkFalsy: true })
+    .isObject()
+    .withMessage("Avatar must be an object")
+    .bail(),
 
-body("avatar.url")
-  .if(body("avatar").exists())
-  .exists()
-  .withMessage("Avatar URL is required")
-  .bail()
-  .isURL()
-  .withMessage("Avatar URL must be a valid URL")
-  .bail(),
+  body("avatar.url")
+    .if(body("avatar").exists())
+    .exists()
+    .withMessage("Avatar URL is required")
+    .bail()
+    .isURL()
+    .withMessage("Avatar URL must be a valid URL")
+    .bail(),
 
-body("avatar.fileId")
-  .if(body("avatar").exists())
-  .exists()
-  .withMessage("Avatar fileId is required")
-  .bail()
-  .isString()
-  .withMessage("Avatar fileId must be a string")
-  .bail()
-  .notEmpty()
-  .withMessage("Avatar fileId cannot be empty"),
+  body("avatar.fileId")
+    .if(body("avatar").exists())
+    .exists()
+    .withMessage("Avatar fileId is required")
+    .bail()
+    .isString()
+    .withMessage("Avatar fileId must be a string")
+    .bail()
+    .notEmpty()
+    .withMessage("Avatar fileId cannot be empty"),
 
-
-    (req,res,next)=>{
-        const errors = validationResult(req);
-        if(!errors.isEmpty()){
-            return res.status(400).json({ errors: errors.array() });
-        }
-        next();
+  // At least one identifier must be provided
+  (req, res, next) => {
+    if (!req.body.email && !req.body.mobile) {
+      return res.status(400).json({
+        success: false,
+        message: "Email or mobile number is required",
+      });
     }
+
+    next();
+  },
+
+  // Return all validation errors
+  (req, res, next) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        errors: errors.array(),
+      });
+    }
+
+    next();
+  },
 ];
 
 export const LoginValidation = [
