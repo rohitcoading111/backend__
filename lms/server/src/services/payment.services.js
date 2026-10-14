@@ -80,6 +80,7 @@ export const createPaymentRequest = async (studentId, courseId) => {
   };
 };
 
+
 export const verifyPayment = async ({
   studentId,
   orderId,
@@ -90,7 +91,7 @@ export const verifyPayment = async ({
     throw new Error("All payment verification fields are required");
   }
 
-  // 1. Fetch local payment record from DB
+  // 1. Find the payment belonging to this student and order
   const payment = await Payment.findOne({
     student: studentId,
     orderId,
@@ -100,11 +101,7 @@ export const verifyPayment = async ({
     throw new Error("Payment order not found");
   }
 
-  if (payment.status === "PAID") {
-    throw new Error("Payment already verified");
-  }
-
-  // 2. Local Signature Verification (Crypto)
+  // 2. Verify the Razorpay signature
   const expectedSignature = crypto
     .createHmac("sha256", config.razorpayKeySecret)
     .update(`${orderId}|${paymentId}`)
@@ -120,20 +117,17 @@ export const verifyPayment = async ({
     throw new Error("Invalid payment signature");
   }
 
-  // 3. Razorpay API Call Verification (Before DB updates)
+  // 3. Verify the actual payment with Razorpay
   const razorpayPayment = await razorpay.payments.fetch(paymentId);
 
-  // Confirm payment belongs to this order
   if (razorpayPayment.order_id !== orderId) {
     throw new Error("Payment order mismatch");
   }
 
-  // Confirm status is 'captured'
   if (razorpayPayment.status !== "captured") {
     throw new Error("Payment is not captured");
   }
 
-  // Confirm amount and currency match DB record
   if (
     razorpayPayment.amount !== Math.round(payment.amount * 100) ||
     razorpayPayment.currency !== payment.currency
@@ -141,7 +135,28 @@ export const verifyPayment = async ({
     throw new Error("Payment amount or currency mismatch");
   }
 
-  // 4. Update DB Payment Record (Only after all validations pass)
+  // 4. Handle repeated verification of the same successful payment
+  if (payment.status === "PAID") {
+    if (payment.razorpayPaymentId !== paymentId) {
+      throw new Error("Payment already verified with a different payment");
+    }
+
+    const enrollment = await Enrollment.findOne({
+      student: payment.student,
+      course: payment.course,
+    });
+
+    if (!enrollment || enrollment.status !== "ACTIVE") {
+      throw new Error(
+        "Payment is paid but enrollment is not active; contact support"
+      );
+    }
+
+    // Return the existing successful result without creating another enrollment
+    return { payment, enrollment };
+  }
+
+  // 5. Save payment as successful
   payment.razorpayPaymentId = paymentId;
   payment.signatureVerified = true;
   payment.status = "PAID";
@@ -149,7 +164,7 @@ export const verifyPayment = async ({
 
   await payment.save();
 
-  // 5. Activate Course Enrollment
+  // 6. Activate the student's enrollment
   const enrollment = await Enrollment.findOneAndUpdate(
     {
       student: payment.student,
@@ -176,6 +191,7 @@ export const verifyPayment = async ({
 
   return { payment, enrollment };
 };
+
 
 export const getMyPayment = async (studentId, paymentId) => {
   if (!studentId || !paymentId) {
