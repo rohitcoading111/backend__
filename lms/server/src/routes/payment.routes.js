@@ -5,6 +5,11 @@ import {
   getMyPaymentController,
   verifyPaymentController
 } from "../controllers/payment.controllers.js";
+import {
+  createPaymentValidator,
+  verifyPaymentValidator,
+  handleValidationErrors,
+} from "../validators/payment.validators.js";
 
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { roleMiddleware } from "../middleware/role.middleware.js";
@@ -15,6 +20,8 @@ router.post(
   "/create",
   authMiddleware,
   roleMiddleware("STUDENT"),
+  createPaymentValidator,
+  handleValidationErrors,
   createPaymentRequestController
 );
 
@@ -22,6 +29,8 @@ router.post(
   "/verify",
   authMiddleware,
   roleMiddleware("STUDENT"),
+  verifyPaymentValidator,
+  handleValidationErrors,
   verifyPaymentController
 );
 
