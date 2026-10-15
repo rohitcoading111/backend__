@@ -4,7 +4,7 @@ import config from "../config/config.js";
 import jwt from "jsonwebtoken";
 import {LogoutUser} from "../services/auth.services.js";
 import { refreshTokenService } from "../services/auth.services.js";
-
+import { verifyMobileOTP } from "../services/otp.services.js";
 
 export const registerUser = async (req, res) => {
   try {
@@ -198,6 +198,59 @@ export const adminTest = async (req, res) => {
     },
   });
 };
+
+// User ke OTP ko verify karne wala controller
+export const verifyMobileOTPController = async (req, res) => {
+  try {
+    // Request body se mobile aur OTP lo
+    const { mobile, code } = req.body;
+
+    // Check karo ki dono values mili hain
+    if (!mobile || !code) {
+      return res.status(400).json({
+        success: false,
+        message: "Mobile number and OTP are required",
+      });
+    }
+
+    // Mobile number se user ko find karo
+    const user = await userModel.findOne({ mobile });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Twilio se OTP verify karwao
+    const isValid = await verifyMobileOTP(mobile, code);
+
+    if (!isValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or unapproved OTP",
+      });
+    }
+
+    // Successful verification par mobile verified mark karo
+    user.mobileVerified = true;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Mobile number verified successfully",
+    });
+  } catch (error) {
+    console.error("OTP verification failed:", error.message);
+
+    return res.status(400).json({
+      success: false,
+      message: "OTP verification failed or code expired",
+    });
+  }
+};
+
 
 
 
