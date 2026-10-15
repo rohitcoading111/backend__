@@ -2,23 +2,23 @@ import userModel from "../models/user.models.js";
 import bcrypt from "bcryptjs";
 import { generateAccessToken, generateRefreshToken } from "../utils/auth.utils.js";
 import imagekit from "../config/imagekit.js";
+import { sendMobileOTP } from "./otp.services.js";
 
 
 
 export const registerUser = async (user) => {
-  // 1. Extract registration data from the request
-  const { email, mobile, password, name, avatar, file } = user;
+  const { email, mobile, password, name, file } = user;
 
-  // 2. Normalize identifiers before checking the database
+  // Email aur mobile ko normalize karo
   const normalizedEmail = email?.trim().toLowerCase() || undefined;
   const normalizedMobile = mobile?.trim() || undefined;
 
-  // 3. At least one identifier must be provided
+  // Kam se kam ek identifier zaroori hai
   if (!normalizedEmail && !normalizedMobile) {
     throw new Error("Email or mobile number is required");
   }
 
-  // 4. Check whether this email or mobile is already registered
+  // Duplicate email ya mobile check karo
   const existingUser = await userModel.findOne({
     $or: [
       ...(normalizedEmail ? [{ email: normalizedEmail }] : []),
@@ -30,16 +30,13 @@ export const registerUser = async (user) => {
     throw new Error("Email or mobile number already exists");
   }
 
-  // 5. Hash the password before saving it
+  // Password ko hash karo
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // 6. Set default avatar values
-  let avatarData = {
-    url: null,
-    fileId: null,
-  };
+  // Default avatar
+  let avatarData = { url: null, fileId: null };
 
-  // 7. Upload the avatar to ImageKit if a file was provided
+  // Agar avatar upload hua hai, toh ImageKit par bhejo
   if (file) {
     const uploadResponse = await imagekit.files.upload({
       file: file.buffer.toString("base64"),
@@ -47,38 +44,53 @@ export const registerUser = async (user) => {
       folder: "/lms/avatars",
     });
 
-    // Save the uploaded avatar's URL and file ID
     avatarData = {
       url: uploadResponse.url,
       fileId: uploadResponse.fileId,
     };
   }
 
-  // 8. Create the user in MongoDB
+  // Naya user create karo
   const newUser = await userModel.create({
     name,
     email: normalizedEmail,
     mobile: normalizedMobile,
     password: hashedPassword,
     avatar: avatarData,
+    mobileVerified: false,
   });
 
-  // 9. Generate JWT access and refresh tokens
+  // Mobile registration: OTP bhejo, JWT abhi mat do
+  if (normalizedMobile) {
+    try {
+      const otpStatus = await sendMobileOTP(normalizedMobile);
+
+      return {
+        message: "Registration successful. Verify your mobile number.",
+        mobile: normalizedMobile,
+        otpStatus,
+        requiresOTPVerification: true,
+      };
+    } catch (error) {
+      // OTP request fail ho toh incomplete account remove karo
+      await userModel.deleteOne({ _id: newUser._id });
+      throw new Error("Could not send OTP. Please try again.");
+    }
+  }
+
+  // Email-only registration ka existing behavior filhaal rakho
   const accessToken = generateAccessToken(newUser);
   const refreshToken = generateRefreshToken(newUser);
 
-  // 10. Save the refresh token on the user document
   newUser.refreshToken = refreshToken;
   await newUser.save();
 
-  // 11. Return the registration result
   return {
     accessToken,
     refreshToken,
     newUser,
   };
 };
-
 
 
 export const LoginUser = async (user) => {

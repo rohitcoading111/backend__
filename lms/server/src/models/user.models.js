@@ -56,6 +56,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    // Mobile number ki OTP verification status
+  mobileVerified: {
+  type: Boolean,
+  default: false,
+  },
   },
   {
     timestamps: true,
