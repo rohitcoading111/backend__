@@ -24,6 +24,23 @@ export const mobileRegistrationValidator = [
     .withMessage("Password must be between 8 and 128 characters"),
 ];
 
+export const verifyMobileOTPValidator = [
+  body("mobile")
+    .trim()
+    .notEmpty()
+    .withMessage("Mobile number is required")
+    .matches(/^\+[1-9]\d{7,14}$/)
+    .withMessage("Enter a valid mobile number with country code"),
+
+  body("code")
+    .trim()
+    .notEmpty()
+    .withMessage("OTP is required")
+    .isLength({ min: 4, max: 10 })
+    .withMessage("Enter a valid OTP"),
+];
+
+
 // Validation errors ko response mein bhejna
 export const checkMobileRegistrationValidation = (
   req,

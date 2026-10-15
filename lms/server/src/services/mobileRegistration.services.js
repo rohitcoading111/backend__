@@ -1,4 +1,3 @@
-
 import bcrypt from "bcrypt";
 
 import userModel from "../models/user.models.js";
@@ -69,3 +68,90 @@ export const startMobileRegistration = async ({
     otpStatus,
   };
 };
+
+export const completeMobileRegistration = async ({
+  mobile,
+  code,
+}) => {
+  const normalizedMobile = mobile?.trim();
+  const normalizedCode = String(code ?? "").trim();
+
+  // 1. Required fields check karo
+  if (!normalizedMobile || !normalizedCode) {
+    throw new Error("Mobile number and OTP are required");
+  }
+
+  // 2. Pending registration find karo
+  const pendingUser = await PendingRegistration.findOne({
+    mobile: normalizedMobile,
+  });
+
+  if (!pendingUser) {
+    throw new Error("No pending registration found");
+  }
+
+  // 3. Expiry manually check karo
+  if (pendingUser.expiresAt <= new Date()) {
+    await PendingRegistration.deleteOne({
+      _id: pendingUser._id,
+    });
+
+    throw new Error("Registration expired. Please register again");
+  }
+
+  // 4. Twilio se OTP verify karo
+  let isVerified = false;
+
+  try {
+    isVerified = await verifyMobileOTP(
+      normalizedMobile,
+      normalizedCode
+    );
+  } catch {
+    throw new Error("Invalid or expired OTP");
+  }
+
+  // 5. OTP valid nahi hai toh account create mat karo
+  if (!isVerified) {
+    throw new Error("Invalid or expired OTP");
+  }
+
+  // 6. Permanent account pehle se toh nahi bana?
+  const existingUser = await userModel.findOne({
+    mobile: normalizedMobile,
+  });
+
+  if (existingUser) {
+    await PendingRegistration.deleteOne({
+      _id: pendingUser._id,
+    });
+
+    throw new Error("Mobile number is already registered");
+  }
+
+  // 7. OTP verified hai, ab permanent User create karo
+  const newUser = await userModel.create({
+    name: pendingUser.name,
+    mobile: pendingUser.mobile,
+    password: pendingUser.password,
+    avatar: pendingUser.avatar,
+    mobileVerified: true,
+  });
+
+  // 8. Account create hone ke baad pending record delete karo
+  await PendingRegistration.deleteOne({
+    _id: pendingUser._id,
+  });
+
+  // 9. Safe user details return karo
+  return {
+    message: "Mobile verified and account created successfully",
+    user: {
+      id: newUser._id,
+      name: newUser.name,
+      mobile: newUser.mobile,
+      mobileVerified: newUser.mobileVerified,
+    },
+  };
+};
+
