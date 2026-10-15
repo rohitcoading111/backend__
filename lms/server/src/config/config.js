@@ -1,3 +1,4 @@
+
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -7,17 +8,26 @@ const config = {
     REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET,
     ACCESS_TOKEN_EXPIRES_IN: process.env.ACCESS_TOKEN_EXPIRES_IN,
     REFRESH_TOKEN_EXPIRES_IN: process.env.REFRESH_TOKEN_EXPIRES_IN,
+
     ADMIN_NAME: process.env.ADMIN_NAME,
-    ADMIN_EMAIL:process.env.ADMIN_EMAIL,
-    ADMIN_PASSWORD:process.env.ADMIN_PASSWORD,
+    ADMIN_EMAIL: process.env.ADMIN_EMAIL,
+    ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
+
     INSTRUCTOR_NAME: process.env.INSTRUCTOR_NAME,
-    INSTRUCTOR_EMAIL:process.env.INSTRUCTOR_EMAIL,
-    INSTRUCTOR_PASSWORD:process.env.INSTRUCTOR_PASSWORD,
+    INSTRUCTOR_EMAIL: process.env.INSTRUCTOR_EMAIL,
+    INSTRUCTOR_PASSWORD: process.env.INSTRUCTOR_PASSWORD,
+
     IMAGEKIT_PRIVATE_KEY: process.env.IMAGEKIT_PRIVATE_KEY,
     IMAGEKIT_PUBLIC_KEY: process.env.IMAGEKIT_PUBLIC_KEY,
     IMAGEKIT_URL_ENDPOINT: process.env.IMAGEKIT_URL_ENDPOINT,
-    razorpayKeyId:process.env.RAZORPAY_KEY_ID,
-    razorpayKeySecret:process.env.RAZORPAY_KEY_SECRET,
+
+    razorpayKeyId: process.env.RAZORPAY_KEY_ID,
+    razorpayKeySecret: process.env.RAZORPAY_KEY_SECRET,
+
+    // Twilio OTP configuration
+    TWILIO_ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID,
+    TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN,
+    TWILIO_VERIFY_SERVICE_SID: process.env.TWILIO_VERIFY_SERVICE_SID,
 };
 
 export default config;
