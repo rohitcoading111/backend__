@@ -67,24 +67,19 @@ export const userValidation = [
 
   // At least one identifier must be provided
   (req, res, next) => {
-    if (!req.body.email && !req.body.mobile) {
-      return res.status(400).json({
-        success: false,
-        message: "Email or mobile number is required",
-      });
-    }
-
-    next();
-  },
-
-  // Return all validation errors
-  (req, res, next) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
       return res.status(400).json({
         success: false,
         errors: errors.array(),
+      });
+    }
+
+    if (!req.body.email?.trim() && !req.body.mobile?.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Email or mobile number is required",
       });
     }
 

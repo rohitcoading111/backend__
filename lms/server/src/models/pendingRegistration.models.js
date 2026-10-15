@@ -18,6 +18,12 @@ const pendingRegistrationSchema = new mongoose.Schema(
       trim: true,
     },
 
+    email: {
+      type: String,
+      lowercase: true,
+      trim: true,
+    },
+
     // Password ko hash karke hi temporary store karna hai
     password: {
       type: String,
@@ -41,6 +47,18 @@ const pendingRegistrationSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+
+    otpWindowStartedAt: {
+      type: Date,
+      default: Date.now,
+    },
+    otpSendCount: {
+      type: Number,
+      default: 0,
+    },
+    lastOtpSentAt: {
+      type: Date,
+    },
   },
   {
     timestamps: true,
@@ -57,6 +75,14 @@ pendingRegistrationSchema.index(
 pendingRegistrationSchema.index(
   { mobile: 1 },
   { unique: true }
+);
+
+pendingRegistrationSchema.index(
+  { email: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { email: { $type: "string" } },
+  }
 );
 
 const PendingRegistration = mongoose.model(

@@ -3,6 +3,25 @@ import bcrypt from "bcryptjs";
 import { generateAccessToken, generateRefreshToken } from "../utils/auth.utils.js";
 import imagekit from "../config/imagekit.js";
 
+export const uploadAvatar = async (file) => {
+  if (!file) {
+    return {
+      url: null,
+      fileId: null,
+    };
+  }
+
+  const uploadResponse = await imagekit.files.upload({
+    file: file.buffer.toString("base64"),
+    fileName: `${Date.now()}-${file.originalname}`,
+    folder: "/lms/avatars",
+  });
+
+  return {
+    url: uploadResponse.url,
+    fileId: uploadResponse.fileId,
+  };
+};
 
 
 export const registerUser = async (user) => {
@@ -34,25 +53,7 @@ export const registerUser = async (user) => {
   const hashedPassword = await bcrypt.hash(password, 10);
 
   // 6. Set default avatar values
-  let avatarData = {
-    url: null,
-    fileId: null,
-  };
-
-  // 7. Upload the avatar to ImageKit if a file was provided
-  if (file) {
-    const uploadResponse = await imagekit.files.upload({
-      file: file.buffer.toString("base64"),
-      fileName: `${Date.now()}-${file.originalname}`,
-      folder: "/lms/avatars",
-    });
-
-    // Save the uploaded avatar's URL and file ID
-    avatarData = {
-      url: uploadResponse.url,
-      fileId: uploadResponse.fileId,
-    };
-  }
+  const avatarData = await uploadAvatar(file);
 
   // 8. Create the user in MongoDB
   const newUser = await userModel.create({

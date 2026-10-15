@@ -1,71 +1,207 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 import userModel from "../models/user.models.js";
 import PendingRegistration from "../models/pendingRegistration.models.js";
-
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "../utils/auth.utils.js";
+import { uploadAvatar } from "./auth.services.js";
 import {
   sendMobileOTP,
   verifyMobileOTP,
 } from "./otp.services.js";
 
+const OTP_RESEND_COOLDOWN_MS = 60 * 1000;
+const OTP_SEND_WINDOW_MS = 60 * 60 * 1000;
+const MAX_OTP_SENDS_PER_WINDOW = 5;
+const PENDING_REGISTRATION_TTL_MS = 10 * 60 * 1000;
+
+const normalizeEmail = (email) =>
+  email?.trim().toLowerCase() || undefined;
+
+const throwDuplicateRegistrationError = (error) => {
+  if (error?.code === 11000) {
+    throw new Error("Email or mobile number already exists");
+  }
+
+  throw error;
+};
 
 export const startMobileRegistration = async ({
   name,
+  email,
   mobile,
   password,
+  file,
 }) => {
-  // 1. Name aur mobile ko normalize karo
   const normalizedName = name?.trim();
+  const normalizedEmail = normalizeEmail(email);
   const normalizedMobile = mobile?.trim();
 
-  // 2. Required fields check karo
   if (!normalizedName || !normalizedMobile || !password) {
     throw new Error("Name, mobile and password are required");
   }
 
-  // 3. International format check karo, example: +919876543210
   if (!/^\+[1-9]\d{7,14}$/.test(normalizedMobile)) {
-    throw new Error("Enter mobile number with country code, e.g. +919876543210");
+    throw new Error(
+      "Enter mobile number with country code, e.g. +919876543210"
+    );
   }
 
-  // 4. Check karo ki mobile se account pehle se bana hai ya nahi
+  const identifiers = [
+    { mobile: normalizedMobile },
+    ...(normalizedEmail ? [{ email: normalizedEmail }] : []),
+  ];
+
   const existingUser = await userModel.findOne({
-    mobile: normalizedMobile,
+    $or: identifiers,
   });
 
   if (existingUser) {
-    throw new Error("Mobile number is already registered");
+    throw new Error("Email or mobile number already exists");
   }
 
-  // 5. Password ko hash karo; plain password save nahi karna
+  const now = new Date();
+
+  let pendingRegistration = await PendingRegistration.findOne({
+    mobile: normalizedMobile,
+  });
+
+  if (pendingRegistration?.expiresAt <= now) {
+    await PendingRegistration.deleteOne({
+      _id: pendingRegistration._id,
+    });
+    pendingRegistration = null;
+  }
+
+  if (
+    normalizedEmail &&
+    (await PendingRegistration.exists({
+      email: normalizedEmail,
+      mobile: { $ne: normalizedMobile },
+      expiresAt: { $gt: now },
+    }))
+  ) {
+    throw new Error("Email or mobile number already exists");
+  }
+
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // 6. OTP verification ke liye pending registration data banao
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+  let avatarData = pendingRegistration?.avatar ?? {
+    url: null,
+    fileId: null,
+  };
 
-  await PendingRegistration.findOneAndUpdate(
-    { mobile: normalizedMobile },
+  if (file) {
+    avatarData = await uploadAvatar(file);
+  }
+
+  if (!pendingRegistration) {
+    try {
+      pendingRegistration = await PendingRegistration.create({
+        name: normalizedName,
+        email: normalizedEmail,
+        mobile: normalizedMobile,
+        password: hashedPassword,
+        avatar: avatarData,
+        expiresAt: new Date(
+          now.getTime() + PENDING_REGISTRATION_TTL_MS
+        ),
+        otpWindowStartedAt: now,
+        otpSendCount: 0,
+      });
+    } catch (error) {
+      throwDuplicateRegistrationError(error);
+    }
+  }
+
+  await PendingRegistration.updateOne(
     {
-      name: normalizedName,
-      mobile: normalizedMobile,
-      password: hashedPassword,
-      expiresAt,
+      _id: pendingRegistration._id,
+      $or: [
+        { otpWindowStartedAt: { $exists: false } },
+        {
+          otpWindowStartedAt: {
+            $lte: new Date(now.getTime() - OTP_SEND_WINDOW_MS),
+          },
+        },
+      ],
     },
     {
-      upsert: true,
-      new: true,
-      runValidators: true,
+      $set: {
+        otpWindowStartedAt: now,
+        otpSendCount: 0,
+      },
     }
   );
 
-  // 7. Twilio se SMS OTP bhejo
-  const otpStatus = await sendMobileOTP(normalizedMobile);
+  await PendingRegistration.updateOne(
+    {
+      _id: pendingRegistration._id,
+      otpSendCount: { $exists: false },
+    },
+    {
+      $set: { otpSendCount: 0 },
+    }
+  );
 
-  // 8. OTP response mein mat bhejna
+  const cooldownBoundary = new Date(
+    now.getTime() - OTP_RESEND_COOLDOWN_MS
+  );
+
+  const reservedRegistration =
+    await PendingRegistration.findOneAndUpdate(
+      {
+        _id: pendingRegistration._id,
+        otpSendCount: { $lt: MAX_OTP_SENDS_PER_WINDOW },
+        $or: [
+          { lastOtpSentAt: { $exists: false } },
+          { lastOtpSentAt: { $lte: cooldownBoundary } },
+        ],
+      },
+      {
+        $set: { lastOtpSentAt: now },
+        $inc: { otpSendCount: 1 },
+      },
+      { returnDocument: "after" }
+    );
+
+  if (!reservedRegistration) {
+    const currentRegistration =
+      await PendingRegistration.findById(pendingRegistration._id);
+
+    if (
+      currentRegistration?.otpSendCount >=
+      MAX_OTP_SENDS_PER_WINDOW
+    ) {
+      throw new Error(
+        "OTP send limit reached. Please try again later"
+      );
+    }
+
+    throw new Error("Please wait before requesting another OTP");
+  }
+
+  try {
+    pendingRegistration.name = normalizedName;
+    pendingRegistration.email = normalizedEmail;
+    pendingRegistration.password = hashedPassword;
+    pendingRegistration.avatar = avatarData;
+    pendingRegistration.expiresAt = new Date(
+      now.getTime() + PENDING_REGISTRATION_TTL_MS
+    );
+
+    await pendingRegistration.save();
+
+    await sendMobileOTP(normalizedMobile);
+  } catch (error) {
+    throwDuplicateRegistrationError(error);
+  }
+
   return {
     message: "OTP sent successfully",
     mobile: normalizedMobile,
-    otpStatus,
   };
 };
 
@@ -76,12 +212,10 @@ export const completeMobileRegistration = async ({
   const normalizedMobile = mobile?.trim();
   const normalizedCode = String(code ?? "").trim();
 
-  // 1. Required fields check karo
   if (!normalizedMobile || !normalizedCode) {
     throw new Error("Mobile number and OTP are required");
   }
 
-  // 2. Pending registration find karo
   const pendingUser = await PendingRegistration.findOne({
     mobile: normalizedMobile,
   });
@@ -90,7 +224,6 @@ export const completeMobileRegistration = async ({
     throw new Error("No pending registration found");
   }
 
-  // 3. Expiry manually check karo
   if (pendingUser.expiresAt <= new Date()) {
     await PendingRegistration.deleteOne({
       _id: pendingUser._id,
@@ -99,26 +232,22 @@ export const completeMobileRegistration = async ({
     throw new Error("Registration expired. Please register again");
   }
 
-  // 4. Twilio se OTP verify karo
-  let isVerified = false;
+  const isVerified = await verifyMobileOTP(
+    normalizedMobile,
+    normalizedCode
+  );
 
-  try {
-    isVerified = await verifyMobileOTP(
-      normalizedMobile,
-      normalizedCode
-    );
-  } catch {
-    throw new Error("Invalid or expired OTP");
-  }
-
-  // 5. OTP valid nahi hai toh account create mat karo
   if (!isVerified) {
     throw new Error("Invalid or expired OTP");
   }
 
-  // 6. Permanent account pehle se toh nahi bana?
+  const identifiers = [
+    { mobile: normalizedMobile },
+    ...(pendingUser.email ? [{ email: pendingUser.email }] : []),
+  ];
+
   const existingUser = await userModel.findOne({
-    mobile: normalizedMobile,
+    $or: identifiers,
   });
 
   if (existingUser) {
@@ -126,32 +255,44 @@ export const completeMobileRegistration = async ({
       _id: pendingUser._id,
     });
 
-    throw new Error("Mobile number is already registered");
+    throw new Error("Email or mobile number already exists");
   }
 
-  // 7. OTP verified hai, ab permanent User create karo
-  const newUser = await userModel.create({
-    name: pendingUser.name,
-    mobile: pendingUser.mobile,
-    password: pendingUser.password,
-    avatar: pendingUser.avatar,
-    mobileVerified: true,
-  });
+  let newUser;
 
-  // 8. Account create hone ke baad pending record delete karo
+  try {
+    newUser = await userModel.create({
+      name: pendingUser.name,
+      email: pendingUser.email,
+      mobile: pendingUser.mobile,
+      password: pendingUser.password,
+      avatar: pendingUser.avatar,
+      mobileVerified: true,
+    });
+  } catch (error) {
+    throwDuplicateRegistrationError(error);
+  }
+
+  const accessToken = generateAccessToken(newUser);
+  const refreshToken = generateRefreshToken(newUser);
+
+  newUser.refreshToken = refreshToken;
+  await newUser.save();
+
   await PendingRegistration.deleteOne({
     _id: pendingUser._id,
   });
 
-  // 9. Safe user details return karo
   return {
     message: "Mobile verified and account created successfully",
+    accessToken,
+    refreshToken,
     user: {
       id: newUser._id,
       name: newUser.name,
+      email: newUser.email,
       mobile: newUser.mobile,
       mobileVerified: newUser.mobileVerified,
     },
   };
 };
-

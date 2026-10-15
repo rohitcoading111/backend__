@@ -10,7 +10,11 @@ import { authMiddleware } from "../middleware/auth.middleware.js";
 import { adminTest } from "../controllers/auth.controllers.js";
 import { roleMiddleware } from "../middleware/role.middleware.js";
 import upload from "../middleware/upload.middleware.js";
-import { verifyMobileOTPController } from "../controllers/auth.controllers.js";
+import { verifyMobileRegistrationController } from "../controllers/mobileRegistration.controllers.js";
+import {
+  verifyMobileOTPValidator,
+  checkMobileRegistrationValidation,
+} from "../validators/mobileRegistration.validator.js";
 
 const router = express.Router();
 
@@ -21,6 +25,11 @@ router.post("/refresh", RefreshToken);
 router.post("/logout", Logout);
 router.get("/me", authMiddleware, getMe);
 router.get( "/admin-test",authMiddleware, roleMiddleware("ADMIN"),adminTest);
-router.post("/verify-otp", verifyMobileOTPController);
+router.post(
+  "/verify-otp",
+  verifyMobileOTPValidator,
+  checkMobileRegistrationValidation,
+  verifyMobileRegistrationController
+);
 
 export default router;
