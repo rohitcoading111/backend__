@@ -28,6 +28,9 @@ const config = {
     TWILIO_ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID,
     TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN,
     TWILIO_VERIFY_SERVICE_SID: process.env.TWILIO_VERIFY_SERVICE_SID,
+
+    EMAIL_USER:process.env.EMAIL_USER,
+    EMAIL_APP_PASSWORD:process.env.EMAIL_APP_PASSWORD,
 };
 
 export default config;
