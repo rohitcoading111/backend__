@@ -11,6 +11,7 @@ import {
   sendEmailOTP,
 } from "./emailOTP.services.js";
 import crypto from "node:crypto";
+import { startEmailLoginOTP } from "./emailLoginOTP.services.js";
 
 export const uploadAvatar = async (file) => {
   if (!file) {
@@ -152,14 +153,14 @@ export const LoginUser = async (user) => {
   }
 
   // EMAIL LOGIN: Nodemailer flow will be implemented next
-  if (normalizedEmail) {
-    return {
-      message: "Password verified. Email OTP login is not implemented yet.",
-      email: existingUser.email,
-      otpRequired: true,
-      emailOtpPending: true,
-    };
+ // EMAIL LOGIN
+if (normalizedEmail) {
+  if (!existingUser.email) {
+    throw new Error("LOGIN_EMAIL_REQUIRED");
   }
+
+  return await startEmailLoginOTP(existingUser);
+}
 };
 
 
