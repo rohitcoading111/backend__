@@ -10,10 +10,10 @@ const pendingLoginSchema = new mongoose.Schema(
     },
 
     mobile: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+  type: String,
+  required: false,
+  trim: true,
+},
 
     expiresAt: {
       type: Date,

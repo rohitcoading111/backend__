@@ -12,11 +12,11 @@ const pendingRegistrationSchema = new mongoose.Schema(
       maxlength: 50,
     },
 
-    mobile: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+      mobile: {
+  type: String,
+  required: false,
+  trim: true,
+},
 
     email: {
       type: String,
