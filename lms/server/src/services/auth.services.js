@@ -3,6 +3,8 @@ import bcrypt from "bcryptjs";
 import { generateAccessToken, generateRefreshToken } from "../utils/auth.utils.js";
 import imagekit from "../config/imagekit.js";
 import { startLoginOTP } from "./loginOTP.services.js";
+import PendingLogin from "../models/pendingLogin.models.js";
+import { verifyMobileOTP } from "./otp.services.js";
 
 export const uploadAvatar = async (file) => {
   if (!file) {
@@ -127,6 +129,70 @@ export const LoginUser = async (user) => {
   };
 };
 
+
+export const verifyLoginOTP = async ({ mobile, code }) => {
+  const normalizedMobile = mobile?.trim();
+  const normalizedCode = String(code ?? "").trim();
+
+  if (!normalizedMobile || !normalizedCode) {
+    throw new Error("Mobile and OTP are required");
+  }
+
+  const pendingLogin = await PendingLogin.findOne({
+    mobile: normalizedMobile,
+  });
+
+  if (!pendingLogin) {
+    throw new Error("LOGIN_SESSION_NOT_FOUND");
+  }
+
+  if (pendingLogin.expiresAt <= new Date()) {
+    await PendingLogin.deleteOne({ _id: pendingLogin._id });
+    throw new Error("LOGIN_SESSION_EXPIRED");
+  }
+
+  const existingUser = await userModel.findById(
+    pendingLogin.userId
+  );
+
+  if (!existingUser || existingUser.mobile !== normalizedMobile) {
+    await PendingLogin.deleteOne({ _id: pendingLogin._id });
+    throw new Error("LOGIN_SESSION_NOT_FOUND");
+  }
+
+  const isOTPValid = await verifyMobileOTP(
+    normalizedMobile,
+    normalizedCode
+  );
+
+  if (!isOTPValid) {
+    throw new Error("INVALID_LOGIN_OTP");
+  }
+
+  // OTP verified: ab tokens generate honge.
+  existingUser.mobileVerified = true;
+
+  const accessToken = generateAccessToken(existingUser);
+  const refreshToken = generateRefreshToken(existingUser);
+
+  existingUser.refreshToken = refreshToken;
+  await existingUser.save();
+
+  await PendingLogin.deleteOne({ _id: pendingLogin._id });
+
+  return {
+    accessToken,
+    refreshToken,
+    user: {
+      id: existingUser._id,
+      name: existingUser.name,
+      email: existingUser.email,
+      mobile: existingUser.mobile,
+      role: existingUser.role,
+      mobileVerified: existingUser.mobileVerified,
+    },
+  };
+};
 
 
 export const refreshTokenService = async (decoded, refreshToken) => {
