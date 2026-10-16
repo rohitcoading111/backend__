@@ -164,6 +164,84 @@ if (normalizedEmail) {
 };
 
 
+export const verifyEmailLoginOTP = async ({ email, code }) => {
+  const normalizedEmail = email?.trim().toLowerCase();
+  const normalizedCode = String(code ?? "").trim();
+
+  if (!normalizedEmail || !/^\d{6}$/.test(normalizedCode)) {
+    throw new Error("Email and a valid 6-digit OTP are required");
+  }
+
+  const pendingLogin = await PendingLogin.findOne({
+    email: normalizedEmail,
+  }).select("+otpHash");
+
+  if (!pendingLogin) {
+    throw new Error("LOGIN_SESSION_NOT_FOUND");
+  }
+
+  if (pendingLogin.expiresAt <= new Date()) {
+    await PendingLogin.deleteOne({ _id: pendingLogin._id });
+    throw new Error("LOGIN_SESSION_EXPIRED");
+  }
+
+  if (!pendingLogin.otpHash) {
+    throw new Error("INVALID_LOGIN_OTP");
+  }
+
+  // Maximum 5 incorrect attempts
+  if (pendingLogin.otpAttempts >= 5) {
+    await PendingLogin.deleteOne({ _id: pendingLogin._id });
+    throw new Error("OTP_ATTEMPTS_EXCEEDED");
+  }
+
+  const submittedHash = crypto
+    .createHash("sha256")
+    .update(normalizedCode)
+    .digest("hex");
+
+  const isOTPValid =
+    submittedHash.length === pendingLogin.otpHash.length &&
+    crypto.timingSafeEqual(
+      Buffer.from(submittedHash, "hex"),
+      Buffer.from(pendingLogin.otpHash, "hex")
+    );
+
+  if (!isOTPValid) {
+    pendingLogin.otpAttempts += 1;
+    await pendingLogin.save();
+    throw new Error("INVALID_LOGIN_OTP");
+  }
+
+  const existingUser = await userModel.findById(pendingLogin.userId);
+
+  if (!existingUser || existingUser.email?.toLowerCase() !== normalizedEmail) {
+    await PendingLogin.deleteOne({ _id: pendingLogin._id });
+    throw new Error("LOGIN_SESSION_NOT_FOUND");
+  }
+
+  const accessToken = generateAccessToken(existingUser);
+  const refreshToken = generateRefreshToken(existingUser);
+
+  existingUser.refreshToken = refreshToken;
+  await existingUser.save();
+
+  await PendingLogin.deleteOne({ _id: pendingLogin._id });
+
+  return {
+    accessToken,
+    refreshToken,
+    user: {
+      id: existingUser._id,
+      name: existingUser.name,
+      email: existingUser.email,
+      mobile: existingUser.mobile,
+      role: existingUser.role,
+      mobileVerified: existingUser.mobileVerified,
+    },
+  };
+};
+
 
 export const verifyLoginOTP = async ({ mobile, code }) => {
   const normalizedMobile = mobile?.trim();

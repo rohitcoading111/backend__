@@ -34,6 +34,14 @@ router.post("/refresh", RefreshToken);
 router.post("/logout", Logout);
 router.get("/me", authMiddleware, getMe);
 router.get( "/admin-test",authMiddleware, roleMiddleware("ADMIN"),adminTest);
+import {
+  verifyEmailLoginOTPController,
+} from "../controllers/emailLoginOTP.controllers.js";
+
+import {
+  verifyEmailLoginOTPValidator,
+  checkEmailLoginOTPValidation,
+} from "../validators/emailLoginOTP.validator.js";
 router.post(
   "/verify-otp",
   verifyMobileOTPValidator,
@@ -52,6 +60,12 @@ router.post(
   verifyEmailOTPValidator,
   checkEmailOTPValidation,
   verifyEmailRegistrationController
+);
+router.post(
+  "/verify-email-login-otp",
+  verifyEmailLoginOTPValidator,
+  checkEmailLoginOTPValidation,
+  verifyEmailLoginOTPController
 );
 
 export default router;
