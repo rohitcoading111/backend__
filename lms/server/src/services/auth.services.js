@@ -2,6 +2,7 @@ import userModel from "../models/user.models.js";
 import bcrypt from "bcryptjs";
 import { generateAccessToken, generateRefreshToken } from "../utils/auth.utils.js";
 import imagekit from "../config/imagekit.js";
+import { startLoginOTP } from "./loginOTP.services.js";
 
 export const uploadAvatar = async (file) => {
   if (!file) {
@@ -81,20 +82,17 @@ export const registerUser = async (user) => {
 };
 
 
+
 export const LoginUser = async (user) => {
-  // 1. Extract email, mobile number and password
   const { email, mobile, password } = user;
 
-  // 2. Normalize the email and mobile number
   const normalizedEmail = email?.trim().toLowerCase();
   const normalizedMobile = mobile?.trim();
 
-  // 3. Require either email or mobile number
   if (!normalizedEmail && !normalizedMobile) {
     throw new Error("Email or mobile number is required");
   }
 
-  // 4. Find the user using email OR mobile number
   const existingUser = await userModel.findOne({
     $or: [
       ...(normalizedEmail ? [{ email: normalizedEmail }] : []),
@@ -102,36 +100,33 @@ export const LoginUser = async (user) => {
     ],
   });
 
-  // 5. Reject login if the user does not exist
   if (!existingUser) {
     throw new Error("Invalid email or password");
   }
 
-  // 6. Compare the entered password with the stored password hash
   const isPasswordValid = await bcrypt.compare(
     password,
     existingUser.password
   );
 
-  // 7. Reject login if the password is incorrect
   if (!isPasswordValid) {
     throw new Error("Invalid email or password");
   }
 
-  // 8. Generate JWT access and refresh tokens
-  const accessToken = generateAccessToken(existingUser);
-  const refreshToken = generateRefreshToken(existingUser);
+  // Login OTP ke liye registered mobile zaroori hai.
+  if (!existingUser.mobile) {
+    throw new Error("LOGIN_MOBILE_REQUIRED");
+  }
 
-  // 9. Save the refresh token on the user document
-  existingUser.refreshToken = refreshToken;
-  await existingUser.save();
+  // Password correct hai, ab OTP send hoga.
+  await startLoginOTP(existingUser);
 
-  // 10. Return tokens to the controller
   return {
-    accessToken,
-    refreshToken,
+    message: "Password verified. OTP sent to registered mobile.",
+    mobile: existingUser.mobile,
   };
 };
+
 
 
 export const refreshTokenService = async (decoded, refreshToken) => {
