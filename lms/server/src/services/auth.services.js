@@ -27,61 +27,80 @@ export const uploadAvatar = async (file) => {
 };
 
 
-export const registerUser = async (user) => {
-  // 1. Extract registration data from the request
-  const { email, mobile, password, name, avatar, file } = user;
 
-  // 2. Normalize identifiers before checking the database
-  const normalizedEmail = email?.trim().toLowerCase() || undefined;
+export const registerUser = async (user) => {
+  const { email, mobile, password, name, file } = user;
+
+  const normalizedEmail = email?.trim().toLowerCase();
   const normalizedMobile = mobile?.trim() || undefined;
 
-  // 3. At least one identifier must be provided
-  if (!normalizedEmail && !normalizedMobile) {
-    throw new Error("Email or mobile number is required");
+  // This service handles email registration.
+  if (!normalizedEmail) {
+    throw new Error("Email is required for email registration");
   }
 
-  // 4. Check whether this email or mobile is already registered
+  // Reject an already registered email.
   const existingUser = await userModel.findOne({
-    $or: [
-      ...(normalizedEmail ? [{ email: normalizedEmail }] : []),
-      ...(normalizedMobile ? [{ mobile: normalizedMobile }] : []),
-    ],
+    email: normalizedEmail,
   });
 
   if (existingUser) {
     throw new Error("Email or mobile number already exists");
   }
 
-  // 5. Hash the password before saving it
+  // Reject an email that already has a pending registration.
+  const existingPending = await PendingRegistration.findOne({
+    email: normalizedEmail,
+  });
+
+  if (existingPending) {
+    throw new Error(
+      "Registration already pending for this email. Resend OTP flow is not implemented yet."
+    );
+  }
+
+  // Hash the password before temporarily storing it.
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // 6. Set default avatar values
+  // Upload avatar if supplied.
   const avatarData = await uploadAvatar(file);
 
-  // 8. Create the user in MongoDB
-  const newUser = await userModel.create({
+  // Generate a secure six-digit email OTP.
+  const otp = generateEmailOTP();
+  const emailOtpHash = crypto
+    .createHash("sha256")
+    .update(otp)
+    .digest("hex");
+
+  // Store temporary registration details.
+  const pending = await PendingRegistration.create({
     name,
     email: normalizedEmail,
     mobile: normalizedMobile,
     password: hashedPassword,
     avatar: avatarData,
+    emailOtpHash,
+    expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+    otpWindowStartedAt: new Date(),
+    otpSendCount: 1,
+    lastOtpSentAt: new Date(),
   });
 
-  // 9. Generate JWT access and refresh tokens
-  const accessToken = generateAccessToken(newUser);
-  const refreshToken = generateRefreshToken(newUser);
+  try {
+    await sendEmailOTP(normalizedEmail, otp);
+  } catch (error) {
+    // Clean up if the email could not be sent.
+    await PendingRegistration.deleteOne({ _id: pending._id });
+    throw new Error("EMAIL_OTP_SEND_FAILED");
+  }
 
-  // 10. Save the refresh token on the user document
-  newUser.refreshToken = refreshToken;
-  await newUser.save();
-
-  // 11. Return the registration result
   return {
-    accessToken,
-    refreshToken,
-    newUser,
+    message: "Verification OTP sent to your email",
+    email: normalizedEmail,
+    otpRequired: true,
   };
 };
+
 
 
 
