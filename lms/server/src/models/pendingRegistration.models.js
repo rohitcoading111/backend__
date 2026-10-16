@@ -13,10 +13,10 @@ const pendingRegistrationSchema = new mongoose.Schema(
     },
 
       mobile: {
-  type: String,
-  required: false,
-  trim: true,
-},
+      type: String,
+      required: false,
+      trim: true,
+      },
 
     email: {
       type: String,
@@ -29,6 +29,14 @@ const pendingRegistrationSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+
+    // hasheed otp from nodemailer
+    
+      emailOtpHash: {
+      type: String,
+      default: null,
+     },
+
 
     // Avatar upload hua ho toh uski details
     avatar: {
@@ -74,7 +82,10 @@ pendingRegistrationSchema.index(
 // Mobile ke liye ek hi pending registration rakho
 pendingRegistrationSchema.index(
   { mobile: 1 },
-  { unique: true }
+  {
+    unique: true,
+    partialFilterExpression: { mobile: { $type: "string" } },
+  }
 );
 
 pendingRegistrationSchema.index(
