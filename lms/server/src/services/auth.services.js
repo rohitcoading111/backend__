@@ -5,6 +5,12 @@ import imagekit from "../config/imagekit.js";
 import { startLoginOTP } from "./loginOTP.services.js";
 import PendingLogin from "../models/pendingLogin.models.js";
 import { verifyMobileOTP } from "./otp.services.js";
+import PendingRegistration from "../models/pendingRegistration.models.js";
+import {
+  generateEmailOTP,
+  sendEmailOTP,
+} from "./emailOTP.services.js";
+import crypto from "node:crypto";
 
 export const uploadAvatar = async (file) => {
   if (!file) {
@@ -25,7 +31,6 @@ export const uploadAvatar = async (file) => {
     fileId: uploadResponse.fileId,
   };
 };
-
 
 
 export const registerUser = async (user) => {
@@ -102,8 +107,6 @@ export const registerUser = async (user) => {
 };
 
 
-
-
 export const LoginUser = async (user) => {
   const { email, mobile, password } = user;
 
@@ -134,19 +137,31 @@ export const LoginUser = async (user) => {
     throw new Error("Invalid email or password");
   }
 
-  // Login OTP ke liye registered mobile zaroori hai.
-  if (!existingUser.mobile) {
-    throw new Error("LOGIN_MOBILE_REQUIRED");
+  // MOBILE LOGIN: Existing Twilio OTP flow
+  if (normalizedMobile) {
+    if (!existingUser.mobile) {
+      throw new Error("LOGIN_MOBILE_REQUIRED");
+    }
+
+    await startLoginOTP(existingUser);
+
+    return {
+      message: "Password verified. OTP sent to registered mobile.",
+      mobile: existingUser.mobile,
+    };
   }
 
-  // Password correct hai, ab OTP send hoga.
-  await startLoginOTP(existingUser);
-
-  return {
-    message: "Password verified. OTP sent to registered mobile.",
-    mobile: existingUser.mobile,
-  };
+  // EMAIL LOGIN: Nodemailer flow will be implemented next
+  if (normalizedEmail) {
+    return {
+      message: "Password verified. Email OTP login is not implemented yet.",
+      email: existingUser.email,
+      otpRequired: true,
+      emailOtpPending: true,
+    };
+  }
 };
+
 
 
 export const verifyLoginOTP = async ({ mobile, code }) => {

@@ -1,3 +1,4 @@
+
 import mongoose from "mongoose";
 
 const pendingLoginSchema = new mongoose.Schema(
@@ -9,11 +10,32 @@ const pendingLoginSchema = new mongoose.Schema(
       unique: true,
     },
 
+    // Mobile login ke liye
     mobile: {
-  type: String,
-  required: false,
-  trim: true,
-},
+      type: String,
+      trim: true,
+      sparse: true,
+    },
+
+    // Email login ke liye
+    email: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      sparse: true,
+    },
+
+    // Email OTP ka hashed version
+    otpHash: {
+      type: String,
+      select: false,
+    },
+
+    // Galat OTP attempts track karne ke liye
+    otpAttempts: {
+      type: Number,
+      default: 0,
+    },
 
     expiresAt: {
       type: Date,
@@ -40,7 +62,7 @@ const pendingLoginSchema = new mongoose.Schema(
   }
 );
 
-// Expired login sessions ko automatically delete karega.
+// Expired pending login records automatically delete honge.
 pendingLoginSchema.index(
   { expiresAt: 1 },
   { expireAfterSeconds: 0 }

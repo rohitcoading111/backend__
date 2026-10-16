@@ -4,7 +4,7 @@ import PendingRegistration from "../models/pendingRegistration.models.js";
 import {
   generateAccessToken,
   generateRefreshToken,
-} from "../utils/token.utils.js";
+} from "../utils/auth.utils.js";
 
 
 export const verifyEmailRegistration = async ({ email, code }) => {

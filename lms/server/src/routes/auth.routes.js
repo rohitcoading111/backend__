@@ -16,6 +16,15 @@ import {
   checkMobileRegistrationValidation,
 } from "../validators/mobileRegistration.validator.js";
 import { verifyLoginOTPController } from "../controllers/loginOTP.controllers.js";
+
+import {
+  verifyEmailRegistrationController,
+} from "../controllers/emailRegistration.controllers.js";
+import {
+  verifyEmailOTPValidator,
+  checkEmailOTPValidation,
+} from "../validators/emailRegistration.validator.js";
+
 const router = express.Router();
 
 
@@ -36,6 +45,13 @@ router.post(
   verifyMobileOTPValidator,
   checkMobileRegistrationValidation,
   verifyLoginOTPController
+);
+
+router.post(
+  "/verify-email-otp",
+  verifyEmailOTPValidator,
+  checkEmailOTPValidation,
+  verifyEmailRegistrationController
 );
 
 export default router;

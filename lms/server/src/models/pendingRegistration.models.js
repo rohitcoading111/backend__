@@ -84,7 +84,9 @@ pendingRegistrationSchema.index(
   { mobile: 1 },
   {
     unique: true,
-    partialFilterExpression: { mobile: { $type: "string" } },
+    partialFilterExpression: {
+      mobile: { $type: "string" },
+    },
   }
 );
 
@@ -92,7 +94,9 @@ pendingRegistrationSchema.index(
   { email: 1 },
   {
     unique: true,
-    partialFilterExpression: { email: { $type: "string" } },
+    partialFilterExpression: {
+      email: { $type: "string" },
+    },
   }
 );
 

@@ -6,9 +6,12 @@ import { LogoutUser } from "../services/auth.services.js";
 import { refreshTokenService } from "../services/auth.services.js";
 import { startMobileRegistration } from "../services/mobileRegistration.services.js";
 
+
+
+
 export const registerUser = async (req, res) => {
   try {
-    const email = req.body.email?.trim();
+    const email = req.body.email?.trim().toLowerCase();
     const mobile = req.body.mobile?.trim();
 
     // At least one identifier is required
@@ -19,10 +22,12 @@ export const registerUser = async (req, res) => {
       });
     }
 
-    // MOBILE REGISTRATION: Send OTP, do not create User yet
+    // MOBILE REGISTRATION
     if (mobile) {
       const result = await startMobileRegistration({
         ...req.body,
+        email,
+        mobile,
         file: req.file,
       });
 
@@ -31,47 +36,54 @@ export const registerUser = async (req, res) => {
         message: result.message,
         data: {
           mobile: result.mobile,
+          otpRequired: true,
         },
       });
     }
 
-    // EMAIL REGISTRATION: Existing flow (Nodemailer later)
+    // EMAIL REGISTRATION
     const result = await registerUserService({
       ...req.body,
+      email,
       file: req.file,
     });
 
-    const { accessToken, refreshToken } = result;
-
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    return res.status(201).json({
+    return res.status(202).json({
       success: true,
-      message: "User registered successfully",
+      message: result.message,
       data: {
-        accessToken,
+        email: result.email,
+        otpRequired: result.otpRequired,
       },
     });
   } catch (error) {
+    // Log the real error for debugging
+    console.error("Register Controller Error:", {
+      name: error.name,
+      message: error.message,
+      code: error.code,
+      keyValue: error.keyValue,
+      stack: error.stack,
+    });
+
+    // Duplicate registration / MongoDB unique-index conflict
     if (
       error.message === "User already exists" ||
       error.message === "Email or mobile number already exists" ||
       error.message === "Mobile number is already registered" ||
+      error.message?.includes("already pending") ||
       error.code === 11000
     ) {
       return res.status(409).json({
         success: false,
-        message: "Email or mobile number already exists",
+        message: error.message || "Duplicate registration",
       });
     }
 
+    // OTP rate limits
     if (
-      error.message === "OTP send limit reached. Please try again later" ||
+      error.message ===
+        "OTP send limit reached. Please try again later" ||
       error.message === "Please wait before requesting another OTP"
     ) {
       return res.status(429).json({
@@ -80,9 +92,12 @@ export const registerUser = async (req, res) => {
       });
     }
 
+    // Validation errors
     if (
       error.message?.startsWith("Name, mobile") ||
-      error.message?.startsWith("Enter mobile number")
+      error.message?.startsWith("Enter mobile number") ||
+      error.message === "Email is required for email registration" ||
+      error.message === "Email or mobile number is required"
     ) {
       return res.status(400).json({
         success: false,
@@ -90,10 +105,13 @@ export const registerUser = async (req, res) => {
       });
     }
 
-    console.error(
-      "Register Controller Error:",
-      error.code || error.name
-    );
+    // Email delivery failure
+    if (error.message === "EMAIL_OTP_SEND_FAILED") {
+      return res.status(502).json({
+        success: false,
+        message: "Could not send verification email. Please try again.",
+      });
+    }
 
     return res.status(500).json({
       success: false,
@@ -101,6 +119,7 @@ export const registerUser = async (req, res) => {
     });
   }
 };
+
 
 export const Login = async (req, res) => {
   try {
