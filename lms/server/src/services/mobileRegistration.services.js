@@ -12,6 +12,10 @@ import {
   verifyMobileOTP,
 } from "./otp.services.js";
 
+import {
+  sendMobileRegistrationNotification,
+} from "../services/registrationNotification.services.js";
+
 const OTP_RESEND_COOLDOWN_MS = 60 * 1000;
 const OTP_SEND_WINDOW_MS = 60 * 60 * 1000;
 const MAX_OTP_SENDS_PER_WINDOW = 5;
@@ -278,6 +282,12 @@ export const completeMobileRegistration = async ({
 
   newUser.refreshToken = refreshToken;
   await newUser.save();
+
+  await sendMobileRegistrationNotification({
+  mobile: newUser.mobile,
+  name: newUser.name,
+});
+
   await PendingRegistration.deleteOne({
     _id: pendingUser._id,
   });

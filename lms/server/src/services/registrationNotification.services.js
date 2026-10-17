@@ -1,5 +1,7 @@
 import transporter from "../config/mailer.js";
 import config from "../config/config.js";
+import { twilioClient } from "../config/twilio.js";
+
 
 export const sendRegistrationNotification = async ({
   email,
@@ -46,5 +48,29 @@ Team`,
       error.message
     );
     return false;
+  }
+};
+
+
+export const sendMobileRegistrationNotification = async ({ mobile, name }) => {
+  if (!mobile) return;
+
+  try {
+    const message = await twilioClient.messages.create({
+      from: config.WHATSAPP_FROM,
+      to: `whatsapp:${mobile}`,
+      contentSid: config.APPOINTMENT_TEMPLATE_SID,
+      contentVariables: JSON.stringify({
+        "1": name || "User",
+        "2": "tomorrow",
+      }),
+    });
+
+    console.log("WhatsApp registration test message sent:", message.sid);
+  } catch (error) {
+    console.error(
+      "WhatsApp registration notification failed:",
+      error.message
+    );
   }
 };

@@ -2,6 +2,7 @@ import transporter from "../config/mailer.js";
 import config from "../config/config.js";
 import { twilioClient } from "../config/twilio.js";
 
+
 export const sendLoginNotification = async ({
   email,
   name,
@@ -50,25 +51,25 @@ Support Team
 };
 
 
-export const sendMobileLoginNotification = async ({
-  mobile,
-  name,
-}) => {
+export const sendMobileLoginNotification = async ({ mobile, name }) => {
   if (!mobile) return;
 
   try {
-    await twilioClient.messages.create({
-      body: `Hi ${name || "User"}, your account has been logged in successfully.`,
-      from: config.TWILIO_PHONE_NUMBER,
-      to: mobile,
+    const message = await twilioClient.messages.create({
+      from: config.WHATSAPP_FROM,
+      to: `whatsapp:${mobile}`,
+      contentSid: config.APPOINTMENT_TEMPLATE_SID,
+      contentVariables: JSON.stringify({
+        "1": name || "User",
+        "2": "now",
+      }),
     });
 
-    console.log("Mobile login notification SMS sent");
+    console.log("WhatsApp login notification sent:", message.sid);
   } catch (error) {
     console.error(
-      "Mobile login notification failed:",
+      "WhatsApp login notification failed:",
       error.message
     );
   }
 };
-

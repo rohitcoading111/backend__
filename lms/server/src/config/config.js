@@ -31,6 +31,9 @@ const config = {
 
     EMAIL_USER:process.env.EMAIL_USER,
     EMAIL_APP_PASSWORD:process.env.EMAIL_APP_PASSWORD,
+
+   WHATSAPP_FROM: process.env.WHATSAPP_FROM || "whatsapp:+17372508034",  
+   APPOINTMENT_TEMPLATE_SID: process.env.APPOINTMENT_TEMPLATE_SID || "HXfe5ab5f00277942d4d4200328b4d403c",
 };
 
 export default config;
