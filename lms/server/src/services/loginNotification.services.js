@@ -1,5 +1,6 @@
 import transporter from "../config/mailer.js";
 import config from "../config/config.js";
+import { twilioClient } from "../config/twilio.js";
 
 export const sendLoginNotification = async ({
   email,
@@ -45,6 +46,29 @@ Support Team
   } catch (error) {
     // Notification failure should not break login.
     console.error("Login notification email failed:", error.message);
+  }
+};
+
+
+export const sendMobileLoginNotification = async ({
+  mobile,
+  name,
+}) => {
+  if (!mobile) return;
+
+  try {
+    await twilioClient.messages.create({
+      body: `Hi ${name || "User"}, your account has been logged in successfully.`,
+      from: config.TWILIO_PHONE_NUMBER,
+      to: mobile,
+    });
+
+    console.log("Mobile login notification SMS sent");
+  } catch (error) {
+    console.error(
+      "Mobile login notification failed:",
+      error.message
+    );
   }
 };
 
