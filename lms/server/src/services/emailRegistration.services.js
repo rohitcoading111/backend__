@@ -7,6 +7,7 @@ import {
 } from "../utils/auth.utils.js";
 
 
+
 export const verifyEmailRegistration = async ({ email, code }) => {
   const normalizedEmail = email?.trim().toLowerCase();
 

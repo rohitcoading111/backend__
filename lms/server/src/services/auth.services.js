@@ -297,11 +297,6 @@ export const verifyLoginOTP = async ({ mobile, code }) => {
   existingUser.refreshToken = refreshToken;
   await existingUser.save();
 
-  await sendLoginNotification({
-  email: existingUser.email,
-  name: existingUser.name,
-  loginMethod: "Mobile OTP",
- });
 
   await PendingLogin.deleteOne({ _id: pendingLogin._id });
 
