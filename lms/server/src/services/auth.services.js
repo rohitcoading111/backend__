@@ -6,6 +6,7 @@ import { startLoginOTP } from "./loginOTP.services.js";
 import PendingLogin from "../models/pendingLogin.models.js";
 import { verifyMobileOTP } from "./otp.services.js";
 import PendingRegistration from "../models/pendingRegistration.models.js";
+import { sendLoginNotification } from "./loginNotification.services.js";
 import {
   generateEmailOTP,
   sendEmailOTP,
@@ -225,6 +226,11 @@ export const verifyEmailLoginOTP = async ({ email, code }) => {
 
   existingUser.refreshToken = refreshToken;
   await existingUser.save();
+  await sendLoginNotification({
+  email: existingUser.email,
+  name: existingUser.name,
+  loginMethod: "EMAIL OTP",
+});
 
   await PendingLogin.deleteOne({ _id: pendingLogin._id });
 
@@ -290,6 +296,12 @@ export const verifyLoginOTP = async ({ mobile, code }) => {
 
   existingUser.refreshToken = refreshToken;
   await existingUser.save();
+
+  await sendLoginNotification({
+  email: existingUser.email,
+  name: existingUser.name,
+  loginMethod: "Mobile OTP",
+ });
 
   await PendingLogin.deleteOne({ _id: pendingLogin._id });
 

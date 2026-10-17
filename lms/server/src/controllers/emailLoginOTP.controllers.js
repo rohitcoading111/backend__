@@ -1,4 +1,3 @@
-
 import { verifyEmailLoginOTP } from "../services/auth.services.js";
 
 export const verifyEmailLoginOTPController = async (req, res) => {

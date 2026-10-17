@@ -278,7 +278,6 @@ export const completeMobileRegistration = async ({
 
   newUser.refreshToken = refreshToken;
   await newUser.save();
-
   await PendingRegistration.deleteOne({
     _id: pendingUser._id,
   });
