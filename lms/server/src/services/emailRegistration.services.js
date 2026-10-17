@@ -6,6 +6,7 @@ import {
   generateRefreshToken,
 } from "../utils/auth.utils.js";
 
+import { sendRegistrationNotification } from "./registrationNotification.services.js";
 
 
 export const verifyEmailRegistration = async ({ email, code }) => {
@@ -62,6 +63,10 @@ export const verifyEmailRegistration = async ({ email, code }) => {
 
   newUser.refreshToken = refreshToken;
   await newUser.save();
+  await sendRegistrationNotification({
+  email: newUser.email,
+  name: newUser.name,
+});
 
   await PendingRegistration.deleteOne({ _id: pending._id });
 

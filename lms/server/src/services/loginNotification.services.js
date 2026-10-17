@@ -47,3 +47,4 @@ Support Team
     console.error("Login notification email failed:", error.message);
   }
 };
+

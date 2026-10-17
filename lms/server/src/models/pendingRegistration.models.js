@@ -1,7 +1,5 @@
-
 import mongoose from "mongoose";
 
-// Temporary registration data ka schema
 const pendingRegistrationSchema = new mongoose.Schema(
   {
     name: {
@@ -12,33 +10,29 @@ const pendingRegistrationSchema = new mongoose.Schema(
       maxlength: 50,
     },
 
-      mobile: {
+    mobile: {
       type: String,
-      required: false,
       trim: true,
-      },
+      default: undefined,
+    },
 
     email: {
       type: String,
       lowercase: true,
       trim: true,
+      default: undefined,
     },
 
-    // Password ko hash karke hi temporary store karna hai
     password: {
       type: String,
       required: true,
     },
 
-    // hasheed otp from nodemailer
-    
-      emailOtpHash: {
+    emailOtpHash: {
       type: String,
       default: null,
-     },
+    },
 
-
-    // Avatar upload hua ho toh uski details
     avatar: {
       url: {
         type: String,
@@ -50,7 +44,6 @@ const pendingRegistrationSchema = new mongoose.Schema(
       },
     },
 
-    // Pending registration ki expiry
     expiresAt: {
       type: Date,
       required: true,
@@ -60,10 +53,12 @@ const pendingRegistrationSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+
     otpSendCount: {
       type: Number,
       default: 0,
     },
+
     lastOtpSentAt: {
       type: Date,
     },
@@ -73,13 +68,11 @@ const pendingRegistrationSchema = new mongoose.Schema(
   }
 );
 
-// Expired pending records ko automatically delete karne ka index
 pendingRegistrationSchema.index(
   { expiresAt: 1 },
   { expireAfterSeconds: 0 }
 );
 
-// Mobile ke liye ek hi pending registration rakho
 pendingRegistrationSchema.index(
   { mobile: 1 },
   {
