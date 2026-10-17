@@ -34,6 +34,10 @@ const config = {
 
    WHATSAPP_FROM: process.env.WHATSAPP_FROM || "whatsapp:+17372508034",  
    APPOINTMENT_TEMPLATE_SID: process.env.APPOINTMENT_TEMPLATE_SID || "HXfe5ab5f00277942d4d4200328b4d403c",
+
+   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+   GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL,
 };
 
 export default config;
