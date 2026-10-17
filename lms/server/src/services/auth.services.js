@@ -13,6 +13,7 @@ import {
 } from "./emailOTP.services.js";
 import crypto from "node:crypto";
 import { startEmailLoginOTP } from "./emailLoginOTP.services.js";
+import {sendMobileLoginNotification,} from "./loginNotification.services.js";
 
 export const uploadAvatar = async (file) => {
   if (!file) {
@@ -297,6 +298,11 @@ export const verifyLoginOTP = async ({ mobile, code }) => {
   existingUser.refreshToken = refreshToken;
   await existingUser.save();
 
+
+  await sendMobileLoginNotification({
+  mobile: existingUser.mobile,
+  name: existingUser.name,
+  });
 
   await PendingLogin.deleteOne({ _id: pendingLogin._id });
 
