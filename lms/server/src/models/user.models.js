@@ -18,16 +18,24 @@ const userSchema = new mongoose.Schema(
       match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
     },
 
+    // Google account ki unique identity
+    googleId: {
+      type: String,
+      default: undefined,
+    },
+
     mobile: {
       type: String,
       trim: true,
       match: /^\+[1-9]\d{7,14}$/,
     },
 
+    // Google users ke paas local password zaroori nahi
     password: {
       type: String,
-      required: true,
+      required: false,
       minlength: 8,
+      select: false,
     },
 
     role: {
@@ -55,42 +63,59 @@ const userSchema = new mongoose.Schema(
     refreshToken: {
       type: String,
       default: null,
+      select: false,
     },
-    // Mobile number ki OTP verification status
-  mobileVerified: {
-  type: Boolean,
-  default: false,
-  },
+
+    mobileVerified: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-// At least one login identifier is required
+// Har user ke paas email, mobile ya Google ID honi chahiye
 userSchema.pre("validate", function () {
-  if (!this.email && !this.mobile) {
+  if (!this.email && !this.mobile && !this.googleId) {
     this.invalidate(
       "email",
-      "Email or mobile number is required"
+      "Email, mobile number, or Google account is required"
     );
   }
 });
 
-// Unique indexes for identifiers when present
+// Email unique only when present
 userSchema.index(
   { email: 1 },
   {
     unique: true,
-    partialFilterExpression: { email: { $type: "string" } },
+    partialFilterExpression: {
+      email: { $type: "string" },
+    },
   }
 );
 
+// Mobile unique only when present
 userSchema.index(
   { mobile: 1 },
   {
     unique: true,
-    partialFilterExpression: { mobile: { $type: "string" } },
+    partialFilterExpression: {
+      mobile: { $type: "string" },
+    },
+  }
+);
+
+// Google ID unique only when present
+userSchema.index(
+  { googleId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      googleId: { $type: "string" },
+    },
   }
 );
 
