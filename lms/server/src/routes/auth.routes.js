@@ -25,6 +25,10 @@ import {
   checkEmailOTPValidation,
 } from "../validators/emailRegistration.validator.js";
 
+
+import passport from "../config/googleStrategy.js";
+import { googleAuthCallback } from "../controllers/googleAuthControllers.js";
+
 const router = express.Router();
 
 
@@ -67,5 +71,32 @@ router.post(
   checkEmailLoginOTPValidation,
   verifyEmailLoginOTPController
 );
+
+// Start Google OAuth
+router.get(
+  "/google",
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+    session: false,
+  })
+);
+
+// Google OAuth callback
+router.get(
+  "/google/callback",
+  passport.authenticate("google", {
+    session: false,
+    failureRedirect: "/api/auth/google/failure",
+  }),
+  googleAuthCallback
+);
+
+// Google login failure
+router.get("/google/failure", (req, res) => {
+  res.status(401).json({
+    success: false,
+    message: "Google authentication failed",
+  });
+});
 
 export default router;

@@ -7,6 +7,9 @@ import moduleRoutes from "../routes/module.routes.js";
 import lectureRoutes from "../routes/lecture.routes.js";
 import enrollmentRoutes from "../routes/enrollment.routes.js";
 import paymentRoutes from "../routes/payment.routes.js"
+import passport from '../config/googleStrategy.js';
+
+
 import cors from "cors";
 
 const app = express();
@@ -21,6 +24,7 @@ app.use(
   })
 );
 
+app.use(passport.initialize());
 // auth apis 
 app.use('/api/auth', authRoutes);
 

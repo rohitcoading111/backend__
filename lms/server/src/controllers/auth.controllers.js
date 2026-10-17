@@ -119,6 +119,7 @@ export const registerUser = async (req, res) => {
   }
 };
 
+
 export const Login = async (req, res) => {
   try {
     const result = await LoginUser(req.body);
