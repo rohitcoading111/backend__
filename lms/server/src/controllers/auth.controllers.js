@@ -8,7 +8,6 @@ import { startMobileRegistration } from "../services/mobileRegistration.services
 
 
 
-
 export const registerUser = async (req, res) => {
   try {
     const email = req.body.email?.trim().toLowerCase();
@@ -119,7 +118,6 @@ export const registerUser = async (req, res) => {
     });
   }
 };
-
 
 export const Login = async (req, res) => {
   try {
