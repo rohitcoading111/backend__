@@ -1,4 +1,4 @@
-import { createLiveSession,getActiveLiveSession } from "../services/liveSession.services.js";
+import { createLiveSession,getActiveLiveSession,endLiveSession } from "../services/liveSession.services.js";
 
 export const createLiveSessionController = async (req, res) => {
   try {
@@ -60,6 +60,30 @@ export const getActiveLiveSessionController = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to fetch active live session",
+    });
+  }
+};
+
+export const endLiveSessionController = async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const instructorId = req.user.id || req.user._id;
+
+    const session = await endLiveSession(sessionId, instructorId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Live session ended successfully",
+      data: session,
+    });
+  } catch (error) {
+    console.error("End live session error:", error);
+
+    return res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.statusCode
+        ? error.message
+        : "Internal server error",
     });
   }
 };
