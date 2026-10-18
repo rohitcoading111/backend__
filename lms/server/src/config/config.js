@@ -38,6 +38,10 @@ const config = {
    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
    GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL,
+
+   LIVEKIT_URL:process.env.LIVEKIT_URL,
+   LIVEKIT_API_KEY:process.env.LIVEKIT_API_KEY,
+   LIVEKIT_API_SECRET:process.env.LIVEKIT_API_SECRET,
 };
 
 export default config;
