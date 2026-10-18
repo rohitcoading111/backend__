@@ -156,9 +156,18 @@ export const joinLiveSession = async (sessionId, studentId) => {
     throw error;
   }
 
-  return {
-    sessionId: session._id,
-    roomId: session.roomId,
-    courseId: session.course,
-  };
+  const token = await generateLiveKitToken({
+  roomId: session.roomId,
+  participantId: studentId,
+  participantName: "Student",
+  canPublish: false,
+});
+
+return {
+  sessionId: session._id,
+  roomId: session.roomId,
+  courseId: session.course,
+  token,
+  liveKitUrl: config.LIVEKIT_URL,
+};
 };

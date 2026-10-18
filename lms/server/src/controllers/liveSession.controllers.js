@@ -1,6 +1,5 @@
 import { createLiveSession,getActiveLiveSession,endLiveSession,joinLiveSession } from "../services/liveSession.services.js";
-import config from "../config/config.js";
-import { generateLiveKitToken } from "../utils/liveKit.utils.js";
+
 
 
 export const createLiveSessionController = async (req, res) => {
@@ -95,23 +94,12 @@ export const joinLiveSessionController = async (req, res) => {
     const { sessionId } = req.params;
     const studentId = req.user.id || req.user._id;
 
-    const room = await joinLiveSession(sessionId, studentId);
-
-    const token = await generateLiveKitToken({
-      roomId: room.roomId,
-      participantId: studentId,
-      participantName: req.user.name || "Student",
-      canPublish: false,
-    });
+    const result = await joinLiveSession(sessionId, studentId);
 
     return res.status(200).json({
       success: true,
       message: "Live class access granted",
-      data: {
-        ...room,
-        token,
-        liveKitUrl: config.LIVEKIT_URL,
-      },
+      data: result,
     });
   } catch (error) {
     console.error("Join live session error:", error);
