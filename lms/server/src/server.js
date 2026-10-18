@@ -13,13 +13,32 @@ const io = new Server(httpServer, {
   },
 });
 
+
+
 io.on("connection", (socket) => {
   console.log("Socket connected:", socket.id);
+
+  // Client ko room mein add karna
+  socket.on("room:join", (roomName) => {
+    socket.join(roomName);
+
+    console.log(`${socket.id} joined ${roomName}`);
+
+    // Client ko confirmation bhejna
+    socket.emit("room:joined", roomName);
+  });
+
+  // Room ke sabhi connected members ko message bhejna
+  socket.on("room:test", ({ roomName, message }) => {
+    io.to(roomName).emit("room:message", message);
+  });
 
   socket.on("disconnect", () => {
     console.log("Socket disconnected:", socket.id);
   });
 });
+
+
 
 db();
 

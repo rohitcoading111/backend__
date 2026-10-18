@@ -29,6 +29,7 @@
     "nodemailer": "^10.1.1",
     "razorpay": "^2.9.8",
     "socket.io": "^4.8.4",
+    "socket.io-client": "^4.8.4",
     "twilio": "^6.2.0"
   },
   "devDependencies": {
