@@ -1,4 +1,4 @@
-import { createLiveSession,getActiveLiveSession,endLiveSession } from "../services/liveSession.services.js";
+import { createLiveSession,getActiveLiveSession,endLiveSession,joinLiveSession } from "../services/liveSession.services.js";
 
 export const createLiveSessionController = async (req, res) => {
   try {
@@ -78,6 +78,30 @@ export const endLiveSessionController = async (req, res) => {
     });
   } catch (error) {
     console.error("End live session error:", error);
+
+    return res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.statusCode
+        ? error.message
+        : "Internal server error",
+    });
+  }
+};
+
+export const joinLiveSessionController = async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const studentId = req.user.id || req.user._id;
+
+    const room = await joinLiveSession(sessionId, studentId);
+
+    return res.status(200).json({
+      success: true,
+      message: "You can join this live class",
+      data: room,
+    });
+  } catch (error) {
+    console.error("Join live session error:", error);
 
     return res.status(error.statusCode || 500).json({
       success: false,
