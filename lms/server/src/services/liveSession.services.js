@@ -70,3 +70,30 @@ export const getActiveLiveSession = async (courseId) => {
 
   return session;
 };
+
+export const endLiveSession = async (sessionId, instructorId) => {
+  const session = await LiveSession.findById(sessionId);
+
+  if (!session) {
+    const error = new Error("Live session not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  if (session.instructor.toString() !== instructorId.toString()) {
+    const error = new Error("You can only end your own live session");
+    error.statusCode = 403;
+    throw error;
+  }
+
+  if (session.status === "ENDED") {
+    const error = new Error("Live session has already ended");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  session.status = "ENDED";
+  session.endedAt = new Date();
+
+  return await session.save();
+};
