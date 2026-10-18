@@ -120,21 +120,25 @@ export const LoginUser = async (user) => {
     throw new Error("Email or mobile number is required");
   }
 
-  const existingUser = await userModel.findOne({
+  
+const existingUser = await userModel
+  .findOne({
     $or: [
       ...(normalizedEmail ? [{ email: normalizedEmail }] : []),
       ...(normalizedMobile ? [{ mobile: normalizedMobile }] : []),
     ],
-  });
+  })
+  .select("+password");
 
-  if (!existingUser) {
-    throw new Error("Invalid email or password");
-  }
 
-  const isPasswordValid = await bcrypt.compare(
-    password,
-    existingUser.password
-  );
+if (!password || !existingUser.password) {
+  throw new Error("Invalid email or password");
+}
+
+const isPasswordValid = await bcrypt.compare(
+  password,
+  existingUser.password
+);
 
   if (!isPasswordValid) {
     throw new Error("Invalid email or password");
