@@ -1,4 +1,4 @@
-import { createLiveSession } from "../services/liveSession.services.js";
+import { createLiveSession,getActiveLiveSession } from "../services/liveSession.services.js";
 
 export const createLiveSessionController = async (req, res) => {
   try {
@@ -31,6 +31,35 @@ export const createLiveSessionController = async (req, res) => {
       message: error.statusCode
         ? error.message
         : "Internal server error",
+    });
+  }
+};
+
+
+export const getActiveLiveSessionController = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+
+    const session = await getActiveLiveSession(courseId);
+
+    if (!session) {
+      return res.status(404).json({
+        success: false,
+        message: "No active live session found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Active live session fetched successfully",
+      data: session,
+    });
+  } catch (error) {
+    console.error("Get active live session error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch active live session",
     });
   }
 };
