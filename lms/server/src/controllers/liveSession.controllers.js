@@ -1,4 +1,4 @@
-import { createLiveSession,getActiveLiveSession,endLiveSession,joinLiveSession } from "../services/liveSession.services.js";
+import { createLiveSession,getActiveLiveSession,endLiveSession,joinLiveSession,getLiveKitRoom } from "../services/liveSession.services.js";
 
 
 
@@ -109,6 +109,41 @@ export const joinLiveSessionController = async (req, res) => {
       message: error.statusCode
         ? error.message
         : "Internal server error",
+    });
+  }
+};
+
+export const getLiveKitRoomController = async (req, res) => {
+  try {
+    const { roomId } = req.params;
+
+    if (!roomId) {
+      return res.status(400).json({
+        success: false,
+        message: "Room ID is required",
+      });
+    }
+
+    const room = await getLiveKitRoom(roomId);
+
+    if (!room) {
+      return res.status(404).json({
+        success: false,
+        message: "LiveKit room not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "LiveKit room found",
+      data: room,
+    });
+  } catch (error) {
+    console.error("Get LiveKit room error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch LiveKit room",
     });
   }
 };

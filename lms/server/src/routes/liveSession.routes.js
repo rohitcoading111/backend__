@@ -1,7 +1,7 @@
 
 import express from "express";
 
-import { createLiveSessionController,getActiveLiveSessionController,endLiveSessionController,joinLiveSessionController } from "../controllers/liveSession.controllers.js";
+import { createLiveSessionController,getActiveLiveSessionController,endLiveSessionController,joinLiveSessionController,getLiveKitRoomController } from "../controllers/liveSession.controllers.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { roleMiddleware } from "../middleware/role.middleware.js";
 
@@ -32,6 +32,13 @@ router.post(
   authMiddleware,
   roleMiddleware("STUDENT"),
   joinLiveSessionController
+);
+
+router.get(
+  "/rooms/:roomId",
+  authMiddleware,
+  roleMiddleware("INSTRUCTOR"),
+  getLiveKitRoomController
 );
 
 export default router;
