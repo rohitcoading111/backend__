@@ -187,3 +187,13 @@ export const getLiveKitRoom = async (roomId) => {
 
   return rooms[0] || null;
 };
+
+export const deleteLiveKitRoom = async (roomId) => {
+  const roomService = new RoomServiceClient(
+    config.LIVEKIT_URL,
+    config.LIVEKIT_API_KEY,
+    config.LIVEKIT_API_SECRET
+  );
+
+  await roomService.deleteRoom(roomId);
+};
