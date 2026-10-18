@@ -10,6 +10,9 @@ import Payment from "../models/payment.models.js";
 import config from "../config/config.js"
 import { generateLiveKitToken } from "../utils/liveKit.utils.js";
 
+
+import { RoomServiceClient } from "livekit-server-sdk";
+
 export const createLiveSession = async (courseId, instructorId) => {
   if (!mongoose.isValidObjectId(courseId)) {
     const error = new Error("Invalid course ID");
@@ -170,4 +173,17 @@ return {
   token,
   liveKitUrl: config.LIVEKIT_URL,
 };
+};
+
+
+export const getLiveKitRoom = async (roomId) => {
+  const roomService = new RoomServiceClient(
+    config.LIVEKIT_URL,
+    config.LIVEKIT_API_KEY,
+    config.LIVEKIT_API_SECRET
+  );
+
+  const rooms = await roomService.listRooms([roomId]);
+
+  return rooms[0] || null;
 };
