@@ -1,8 +1,12 @@
 import { createLiveSession,getActiveLiveSession,endLiveSession,joinLiveSession } from "../services/liveSession.services.js";
+import config from "../config/config.js";
+import { generateLiveKitToken } from "../utils/liveKit.utils.js";
+
 
 export const createLiveSessionController = async (req, res) => {
   try {
     const { courseId } = req.body;
+    const instructorId = req.user.id || req.user._id;
 
     if (!courseId) {
       return res.status(400).json({
@@ -11,17 +15,16 @@ export const createLiveSessionController = async (req, res) => {
       });
     }
 
-    const instructorId = req.user.id || req.user._id;
-
-    const liveSession = await createLiveSession(
-      courseId,
-      instructorId
-    );
+    const result = await createLiveSession(courseId, instructorId);
 
     return res.status(201).json({
       success: true,
       message: "Live session created successfully",
-      data: liveSession,
+      data: {
+        session: result.session,
+        token: result.token,
+        liveKitUrl: result.liveKitUrl,
+      },
     });
   } catch (error) {
     console.error("Create live session error:", error);
@@ -34,7 +37,6 @@ export const createLiveSessionController = async (req, res) => {
     });
   }
 };
-
 
 export const getActiveLiveSessionController = async (req, res) => {
   try {
@@ -95,10 +97,21 @@ export const joinLiveSessionController = async (req, res) => {
 
     const room = await joinLiveSession(sessionId, studentId);
 
+    const token = await generateLiveKitToken({
+      roomId: room.roomId,
+      participantId: studentId,
+      participantName: req.user.name || "Student",
+      canPublish: false,
+    });
+
     return res.status(200).json({
       success: true,
-      message: "You can join this live class",
-      data: room,
+      message: "Live class access granted",
+      data: {
+        ...room,
+        token,
+        liveKitUrl: config.LIVEKIT_URL,
+      },
     });
   } catch (error) {
     console.error("Join live session error:", error);

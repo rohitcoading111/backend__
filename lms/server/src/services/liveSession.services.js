@@ -7,6 +7,8 @@ import LiveSession from "../models/liveSession.models.js";
 import Enrollment from "../models/enrollment.models.js";
 import Payment from "../models/payment.models.js";
 
+import config from "../config/config.js"
+import { generateLiveKitToken } from "../utils/liveKit.utils.js";
 
 export const createLiveSession = async (courseId, instructorId) => {
   if (!mongoose.isValidObjectId(courseId)) {
@@ -55,14 +57,25 @@ export const createLiveSession = async (courseId, instructorId) => {
   }
 
   const liveSession = await LiveSession.create({
-    course: course._id,
-    instructor: instructorId,
-    roomId: randomUUID(),
-    status: "LIVE",
-    startedAt: new Date(),
-  });
+  course: course._id,
+  instructor: instructorId,
+  roomId: randomUUID(),
+  status: "LIVE",
+  startedAt: new Date(),
+});
 
-  return liveSession;
+const token = await generateLiveKitToken({
+  roomId: liveSession.roomId,
+  participantId: instructorId,
+  participantName: "Instructor",
+  canPublish: true,
+});
+
+return {
+  session: liveSession,
+  token,
+  liveKitUrl: config.LIVEKIT_URL,
+};
 };
 
 
