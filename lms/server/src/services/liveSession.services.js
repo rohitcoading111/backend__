@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 import { randomUUID } from "node:crypto";
 
@@ -60,4 +59,14 @@ export const createLiveSession = async (courseId, instructorId) => {
   });
 
   return liveSession;
+};
+
+
+export const getActiveLiveSession = async (courseId) => {
+  const session = await LiveSession.findOne({
+    course: courseId,
+    status: "LIVE",
+  });
+
+  return session;
 };
