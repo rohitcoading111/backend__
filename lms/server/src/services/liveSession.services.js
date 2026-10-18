@@ -111,6 +111,7 @@ export const endLiveSession = async (sessionId, instructorId) => {
     error.statusCode = 400;
     throw error;
   }
+  await deleteLiveKitRoom(session.roomId);
 
   session.status = "ENDED";
   session.endedAt = new Date();
