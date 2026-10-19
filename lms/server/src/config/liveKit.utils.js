@@ -1,6 +1,6 @@
 
 import { AccessToken } from "livekit-server-sdk";
-import config from "../config/config.js";
+import config from "./config.js";
 
 export const generateLiveKitToken = async ({
   roomId,

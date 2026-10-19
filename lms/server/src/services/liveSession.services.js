@@ -8,7 +8,7 @@ import Enrollment from "../models/enrollment.models.js";
 import Payment from "../models/payment.models.js";
 
 import config from "../config/config.js"
-import { generateLiveKitToken } from "../utils/liveKit.utils.js";
+import { generateLiveKitToken } from "../config/liveKit.utils.js";
 
 
 import { RoomServiceClient } from "livekit-server-sdk";
