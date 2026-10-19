@@ -1,3 +1,4 @@
+
 import { AccessToken } from "livekit-server-sdk";
 import config from "../config/config.js";
 
@@ -13,7 +14,7 @@ export const generateLiveKitToken = async ({
     {
       identity: participantId.toString(),
       name: participantName,
-      ttl: "1h",
+      ttl: "10m",
     }
   );
 
