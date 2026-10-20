@@ -487,3 +487,96 @@ export const startPasswordReset = async ({ identifier }) => {
 
   return genericResponse;
 };
+
+
+export const verifyPasswordResetOTP = async ({ identifier, code }) => {
+  const normalizedIdentifier = identifier?.trim();
+  const normalizedCode = String(code ?? "").trim();
+
+  if (
+    !normalizedIdentifier ||
+    !/^\d{6}$/.test(normalizedCode)
+  ) {
+    throw new Error("INVALID_RESET_OTP");
+  }
+
+  const isEmail = normalizedIdentifier.includes("@");
+
+  const resetRecord = await PasswordReset.findOne(
+    isEmail
+      ? { email: normalizedIdentifier.toLowerCase() }
+      : { mobile: normalizedIdentifier }
+  ).select("+otpHash");
+
+  if (!resetRecord) {
+    throw new Error("RESET_SESSION_NOT_FOUND");
+  }
+
+  if (resetRecord.expiresAt <= new Date()) {
+    await PasswordReset.deleteOne({ _id: resetRecord._id });
+    throw new Error("RESET_SESSION_EXPIRED");
+  }
+
+  if (resetRecord.otpAttempts >= 5) {
+    await PasswordReset.deleteOne({ _id: resetRecord._id });
+    throw new Error("RESET_OTP_ATTEMPTS_EXCEEDED");
+  }
+
+  let isOTPValid = false;
+
+  if (isEmail) {
+    const submittedHash = crypto
+      .createHash("sha256")
+      .update(normalizedCode)
+      .digest("hex");
+
+    if (resetRecord.otpHash) {
+      const storedHash = resetRecord.otpHash;
+
+      isOTPValid =
+        /^[a-f0-9]{64}$/i.test(storedHash) &&
+        crypto.timingSafeEqual(
+          Buffer.from(submittedHash, "hex"),
+          Buffer.from(storedHash, "hex")
+        );
+    }
+  } else {
+    const user = await userModel.findById(resetRecord.userId);
+
+    if (user?.mobile === normalizedIdentifier) {
+      isOTPValid = await verifyMobileOTP(
+        normalizedIdentifier,
+        normalizedCode
+      );
+    }
+  }
+
+  if (!isOTPValid) {
+    resetRecord.otpAttempts += 1;
+    await resetRecord.save();
+    throw new Error("INVALID_RESET_OTP");
+  }
+
+  // OTP ko dobara verify karne se rokne ke liye consume karo.
+  resetRecord.verifiedAt = new Date();
+
+  // Email OTP hash ko dobara use nahi kiya ja sakega.
+  resetRecord.otpHash = undefined;
+
+  await resetRecord.save();
+
+  const resetToken = crypto.randomBytes(32).toString("hex");
+  const resetTokenHash = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  resetRecord.resetTokenHash = resetTokenHash;
+  resetRecord.resetTokenExpiresAt = new Date(
+    Date.now() + 5 * 60 * 1000
+  );
+
+  await resetRecord.save();
+
+  return { resetToken };
+};
