@@ -6,7 +6,7 @@ export const createLiveSessionController = async (req, res) => {
   try {
     const { courseId } = req.body;
     const instructorId = req.user.id || req.user._id;
-
+ 
     if (!courseId) {
       return res.status(400).json({
         success: false,
