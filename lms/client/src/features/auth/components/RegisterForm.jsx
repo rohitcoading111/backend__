@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import {
   UserRound,
@@ -20,6 +21,7 @@ function RegisterForm() {
     onSubmit,
     errors,
     isSubmitting,
+    serverError,
   } = useRegisterForm();
 
   return (
@@ -155,6 +157,15 @@ function RegisterForm() {
           </p>
         )}
       </div>
+
+      {/* Backend Error */}
+      {serverError && (
+        <p role="alert" className="text-sm text-red-400">
+          {typeof serverError === "string"
+            ? serverError
+            : "Registration failed. Please try again."}
+        </p>
+      )}
 
       {/* Register Button */}
       <button

@@ -1,15 +1,21 @@
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useDispatch } from "react-redux";
-import { registerUser } from "../authThunks/authThunks";
+import { useDispatch, useSelector } from "react-redux";
+import { registerUser } from "../authThunk/authThunks.js";
 
 function useRegisterForm() {
   const dispatch = useDispatch();
+  const { status, error: serverError } = useSelector(
+    (state) => state.auth
+  );
+
+  const [identifierType, setIdentifierType] = useState("");
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm({
     defaultValues: {
       name: "",
@@ -22,7 +28,6 @@ function useRegisterForm() {
   const onSubmit = async (data) => {
     try {
       const result = await dispatch(registerUser(data)).unwrap();
-
       console.log("Registration successful:", result);
     } catch (error) {
       console.error("Registration failed:", error);
@@ -34,7 +39,10 @@ function useRegisterForm() {
     handleSubmit,
     onSubmit,
     errors,
-    isSubmitting,
+    isSubmitting: status === "loading",
+    serverError,
+    identifierType,
+    setIdentifierType,
   };
 }
 

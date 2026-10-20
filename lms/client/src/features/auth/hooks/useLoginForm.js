@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { loginUser } from "../authThunks/authThunks";
-
+import { loginUser } from "../authThunk/authThunks.js";
 function useLoginForm() {
   const dispatch = useDispatch();
   const { status, error: serverError } = useSelector(
@@ -23,17 +22,22 @@ function useLoginForm() {
     mode: "onSubmit",
   });
 
-  const onSubmit = async (data) => {
-    try {
-      const result = await dispatch(
-        loginUser({ ...data, rememberMe })
-      ).unwrap();
 
-      console.log("Login successful:", result);
-    } catch (error) {
-      console.error("Login failed:", error);
-    }
-  };
+const onSubmit = async (data) => {
+  try {
+    const result = await dispatch(
+      loginUser({
+        email: data.identifier,
+        password: data.password,
+      })
+    ).unwrap();
+
+    console.log("Login successful:", result);
+  } catch (error) {
+    console.error("Login failed:", error);
+  }
+};
+
 
   return {
     register,
