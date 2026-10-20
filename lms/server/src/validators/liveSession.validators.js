@@ -1,5 +1,4 @@
-
-import { body, param } from "express-validator";
+import { body, param ,validationResult} from "express-validator";
 
 export const createLiveSessionValidator = [
   body("courseId")
@@ -37,3 +36,20 @@ export const roomIdParamValidator = [
     .isUUID()
     .withMessage("Invalid room ID"),
 ];
+
+export const handleValidationErrors = (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      success: false,
+      message: "Validation failed",
+      errors: errors.array().map((error) => ({
+        field: error.path,
+        message: error.msg,
+      })),
+    });
+  }
+
+  next();
+};

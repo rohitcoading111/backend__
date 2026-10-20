@@ -32,6 +32,58 @@ export const forgotPasswordValidator = [
     }),
 ];
 
+export const verifyResetOTPValidator = [
+  body("identifier")
+    .trim()
+    .notEmpty()
+    .withMessage("Email or mobile number is required")
+    .bail()
+    .custom((value) => {
+      if (value.includes("@")) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+      }
+
+      return /^\+[1-9]\d{7,14}$/.test(value);
+    })
+    .withMessage("Invalid email or mobile number"),
+
+  body("code")
+    .isString()
+    .withMessage("OTP must be a string")
+    .bail()
+    .matches(/^\d{6}$/)
+    .withMessage("OTP must contain exactly 6 digits"),
+];
+
+export const resetPasswordValidator = [
+  body("resetToken")
+    .isString()
+    .withMessage("Reset token is required")
+    .bail()
+    .matches(/^[a-f0-9]{64}$/i)
+    .withMessage("Invalid reset token"),
+
+  body("newPassword")
+    .isString()
+    .withMessage("New password is required")
+    .bail()
+    .isLength({ min: 8 })
+    .withMessage("Password must be at least 8 characters"),
+
+  body("confirmPassword")
+    .isString()
+    .withMessage("Confirm password is required")
+    .bail()
+    .custom((value, { req }) => {
+      if (value !== req.body.newPassword) {
+        throw new Error("Passwords do not match");
+      }
+
+      return true;
+    }),
+];
+
+
 export const validateForgotPassword = (req, res, next) => {
   const errors = validationResult(req);
 
@@ -48,3 +100,6 @@ export const validateForgotPassword = (req, res, next) => {
 
   next();
 };
+
+export const validateVerifyResetOTP = validateForgotPassword;
+export const validateResetPassword = validateForgotPassword;

@@ -40,6 +40,25 @@ import {
   checkEmailLoginOTPValidation,
 } from "../validators/emailLoginOTP.validator.js";
 
+
+import {
+  forgotPasswordController,
+  verifyPasswordResetOTPController,
+  resetPasswordController,
+} from "../controllers/auth.controllers.js";
+
+
+import {
+  forgotPasswordValidator,
+  validateForgotPassword,
+  verifyResetOTPValidator,
+  validateVerifyResetOTP,
+  resetPasswordValidator,
+  validateResetPassword,
+} from "../validators/forgotPassword.validator.js";
+
+
+
 const router = express.Router();
 
 
@@ -75,6 +94,30 @@ router.post(
   checkEmailLoginOTPValidation,
   verifyEmailLoginOTPController
 );
+
+
+router.post(
+  "/forgot-password",
+  forgotPasswordValidator,
+  validateForgotPassword,
+  forgotPasswordController
+);
+
+router.post(
+  "/verify-reset-otp",
+  verifyResetOTPValidator,
+  validateVerifyResetOTP,
+  verifyPasswordResetOTPController
+);
+
+router.post(
+  "/reset-password",
+  resetPasswordValidator,
+  validateResetPassword,
+  resetPasswordController
+);
+
+
 
 // Start Google OAuth
 router.get(

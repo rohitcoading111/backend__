@@ -9,6 +9,7 @@ import {
   courseIdParamValidator,
   sessionIdParamValidator,
   roomIdParamValidator,
+  handleValidationErrors
 } from "../validators/liveSession.validators.js";
 const router = express.Router();
 
