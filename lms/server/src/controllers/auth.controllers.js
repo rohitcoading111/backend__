@@ -256,5 +256,122 @@ export const adminTest = async (req, res) => {
   });
 };
 
+
+import {
+  startPasswordReset,
+  verifyPasswordResetOTP,
+  resetPassword,
+} from "../services/auth.services.js";
+
+export const forgotPasswordController = async (req, res) => {
+  try {
+    const result = await startPasswordReset({
+      identifier: req.body.identifier,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: result.message,
+    });
+  } catch (error) {
+    if (error.message === "OTP_COOLDOWN") {
+      return res.status(429).json({
+        success: false,
+        message: "Please wait before requesting another OTP.",
+      });
+    }
+
+    if (error.message === "OTP_RATE_LIMIT") {
+      return res.status(429).json({
+        success: false,
+        message: "OTP request limit reached. Please try later.",
+      });
+    }
+
+    console.error("Forgot Password Error:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to process the request.",
+    });
+  }
+};
+
+export const verifyPasswordResetOTPController = async (req, res) => {
+  try {
+    const result = await verifyPasswordResetOTP({
+      identifier: req.body.identifier,
+      code: req.body.code,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP verified successfully.",
+      data: {
+        resetToken: result.resetToken,
+      },
+    });
+  } catch (error) {
+    const clientErrors = [
+      "INVALID_RESET_OTP",
+      "RESET_SESSION_EXPIRED",
+      "RESET_SESSION_NOT_FOUND",
+      "RESET_OTP_ATTEMPTS_EXCEEDED",
+    ];
+
+    if (clientErrors.includes(error.message)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired OTP. Please request a new one.",
+      });
+    }
+
+    console.error("Reset OTP Verification Error:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to verify OTP.",
+    });
+  }
+};
+
+export const resetPasswordController = async (req, res) => {
+  try {
+    await resetPassword({
+      resetToken: req.body.resetToken,
+      newPassword: req.body.newPassword,
+      confirmPassword: req.body.confirmPassword,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "Password reset successfully. Please log in with your new password.",
+    });
+  } catch (error) {
+    const clientErrors = [
+      "INVALID_RESET_TOKEN",
+      "RESET_SESSION_EXPIRED",
+      "PASSWORD_MISMATCH",
+      "INVALID_NEW_PASSWORD",
+    ];
+
+    if (clientErrors.includes(error.message)) {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    console.error("Password Reset Error:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to reset password.",
+    });
+  }
+};
+
+
 // User ke OTP ko verify karne wala controller
 export default registerUser;
