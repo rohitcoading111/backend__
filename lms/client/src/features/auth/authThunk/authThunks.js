@@ -29,3 +29,35 @@ export const registerUser = createAsyncThunk(
     }
   }
 );
+
+
+
+export const verifyEmailLoginOtp = createAsyncThunk(
+  "auth/verifyEmailLoginOtp",
+  async (otpData, { rejectWithValue }) => {
+    try {
+      const response = await authService.verifyEmailLoginOtp(otpData);
+      return response;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+          "Email OTP verification failed. Please try again."
+      );
+    }
+  }
+);
+
+export const verifyMobileLoginOtp = createAsyncThunk(
+  "auth/verifyMobileLoginOtp",
+  async (otpData, { rejectWithValue }) => {
+    try {
+      const response = await authService.verifyMobileLoginOtp(otpData);
+      return response;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+          "Mobile OTP verification failed. Please try again."
+      );
+    }
+  }
+);
