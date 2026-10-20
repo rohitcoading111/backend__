@@ -22,6 +22,8 @@ const OTP_RESEND_COOLDOWN_MS = 60 * 1000;
 const OTP_SEND_WINDOW_MS = 60 * 60 * 1000;
 const MAX_OTP_SENDS_PER_WINDOW = 5;
 const RESET_OTP_TTL_MS = 10 * 60 * 1000;
+import transporter from "../config/mailer.js";
+import config from "../config/config.js";
 
 // Temporary reset OTP records will be stored separately.
 
