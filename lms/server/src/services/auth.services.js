@@ -580,3 +580,81 @@ export const verifyPasswordResetOTP = async ({ identifier, code }) => {
 
   return { resetToken };
 };
+
+
+export const resetPassword = async ({
+  resetToken,
+  newPassword,
+  confirmPassword,
+}) => {
+  if (!resetToken || !newPassword || !confirmPassword) {
+    throw new Error("INVALID_NEW_PASSWORD");
+  }
+
+  if (newPassword !== confirmPassword) {
+    throw new Error("PASSWORD_MISMATCH");
+  }
+
+  if (newPassword.length < 8) {
+    throw new Error("INVALID_NEW_PASSWORD");
+  }
+
+  // Client se aaye reset token ka hash banao.
+  const resetTokenHash = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  const resetRecord = await PasswordReset.findOne({
+    resetTokenHash,
+    verifiedAt: { $ne: null },
+    resetTokenExpiresAt: { $gt: new Date() },
+    expiresAt: { $gt: new Date() },
+  }).select("+resetTokenHash");
+
+  if (!resetRecord) {
+    throw new Error("INVALID_RESET_TOKEN");
+  }
+
+  const user = await userModel.findById(resetRecord.userId)
+    .select("+password +refreshToken");
+
+  if (!user) {
+    throw new Error("INVALID_RESET_TOKEN");
+  }
+
+  // Original User document mein hashed password save hoga.
+  user.password = await bcrypt.hash(newPassword, 10);
+
+  // Existing refresh session revoke karo.
+  user.refreshToken = null;
+
+  await user.save();
+
+  // Reset token ko dobara use nahi hone dena.
+  await PasswordReset.deleteOne({ _id: resetRecord._id });
+
+  // Password update ke baad confirmation email.
+  if (user.email) {
+    try {
+      await transporter.sendMail({
+        from: config.EMAIL_USER,
+        to: user.email,
+        subject: "Your password has been reset",
+        text: "Your password was reset successfully. If you did not make this change, contact support immediately.",
+        html: `
+          <h2>Password Reset Successful</h2>
+          <p>Your account password has been reset successfully.</p>
+          <p>If you did not make this change, please contact support immediately.</p>
+        `,
+      });
+    } catch (error) {
+      // Password already changed; notification failure shouldn't undo it.
+      console.error("Password reset notification failed:", error.message);
+    }
+  }
+
+  return {
+    message: "Password reset successfully",
+  };
+};
