@@ -25,6 +25,6 @@ const authService = {
   register,
   getMe,
   logout,
-};
+}; 
 
 export default authService;
