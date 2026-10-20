@@ -1,5 +1,6 @@
+
 import { Link } from "react-router-dom";
-import { Mail, Phone, Lock, ArrowRight } from "lucide-react";
+import { Mail, Lock, ArrowRight } from "lucide-react";
 import useLoginForm from "../hooks/useLoginForm";
 
 function LoginForm() {
@@ -9,12 +10,14 @@ function LoginForm() {
     onSubmit,
     errors,
     isSubmitting,
+    serverError,
+    rememberMe,
+    setRememberMe,
   } = useLoginForm();
 
   return (
     <div className="w-full max-w-md">
-      <div className="mb-5">
-      </div>
+      <div className="mb-5"></div>
 
       <form
         className="space-y-4"
@@ -103,7 +106,8 @@ function LoginForm() {
           <label className="flex items-center gap-2 text-slate-400">
             <input
               type="checkbox"
-              name="rememberMe"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
               className="h-3.5 w-3.5 rounded accent-indigo-500"
             />
             Remember me
@@ -116,6 +120,15 @@ function LoginForm() {
             Forgot password?
           </Link>
         </div>
+
+        {/* Backend Error */}
+        {serverError && (
+          <p role="alert" className="text-sm text-red-400">
+            {typeof serverError === "string"
+              ? serverError
+              : "Login failed. Please try again."}
+          </p>
+        )}
 
         {/* Submit */}
         <button

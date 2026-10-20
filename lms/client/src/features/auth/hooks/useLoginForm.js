@@ -1,14 +1,20 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../authThunks/authThunks";
 
 function useLoginForm() {
   const dispatch = useDispatch();
+  const { status, error: serverError } = useSelector(
+    (state) => state.auth
+  );
+
+  const [rememberMe, setRememberMe] = useState(false);
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm({
     defaultValues: {
       identifier: "",
@@ -19,7 +25,9 @@ function useLoginForm() {
 
   const onSubmit = async (data) => {
     try {
-      const result = await dispatch(loginUser(data)).unwrap();
+      const result = await dispatch(
+        loginUser({ ...data, rememberMe })
+      ).unwrap();
 
       console.log("Login successful:", result);
     } catch (error) {
@@ -32,7 +40,10 @@ function useLoginForm() {
     handleSubmit,
     onSubmit,
     errors,
-    isSubmitting,
+    isSubmitting: status === "loading",
+    serverError,
+    rememberMe,
+    setRememberMe,
   };
 }
 
