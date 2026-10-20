@@ -366,8 +366,14 @@ export const LogoutUser = async (refreshToken) => {
   return loggedOutUser;
 };
 
+
 export const startPasswordReset = async ({ identifier }) => {
-  const normalizedIdentifier = identifier.trim();
+  const normalizedIdentifier = identifier?.trim();
+  
+  if (!normalizedIdentifier) {
+    throw new Error("Email or mobile number is required");
+  }
+
   const isEmail = normalizedIdentifier.includes("@");
 
   const user = await userModel.findOne(
@@ -376,12 +382,14 @@ export const startPasswordReset = async ({ identifier }) => {
       : { mobile: normalizedIdentifier }
   );
 
-  // Do not reveal whether the account exists.
+  // Do not reveal whether an account exists.
+  const genericResponse = {
+    message:
+      "If an account exists, a password reset OTP will be sent.",
+  };
+
   if (!user) {
-    return {
-      message:
-        "If an account exists, a password reset OTP will be sent.",
-    };
+    return genericResponse;
   }
 
   const now = new Date();
@@ -420,22 +428,19 @@ export const startPasswordReset = async ({ identifier }) => {
 
   if (isEmail) {
     if (!user.email) {
-      return {
-        message:
-          "If an account exists, a password reset OTP will be sent.",
-      };
+      return genericResponse;
     }
 
     const otp = generateEmailOTP();
-    otpHash = crypto.createHash("sha256").update(otp).digest("hex");
+    otpHash = crypto
+      .createHash("sha256")
+      .update(otp)
+      .digest("hex");
 
     await sendEmailOTP(user.email, otp);
   } else {
     if (!user.mobile) {
-      return {
-        message:
-          "If an account exists, a password reset OTP will be sent.",
-      };
+      return genericResponse;
     }
 
     await sendMobileOTP(user.mobile);
@@ -454,10 +459,11 @@ export const startPasswordReset = async ({ identifier }) => {
       lastOtpSentAt: now,
     });
   } else {
+    const windowStartedAt =
+      resetRecord.otpWindowStartedAt?.getTime() ?? 0;
+
     const windowExpired =
-      now.getTime() -
-        (resetRecord.otpWindowStartedAt?.getTime() ?? 0) >=
-      OTP_SEND_WINDOW_MS;
+      now.getTime() - windowStartedAt >= OTP_SEND_WINDOW_MS;
 
     if (windowExpired) {
       resetRecord.otpWindowStartedAt = now;
@@ -470,14 +476,14 @@ export const startPasswordReset = async ({ identifier }) => {
     resetRecord.mobile = !isEmail ? user.mobile : undefined;
     resetRecord.otpHash = otpHash;
     resetRecord.otpAttempts = 0;
-    resetRecord.expiresAt = new Date(now.getTime() + RESET_OTP_TTL_MS);
+    resetRecord.verifiedAt = null;
+    resetRecord.expiresAt = new Date(
+      now.getTime() + RESET_OTP_TTL_MS
+    );
     resetRecord.lastOtpSentAt = now;
   }
 
   await resetRecord.save();
 
-  return {
-    message:
-      "If an account exists, a password reset OTP will be sent.",
-  };
+  return genericResponse;
 };
