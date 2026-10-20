@@ -496,7 +496,7 @@ export const verifyPasswordResetOTP = async ({ identifier, code }) => {
   if (
     !normalizedIdentifier ||
     !/^\d{6}$/.test(normalizedCode)
-  ) {
+  ) { 
     throw new Error("INVALID_RESET_OTP");
   }
 
