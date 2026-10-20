@@ -69,12 +69,16 @@ router.post("/logout", Logout);
 router.get("/me", authMiddleware, getMe);
 router.get( "/admin-test",authMiddleware, roleMiddleware("ADMIN"),adminTest);
 
+
+// register otp ko verify krega mobile ki 
 router.post(
   "/verify-otp",
   verifyMobileOTPValidator,
   checkMobileRegistrationValidation,
   verifyMobileRegistrationController
 );
+
+// login otp ko verify krega login ki
 router.post(
   "/verify-login-otp",
   verifyMobileOTPValidator,
@@ -82,12 +86,14 @@ router.post(
   verifyLoginOTPController
 );
 
+// login otp ko verify krega email ki 
 router.post(
   "/verify-email-otp",
   verifyEmailOTPValidator,
   checkEmailOTPValidation,
   verifyEmailRegistrationController
 );
+// login otp ko varify  krega email ki 
 router.post(
   "/verify-email-login-otp",
   verifyEmailLoginOTPValidator,

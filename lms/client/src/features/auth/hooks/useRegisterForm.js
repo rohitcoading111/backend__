@@ -1,16 +1,16 @@
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { registerUser } from "../authThunk/authThunks.js";
 
 function useRegisterForm() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const { status, error: serverError } = useSelector(
     (state) => state.auth
   );
-
-  const [identifierType, setIdentifierType] = useState("");
 
   const {
     register,
@@ -27,8 +27,30 @@ function useRegisterForm() {
 
   const onSubmit = async (data) => {
     try {
-      const result = await dispatch(registerUser(data)).unwrap();
-      console.log("Registration successful:", result);
+      const identifier = data.identifier.trim();
+
+      // Backend registration service expects email.
+      const result = await dispatch(
+        registerUser({
+          name: data.name.trim(),
+          email: identifier,
+          password: data.password,
+        })
+      ).unwrap();
+
+      console.log("Registration response:", result);
+
+      const response = result?.data ?? result;
+
+      if (response?.otpRequired) {
+        navigate("/verify-otp", {
+          state: {
+            flow: "register",
+            method: "email",
+            identifier: response.email || identifier,
+          },
+        });
+      }
     } catch (error) {
       console.error("Registration failed:", error);
     }
@@ -41,8 +63,6 @@ function useRegisterForm() {
     errors,
     isSubmitting: status === "loading",
     serverError,
-    identifierType,
-    setIdentifierType,
   };
 }
 
