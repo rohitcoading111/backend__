@@ -1,7 +1,15 @@
 import { useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
+import { loginUser } from "../authThunks/authThunks";
 
 function useLoginForm() {
-  const form = useForm({
+  const dispatch = useDispatch();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({
     defaultValues: {
       identifier: "",
       password: "",
@@ -9,15 +17,14 @@ function useLoginForm() {
     mode: "onSubmit",
   });
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = form;
-
   const onSubmit = async (data) => {
-    // Abhi sirf testing; baad mein Redux thunk call karenge.
-    console.log("Login form data:", data);
+    try {
+      const result = await dispatch(loginUser(data)).unwrap();
+
+      console.log("Login successful:", result);
+    } catch (error) {
+      console.error("Login failed:", error);
+    }
   };
 
   return {

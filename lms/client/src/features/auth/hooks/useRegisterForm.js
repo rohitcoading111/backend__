@@ -1,6 +1,11 @@
+
 import { useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
+import { registerUser } from "../authThunks/authThunks";
 
 function useRegisterForm() {
+  const dispatch = useDispatch();
+
   const {
     register,
     handleSubmit,
@@ -15,7 +20,13 @@ function useRegisterForm() {
   });
 
   const onSubmit = async (data) => {
-    console.log("Register form data:", data);
+    try {
+      const result = await dispatch(registerUser(data)).unwrap();
+
+      console.log("Registration successful:", result);
+    } catch (error) {
+      console.error("Registration failed:", error);
+    }
   };
 
   return {
