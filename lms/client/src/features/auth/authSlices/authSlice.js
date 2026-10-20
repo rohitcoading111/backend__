@@ -1,6 +1,6 @@
 
 import { createSlice } from "@reduxjs/toolkit";
-import { loginUser, registerUser } from "../authThunk/authThunks.js";
+import { loginUser, registerUser,verifyEmailLoginOtp,verifyMobileLoginOtp } from "../authThunk/authThunks.js";
 
 const initialState = {
   user: null,
@@ -51,9 +51,10 @@ const authSlice = createSlice({
         }
       })
       .addCase(loginUser.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.error.message || "Login failed";
-      })
+  state.status = "failed";
+  state.error =
+    action.payload || action.error.message || "Login failed";
+})
 
       // REGISTER
       .addCase(registerUser.pending, (state) => {
@@ -64,10 +65,53 @@ const authSlice = createSlice({
         state.status = "succeeded";
         state.error = null;
       })
-      .addCase(registerUser.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.error.message || "Registration failed";
-      });
+    .addCase(registerUser.rejected, (state, action) => {
+  state.status = "failed";
+  state.error =
+    action.payload || action.error.message || "Registration failed";
+})
+.addCase(verifyEmailLoginOtp.pending, (state) => {
+  state.status = "loading";
+  state.error = null;
+})
+.addCase(verifyEmailLoginOtp.fulfilled, (state, action) => {
+  state.status = "succeeded";
+  state.error = null;
+
+  const response = action.payload?.data ?? action.payload;
+
+  if (response?.user) {
+    state.user = response.user;
+    state.isAuthenticated = true;
+  }
+})
+.addCase(verifyEmailLoginOtp.rejected, (state, action) => {
+  state.status = "failed";
+  state.error =
+    action.payload || "Email OTP verification failed.";
+})
+
+.addCase(verifyMobileLoginOtp.pending, (state) => {
+  state.status = "loading";
+  state.error = null;
+})
+.addCase(verifyMobileLoginOtp.fulfilled, (state, action) => {
+  state.status = "succeeded";
+  state.error = null;
+
+  const response = action.payload?.data ?? action.payload;
+
+  if (response?.user) {
+    state.user = response.user;
+    state.isAuthenticated = true;
+  }
+})
+.addCase(verifyMobileLoginOtp.rejected, (state, action) => {
+  state.status = "failed";
+  state.error =
+    action.payload || "Mobile OTP verification failed.";
+})
+
   },
 });
 
