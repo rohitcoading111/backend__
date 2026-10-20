@@ -1,27 +1,30 @@
-import axios from "axios";
+import api from "../../../services/api";
 
-const API_URL = "http://localhost:3000/api/auth";
+const login = async (credentials) => {
+  const response = await api.post("/auth/login", credentials);
+  return response.data;
+};
+
+const register = async (userData) => {
+  const response = await api.post("/auth/register", userData);
+  return response.data;
+};
+
+const getMe = async () => {
+  const response = await api.get("/auth/me");
+  return response.data;
+};
+
+const logout = async () => {
+  const response = await api.post("/auth/logout");
+  return response.data;
+};
 
 const authService = {
-  async login(credentials) {
-    const response = await axios.post(
-      `${API_URL}/login`,
-      credentials,
-      { withCredentials: true }
-    );
-
-    return response.data;
-  },
-
-  async register(userData) {
-    const response = await axios.post(
-      `${API_URL}/register`,
-      userData,
-      { withCredentials: true }
-    );
-
-    return response.data;
-  },
+  login,
+  register,
+  getMe,
+  logout,
 };
 
 export default authService;
