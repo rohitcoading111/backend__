@@ -29,6 +29,17 @@ import {
 import passport from "../config/googleStrategy.js";
 import { googleAuthCallback } from "../controllers/googleAuthControllers.js";
 
+
+
+import {
+  verifyEmailLoginOTPController,
+} from "../controllers/emailLoginOTP.controllers.js";
+
+import {
+  verifyEmailLoginOTPValidator,
+  checkEmailLoginOTPValidation,
+} from "../validators/emailLoginOTP.validator.js";
+
 const router = express.Router();
 
 
@@ -38,14 +49,7 @@ router.post("/refresh", RefreshToken);
 router.post("/logout", Logout);
 router.get("/me", authMiddleware, getMe);
 router.get( "/admin-test",authMiddleware, roleMiddleware("ADMIN"),adminTest);
-import {
-  verifyEmailLoginOTPController,
-} from "../controllers/emailLoginOTP.controllers.js";
 
-import {
-  verifyEmailLoginOTPValidator,
-  checkEmailLoginOTPValidation,
-} from "../validators/emailLoginOTP.validator.js";
 router.post(
   "/verify-otp",
   verifyMobileOTPValidator,
