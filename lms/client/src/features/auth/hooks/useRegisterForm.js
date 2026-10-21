@@ -30,24 +30,41 @@ function useRegisterForm() {
 
   const onSubmit = async (data) => {
     try {
-      const email = data.identifier.trim().toLowerCase();
+      // Added: Identify whether the input is email or mobile
+      const identifier = data.identifier.trim();
 
-      const result = await dispatch(
-        registerUser({
-          name: data.name.trim(),
-          email,
-          password: data.password,
-        })
-      ).unwrap();
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
+
+      const normalizedMobile = identifier.replace(/\s/g, "");
+
+      const isMobile = /^\+?[0-9]{10,15}$/.test(normalizedMobile);
+
+      if (!isEmail && !isMobile) {
+        return;
+      }
+
+      // Added: Send the correct field according to identifier type
+      const payload = {
+        name: data.name.trim(),
+        password: data.password,
+        ...(isEmail
+          ? { email: identifier.toLowerCase() }
+          : { mobile: normalizedMobile }),
+      };
+
+      const result = await dispatch(registerUser(payload)).unwrap();
 
       const response = result?.data ?? result;
 
+      // Added: Keep the selected registration method for OTP verification
       if (response?.otpRequired) {
         navigate("/verify-otp", {
           state: {
             flow: "register",
-            method: "email",
-            identifier: response.email || email,
+            method: isEmail ? "email" : "mobile",
+            identifier: isEmail
+              ? response.email || identifier.toLowerCase()
+              : response.mobile || normalizedMobile,
           },
         });
       }
