@@ -86,7 +86,7 @@ router.post(
   verifyLoginOTPController
 );
 
-// login otp ko verify krega email ki 
+// register otp ko verify krega email ki 
 router.post(
   "/verify-email-otp",
   verifyEmailOTPValidator,
