@@ -37,54 +37,56 @@ function useVerifyOtp() {
       return;
     }
 
-    try {
-      let result;
+   try {
+  let result;
 
-      if (flow === "register" && method === "email") {
-        result = await dispatch(
-          verifyEmailRegistrationOtp({
-            email: identifier,
-            code: otp,
-          })
-        ).unwrap();
-      } else if (flow === "login" && method === "email") {
-        result = await dispatch(
-          verifyEmailLoginOtp({
-            email: identifier,
-            code: otp,
-          })
-        ).unwrap();
-      } else if (flow === "login" && method === "mobile") {
-        result = await dispatch(
-          verifyMobileLoginOtp({
-            mobile: identifier,
-            code: otp,
-          })
-        ).unwrap();
-      } else {
-        setLocalError("Unsupported verification method.");
-        return;
-      }
+  if (flow === "register" && method === "email") {
+    result = await dispatch(
+      verifyEmailRegistrationOtp({
+        email: identifier,
+        code: otp,
+      })
+    ).unwrap();
+  } else if (flow === "login" && method === "email") {
+    result = await dispatch(
+      verifyEmailLoginOtp({
+        email: identifier,
+        code: otp,
+      })
+    ).unwrap();
+  } else if (flow === "login" && method === "mobile") {
+    result = await dispatch(
+      verifyMobileLoginOtp({
+        mobile: identifier,
+        code: otp,
+      })
+    ).unwrap();
+  } else {
+    setLocalError("Unsupported verification method.");
+    return;
+  }
 
-      const response = result?.data ?? result;
+  const response = result?.data ?? result;
 
-      if (flow === "login" && response?.user) {
-        navigate("/dashboard", { replace: true });
-      } else if (flow === "register") {
-        // Registration response par depend karega:
-        // Agar backend user aur tokens deta hai, auth state update
-        // karne ke baad dashboard par ja sakte hain.
-        navigate("/login", { replace: true });
-      } else {
-        setLocalError("Verification succeeded, but user details were not returned.");
-      }
-    } catch (error) {
-      setLocalError(
-        typeof error === "string"
-          ? error
-          : "OTP verification failed. Please try again."
-      );
-    }
+  if (response?.user) {
+    // Redux auth state should be updated by the fulfilled reducer.
+    navigate("/dashboard", { replace: true });
+  } else if (flow === "register") {
+    setLocalError(
+      "Registration verified, but user details were not returned."
+    );
+  } else {
+    setLocalError(
+      "Verification succeeded, but user details were not returned."
+    );
+  }
+} catch (error) {
+  setLocalError(
+    typeof error === "string"
+      ? error
+      : "OTP verification failed. Please try again."
+  );
+}
   };
 
   return {

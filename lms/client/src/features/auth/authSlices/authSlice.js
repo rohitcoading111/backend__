@@ -106,18 +106,20 @@ const authSlice = createSlice({
     state.isAuthenticated = true;
   }
 })
-.addCase(verifyMobileLoginOtp.rejected, (state, action) => {
-  state.status = "failed";
-  state.error =
-    action.payload || "Mobile OTP verification failed.";
-})
 .addCase(verifyEmailRegistrationOtp.pending, (state) => {
   state.status = "loading";
   state.error = null;
 })
-.addCase(verifyEmailRegistrationOtp.fulfilled, (state) => {
+.addCase(verifyEmailRegistrationOtp.fulfilled, (state, action) => {
   state.status = "succeeded";
   state.error = null;
+
+  const response = action.payload?.data ?? action.payload;
+
+  if (response?.user) {
+    state.user = response.user;
+    state.isAuthenticated = true;
+  }
 })
 .addCase(verifyEmailRegistrationOtp.rejected, (state, action) => {
   state.status = "failed";
@@ -126,6 +128,7 @@ const authSlice = createSlice({
     action.error.message ||
     "Registration OTP verification failed.";
 })
+
 },
 });
 
