@@ -25,6 +25,15 @@ const verifyEmailLoginOtp = async ({ email, code }) => {
 const verifyMobileLoginOtp = async ({ mobile, code }) => {
   const response = await api.post("/auth/verify-login-otp", {
     mobile,
+    code, 
+  });
+
+  return response.data;
+};
+
+const verifyEmailRegistrationOtp = async ({ email, code }) => {
+  const response = await api.post("/auth/verify-email-otp", {
+    email,
     code,
   });
 
@@ -44,10 +53,10 @@ const logout = async () => {
 const authService = {
   login,
   register,
+  verifyEmailRegistrationOtp,
   verifyEmailLoginOtp,
   verifyMobileLoginOtp,
   getMe,
   logout,
 };
-
 export default authService;
