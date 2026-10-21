@@ -10,6 +10,7 @@ import {
 import useRegisterForm from "../hooks/useRegisterForm";
 
 function RegisterForm() {
+  // Email ya mobile input ke according icon change karne ke liye
   const [identifier, setIdentifier] = useState("");
 
   const isPhone =
@@ -27,7 +28,12 @@ function RegisterForm() {
   return (
     <form
       className="space-y-3.5"
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit((data) =>
+        onSubmit({
+          ...data,
+          identifier: data.identifier.trim(),
+        })
+      )}
       noValidate
     >
       {/* Full Name */}
@@ -65,7 +71,7 @@ function RegisterForm() {
         )}
       </div>
 
-      {/* Email or Mobile Number */}
+      {/* Email or Mobile Number: Original UI preserved */}
       <div>
         <label
           htmlFor="identifier"
@@ -91,9 +97,13 @@ function RegisterForm() {
             placeholder="Email or mobile number"
             {...register("identifier", {
               required: "Email or mobile number is required",
+
+              // Input change par icon update hoga
               onChange: (event) => {
                 setIdentifier(event.target.value);
               },
+
+              // Email aur mobile dono validate honge
               validate: (value) => {
                 const normalizedValue = value.trim();
 
