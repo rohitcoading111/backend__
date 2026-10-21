@@ -6,6 +6,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   verifyEmailLoginOtp,
   verifyMobileLoginOtp,
+  verifyEmailRegistrationOtp,
 } from "../authThunk/authThunks.js";
 
 function useVerifyOtp() {
@@ -13,11 +14,10 @@ function useVerifyOtp() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Login page se aayi hui information
   const { flow, method, identifier } = location.state || {};
 
   const [otp, setOtp] = useState("");
-  const [error, setError] = useState("");
+  const [localError, setLocalError] = useState("");
 
   const { status, error: serverError } = useSelector(
     (state) => state.auth
@@ -25,17 +25,29 @@ function useVerifyOtp() {
 
   const onSubmit = async (event) => {
     event.preventDefault();
-    setError("");
+    setLocalError("");
 
     if (!/^\d{6}$/.test(otp)) {
-      setError("Please enter a valid 6-digit OTP.");
+      setLocalError("Please enter a valid 6-digit OTP.");
+      return;
+    }
+
+    if (!flow || !method || !identifier) {
+      setLocalError("Verification session not found. Please try again.");
       return;
     }
 
     try {
       let result;
 
-      if (flow === "login" && method === "email") {
+      if (flow === "register" && method === "email") {
+        result = await dispatch(
+          verifyEmailRegistrationOtp({
+            email: identifier,
+            code: otp,
+          })
+        ).unwrap();
+      } else if (flow === "login" && method === "email") {
         result = await dispatch(
           verifyEmailLoginOtp({
             email: identifier,
@@ -50,21 +62,26 @@ function useVerifyOtp() {
           })
         ).unwrap();
       } else {
-        setError("Invalid verification flow. Please login again.");
+        setLocalError("Unsupported verification method.");
         return;
       }
 
       const response = result?.data ?? result;
 
-      if (response?.user) {
+      if (flow === "login" && response?.user) {
         navigate("/dashboard", { replace: true });
+      } else if (flow === "register") {
+        // Registration response par depend karega:
+        // Agar backend user aur tokens deta hai, auth state update
+        // karne ke baad dashboard par ja sakte hain.
+        navigate("/login", { replace: true });
       } else {
-        setError("OTP verified, but user details were not returned.");
+        setLocalError("Verification succeeded, but user details were not returned.");
       }
-    } catch (err) {
-      setError(
-        typeof err === "string"
-          ? err
+    } catch (error) {
+      setLocalError(
+        typeof error === "string"
+          ? error
           : "OTP verification failed. Please try again."
       );
     }
@@ -78,7 +95,7 @@ function useVerifyOtp() {
     setOtp,
     onSubmit,
     isSubmitting: status === "loading",
-    error: error || serverError,
+    error: localError || serverError,
   };
 }
 
