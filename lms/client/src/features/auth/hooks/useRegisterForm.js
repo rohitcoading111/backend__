@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +12,8 @@ function useRegisterForm() {
   const { status, error: serverError } = useSelector(
     (state) => state.auth
   );
+
+  const [identifierType, setIdentifierType] = useState("");
 
   const {
     register,
@@ -27,18 +30,15 @@ function useRegisterForm() {
 
   const onSubmit = async (data) => {
     try {
-      const identifier = data.identifier.trim();
+      const email = data.identifier.trim().toLowerCase();
 
-      // Backend registration service expects email.
       const result = await dispatch(
         registerUser({
           name: data.name.trim(),
-          email: identifier,
+          email,
           password: data.password,
         })
       ).unwrap();
-
-      console.log("Registration response:", result);
 
       const response = result?.data ?? result;
 
@@ -47,7 +47,7 @@ function useRegisterForm() {
           state: {
             flow: "register",
             method: "email",
-            identifier: response.email || identifier,
+            identifier: response.email || email,
           },
         });
       }
@@ -63,6 +63,8 @@ function useRegisterForm() {
     errors,
     isSubmitting: status === "loading",
     serverError,
+    identifierType,
+    setIdentifierType,
   };
 }
 
