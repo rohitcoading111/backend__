@@ -76,3 +76,19 @@ export const verifyEmailRegistrationOtp = createAsyncThunk(
     }
   }
 );
+
+
+// Verify mobile registration OTP
+export const verifyMobileRegistrationOtp = createAsyncThunk(
+  "auth/verifyMobileRegistrationOtp",
+  async (otpData, { rejectWithValue }) => {
+    try {
+      return await authService.verifyMobileRegistrationOtp(otpData);
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+          "Mobile OTP verification failed. Please try again."
+      );
+    }
+  }
+);
