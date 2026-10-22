@@ -1,6 +1,6 @@
 
 import { createSlice } from "@reduxjs/toolkit";
-import { loginUser, registerUser,verifyEmailLoginOtp,verifyMobileLoginOtp,verifyEmailRegistrationOtp } from "../authThunk/authThunks.js";
+import { loginUser, registerUser,verifyEmailLoginOtp,verifyMobileLoginOtp,verifyEmailRegistrationOtp,verifyMobileRegistrationOtp } from "../authThunk/authThunks.js";
 
 const initialState = {
   user: null,
@@ -127,6 +127,28 @@ const authSlice = createSlice({
     action.payload ||
     action.error.message ||
     "Registration OTP verification failed.";
+})
+.addCase(verifyMobileRegistrationOtp.pending, (state) => {
+  state.status = "loading";
+  state.error = null;
+})
+
+.addCase(verifyMobileRegistrationOtp.fulfilled, (state, action) => {
+  state.status = "succeeded";
+  state.error = null;
+
+  const response = action.payload?.data ?? action.payload;
+
+  if (response?.user) {
+    state.user = response.user;
+    state.isAuthenticated = true;
+  }
+})
+
+.addCase(verifyMobileRegistrationOtp.rejected, (state, action) => {
+  state.status = "failed";
+  state.error =
+    action.payload || "Mobile OTP verification failed.";
 })
 
 },
