@@ -34,18 +34,23 @@ function useLoginForm() {
       const isEmail =
         /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
 
+      // Added: normalize Indian mobile number
+      const digits = identifier.replace(/\D/g, "");
+
+      const normalizedMobile = digits.startsWith("91")
+        ? `+${digits}`
+        : `+91${digits}`;
+
       const credentials = {
         password: data.password,
         ...(isEmail
-          ? { email: identifier }
-          : { mobile: identifier }),
+          ? { email: identifier.toLowerCase() }
+          : { mobile: normalizedMobile }),
       };
 
       const result = await dispatch(
         loginUser(credentials)
       ).unwrap();
-
-      console.log("Login response:", result);
 
       const response = result?.data ?? result;
 
@@ -54,7 +59,10 @@ function useLoginForm() {
           state: {
             flow: "login",
             method: isEmail ? "email" : "mobile",
-            identifier,
+            // Added: pass normalized number to OTP page too
+            identifier: isEmail
+              ? identifier.toLowerCase()
+              : normalizedMobile,
           },
         });
       }
