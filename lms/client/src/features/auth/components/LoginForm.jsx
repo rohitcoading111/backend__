@@ -1,9 +1,16 @@
 
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Mail, Lock, ArrowRight } from "lucide-react";
+import { Mail, Lock, ArrowRight, Smartphone } from "lucide-react";
 import useLoginForm from "../hooks/useLoginForm";
 
 function LoginForm() {
+  const [identifier, setIdentifier] = useState("");
+
+  // Detect whether the user is entering a mobile number
+  const isPhone =
+    /^[0-9+ ]*$/.test(identifier) && identifier.length > 0;
+
   const {
     register,
     handleSubmit,
@@ -34,33 +41,71 @@ function LoginForm() {
           </label>
 
           <div className="flex items-center gap-2.5 rounded-xl border border-slate-700 bg-slate-800/70 px-3.5 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20">
-            <Mail size={18} className="shrink-0 text-slate-400" />
+            {isPhone ? (
+              <Smartphone
+                size={18}
+                className="shrink-0 text-indigo-400"
+              />
+            ) : (
+              <Mail size={18} className="shrink-0 text-slate-400" />
+            )}
 
-            <input
-              id="identifier"
-              type="text"
-              autoComplete="username"
-              placeholder="Email or mobile number"
-              {...register("identifier", {
-                required: "Email or mobile number is required",
-                validate: (value) => {
-                  const input = value.trim();
+            {/* Fixed +91 prefix for mobile; email input remains unchanged */}
+            {isPhone ? (
+              <>
+                <span className="shrink-0 text-sm text-slate-300">
+                  +91
+                </span>
 
-                  const isEmail =
-                    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input);
+                <input
+                  id="identifier"
+                  type="tel"
+                  autoComplete="tel-national"
+                  placeholder="10-digit mobile number"
+                  maxLength={10}
+                  {...register("identifier", {
+                    required: "Mobile number is required",
+                    validate: (value) =>
+                      /^[6-9]\d{9}$/.test(value) ||
+                      "Enter a valid 10-digit Indian mobile number",
+                  })}
+                  onChange={(event) => {
+                    const value = event.target.value.replace(/\D/g, "");
+                    event.target.value = value;
+                    setIdentifier(value);
+                  }}
+                  className="w-full bg-transparent py-2.5 text-sm text-white outline-none placeholder:text-slate-500"
+                />
+              </>
+            ) : (
+              <input
+                id="identifier"
+                type="text"
+                autoComplete="username"
+                placeholder="Email or mobile number"
+                {...register("identifier", {
+                  required: "Email or mobile number is required",
+                  validate: (value) => {
+                    const input = value.trim();
 
-                  const isPhone =
-                    /^\+?[0-9]{10,15}$/.test(input);
+                    const isEmail =
+                      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input);
 
-                  return (
-                    isEmail ||
-                    isPhone ||
-                    "Enter a valid email or mobile number"
-                  );
-                },
-              })}
-              className="w-full bg-transparent py-2.5 text-sm text-white outline-none placeholder:text-slate-500"
-            />
+                    const isPhone = /^\+?[0-9]{10,15}$/.test(input);
+
+                    return (
+                      isEmail ||
+                      isPhone ||
+                      "Enter a valid email or mobile number"
+                    );
+                  },
+                  onChange: (event) => {
+                    setIdentifier(event.target.value);
+                  },
+                })}
+                className="w-full bg-transparent py-2.5 text-sm text-white outline-none placeholder:text-slate-500"
+              />
+            )}
           </div>
 
           {errors.identifier && (
