@@ -4,11 +4,11 @@ import { loginUser, registerUser,verifyEmailLoginOtp,verifyMobileLoginOtp,verify
 
 const initialState = {
   user: null,
+  accessToken: null,
   isAuthenticated: false,
   status: "idle",
   error: null,
 };
-
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -21,16 +21,25 @@ const authSlice = createSlice({
       state.error = null;
     },
 
-    logout: (state) => {
-      state.user = null;
-      state.isAuthenticated = false;
-      state.status = "idle";
-      state.error = null;
-    },
+   logout: (state) => {
+  state.user = null;
+  state.accessToken = null;
+  state.isAuthenticated = false;
+  state.status = "idle";
+  state.error = null;
+},
 
     clearAuthError: (state) => {
       state.error = null;
     },
+
+    setGoogleAuth: (state, action) => {
+  state.user = action.payload.user;
+  state.accessToken = action.payload.accessToken;
+  state.isAuthenticated = true;
+  state.status = "succeeded";
+  state.error = null;
+},
   },
 
   extraReducers: (builder) => {
@@ -154,7 +163,7 @@ const authSlice = createSlice({
 },
 });
 
-export const { setCredentials, logout, clearAuthError } =
+export const { setCredentials, logout, clearAuthError,setGoogleAuth } =
   authSlice.actions;
 
 export default authSlice.reducer;
