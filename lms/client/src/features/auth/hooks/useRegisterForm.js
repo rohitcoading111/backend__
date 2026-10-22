@@ -44,13 +44,13 @@ function useRegisterForm() {
       }
 
       // Added: Send the correct field according to identifier type
-      const payload = {
-        name: data.name.trim(),
-        password: data.password,
-        ...(isEmail
-          ? { email: identifier.toLowerCase() }
-          : { mobile: normalizedMobile }),
-      };
+     const payload = {
+  name: data.name.trim(),
+  password: data.password,
+  ...(isEmail
+    ? { email: identifier.toLowerCase() }
+    : { mobile: `+91${normalizedMobile}` }),
+};;
 
       const result = await dispatch(registerUser(payload)).unwrap();
 
