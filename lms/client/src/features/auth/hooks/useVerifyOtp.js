@@ -7,6 +7,7 @@ import {
   verifyEmailLoginOtp,
   verifyMobileLoginOtp,
   verifyEmailRegistrationOtp,
+  verifyMobileRegistrationOtp
 } from "../authThunk/authThunks.js";
 
 function useVerifyOtp() {
@@ -47,6 +48,17 @@ function useVerifyOtp() {
         code: otp,
       })
     ).unwrap();
+    
+   } else if (flow === "register" && method === "mobile") {
+  // Added: Mobile registration OTP verification
+  result = await dispatch(
+    verifyMobileRegistrationOtp({
+      mobile: identifier,
+      code: otp,
+    })
+  ).unwrap();
+
+
   } else if (flow === "login" && method === "email") {
     result = await dispatch(
       verifyEmailLoginOtp({
