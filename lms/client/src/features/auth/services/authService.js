@@ -96,6 +96,16 @@ const authService = {
   getGoogleAuthUrl: () => {
     return `${api.defaults.baseURL}/auth/google`;
   },
+
+  exchangeGoogleAuthCode: async (code) => {
+  const response = await api.post("/auth/google/exchange", {
+    code,
+  });
+
+  return response.data;
+},
 };
+
+
 
 export default authService;

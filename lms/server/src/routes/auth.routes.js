@@ -12,6 +12,9 @@ import { roleMiddleware } from "../middleware/role.middleware.js";
 import upload from "../middleware/upload.middleware.js";
 import { verifyMobileRegistrationController } from "../controllers/mobileRegistration.controllers.js";
 import {
+  exchangeGoogleAuthCode,
+} from "../controllers/googleAuthControllers.js";
+import {
   verifyMobileOTPValidator,
   checkMobileRegistrationValidation,
 } from "../validators/mobileRegistration.validator.js";
@@ -151,5 +154,7 @@ router.get("/google/failure", (req, res) => {
     message: "Google authentication failed",
   });
 });
+
+router.post("/google/exchange", exchangeGoogleAuthCode);
 
 export default router;
