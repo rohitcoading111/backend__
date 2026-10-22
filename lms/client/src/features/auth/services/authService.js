@@ -40,6 +40,16 @@ const verifyEmailRegistrationOtp = async ({ email, code }) => {
   return response.data;
 };
 
+// Verify mobile registration OTP
+const verifyMobileRegistrationOtp = async ({ mobile, code }) => {
+  const response = await api.post("/auth/verify-otp", {
+    mobile,
+    code,
+  });
+
+  return response.data;
+};
+
 const getMe = async () => {
   const response = await api.get("/auth/me");
   return response.data;
@@ -58,5 +68,6 @@ const authService = {
   verifyMobileLoginOtp,
   getMe,
   logout,
+  verifyMobileRegistrationOtp
 };
 export default authService;
