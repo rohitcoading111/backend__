@@ -1,18 +1,46 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setGoogleAuth } from "../authSlices/authSlice.js";
 
 function GoogleAuthCallback() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const started = useRef(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    // Backend abhi frontend par redirect nahi karta.
-    // Isliye bina response ke auth state update nahi kar sakte.
-    setError(
-      "Google callback integration is not connected yet."
-    );
-  }, []);
+    if (started.current) return;
+    started.current = true;
+
+    try {
+      const params = new URLSearchParams(
+        window.location.hash.slice(1)
+      );
+
+      const accessToken = params.get("accessToken");
+      const userData = params.get("user");
+
+      // Remove callback data from URL
+      window.history.replaceState(
+        null,
+        "",
+        window.location.pathname
+      );
+
+      if (!accessToken || !userData) {
+        throw new Error("Google authentication data missing.");
+      }
+
+      const user = JSON.parse(userData);
+
+      dispatch(setGoogleAuth({ user, accessToken }));
+      navigate("/dashboard", { replace: true });
+    } catch {
+      setError("Google login failed. Please try again.");
+    }
+  }, [dispatch, navigate]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
