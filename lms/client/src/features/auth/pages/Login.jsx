@@ -1,9 +1,13 @@
-
 import { Link } from "react-router-dom";
 import { GraduationCap } from "lucide-react";
 import LoginForm from "../components/LoginForm";
+import authService from "../services/authService";
+
 
 function Login() {
+  const handleGoogleLogin = () => {
+  window.location.href = authService.getGoogleAuthUrl();
+};
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-950 p-3 text-white sm:p-4 lg:p-6">
       <div className="my-auto grid w-full max-w-4xl overflow-hidden rounded-2xl border border-white/10 bg-slate-900 shadow-2xl lg:grid-cols-2">
@@ -114,6 +118,7 @@ function Login() {
             {/* Google Login Button */}
             <button
               type="button"
+              onClick={handleGoogleLogin}
               className="flex w-full items-center justify-center gap-2.5 rounded-xl border border-slate-700 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 transition hover:bg-slate-100 active:scale-[0.99]"
             >
               <svg
