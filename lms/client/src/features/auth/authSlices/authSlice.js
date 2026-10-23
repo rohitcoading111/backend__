@@ -1,6 +1,15 @@
 
 import { createSlice } from "@reduxjs/toolkit";
-import { loginUser, registerUser,verifyEmailLoginOtp,verifyMobileLoginOtp,verifyEmailRegistrationOtp,verifyMobileRegistrationOtp,restoreAuth } from "../authThunk/authThunks.js";
+import { 
+  loginUser, 
+  registerUser,
+  verifyEmailLoginOtp,
+  verifyMobileLoginOtp,
+  verifyEmailRegistrationOtp,
+  verifyMobileRegistrationOtp,
+  restoreAuth,
+  logoutUser
+ } from "../authThunk/authThunks.js";
 
 const initialState = {
   user: null,
@@ -173,6 +182,23 @@ const authSlice = createSlice({
   state.status = "failed";
   state.error =
     action.payload || "Failed to restore authentication.";
+})
+.addCase(logoutUser.pending, (state) => {
+  state.status = "loading";
+  state.error = null;
+})
+
+.addCase(logoutUser.fulfilled, (state) => {
+  state.user = null;
+  state.accessToken = null;
+  state.isAuthenticated = false;
+  state.status = "idle";
+  state.error = null;
+})
+
+.addCase(logoutUser.rejected, (state, action) => {
+  state.status = "failed";
+  state.error = action.payload || "Logout failed";
 })
 
 },
