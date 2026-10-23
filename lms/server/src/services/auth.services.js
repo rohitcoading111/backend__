@@ -342,8 +342,9 @@ export const verifyLoginOTP = async ({ mobile, code }) => {
 export const refreshTokenService = async (decoded, refreshToken) => {
   const { id, email } = decoded;
 
-  const existingUser = await userModel.findById(id);
-
+  const existingUser = await userModel
+  .findById(id)
+  .select("+refreshToken");
   if (!existingUser || existingUser.email !== email) {
     throw new Error("Invalid refresh token");
   }
