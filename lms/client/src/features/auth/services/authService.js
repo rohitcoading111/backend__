@@ -1,4 +1,3 @@
-
 import api from "../../../services/api";
 
 const authService = {
@@ -50,21 +49,25 @@ const authService = {
     return response.data;
   },
 
-  // 7. Refresh access token
-  refreshToken: async () => {
-    const response = await api.post("/auth/refresh");
-    return response.data;
-  },
-
   // 8. Logout
   logout: async () => {
     const response = await api.post("/auth/logout");
     return response.data;
   },
 
+  refreshAccessToken: async () => {
+    const response = await api.post("/auth/refresh");
+    return response.data;
+  },
+
   // 9. Get logged-in user
-  getMe: async () => {
-    const response = await api.get("/auth/me");
+  getMe: async (accessToken) => {
+    const response = await api.get("/auth/me", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
     return response.data;
   },
 
@@ -98,14 +101,12 @@ const authService = {
   },
 
   exchangeGoogleAuthCode: async (code) => {
-  const response = await api.post("/auth/google/exchange", {
-    code,
-  });
+    const response = await api.post("/auth/google/exchange", {
+      code,
+    });
 
-  return response.data;
-},
+    return response.data;
+  },
 };
-
-
 
 export default authService;
