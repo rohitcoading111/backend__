@@ -92,3 +92,36 @@ export const verifyMobileRegistrationOtp = createAsyncThunk(
     }
   }
 );
+
+
+export const restoreAuth = createAsyncThunk(
+  "auth/restoreAuth",
+  async (_, { rejectWithValue }) => {
+    try {
+      // Step 1: Naya access token lo
+      const refreshResult = await authService.refreshAccessToken();
+      const accessToken = refreshResult?.data?.accessToken;
+
+      if (!accessToken) {
+        throw new Error("Access token missing from refresh response.");
+      }
+
+      // Step 2: Access token se user details lo
+      const meResult = await authService.getMe(accessToken);
+      const user = meResult?.data?.user;
+
+      if (!user) {
+        throw new Error("User data missing from /me response.");
+      }
+
+      // Step 3: Dono Redux ko return karo
+      return { user, accessToken };
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to restore authentication."
+      );
+    }
+  }
+);
