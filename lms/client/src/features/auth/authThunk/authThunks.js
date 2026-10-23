@@ -125,3 +125,18 @@ export const restoreAuth = createAsyncThunk(
     }
   }
 );
+
+export const logoutUser = createAsyncThunk(
+  "auth/logoutUser",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await authService.logout();
+      return response;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+          "Logout failed. Please try again."
+      );
+    }
+  }
+);
