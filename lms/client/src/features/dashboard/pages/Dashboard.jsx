@@ -1,20 +1,22 @@
-
 import { BookOpen, Clock, CheckCircle, TrendingUp, LogOut } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { logout } from "../../auth/authSlices/authSlice";
+import { logoutUser } from "../../auth/authThunk/authThunks.js";
 
 function Dashboard() {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
   const user = useSelector((state) => state.auth.user);
 
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate("/login", { replace: true });
-  };
+const dispatch = useDispatch();
+const navigate = useNavigate();
 
+const handleLogout = async () => {
+  try {
+    await dispatch(logoutUser()).unwrap();
+    navigate("/login", { replace: true });
+  } catch (error) {
+    console.error("Logout failed:", error);
+  }
+};
   const stats = [
     {
       title: "My Courses",
