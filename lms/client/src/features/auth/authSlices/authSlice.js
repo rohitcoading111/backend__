@@ -42,6 +42,10 @@ const authSlice = createSlice({
       state.error = null;
     },
 
+    setAccessToken: (state, action) => {
+     state.accessToken = action.payload;
+    },
+
     setGoogleAuth: (state, action) => {
   state.user = action.payload.user;
   state.accessToken = action.payload.accessToken;
