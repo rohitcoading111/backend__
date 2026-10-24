@@ -1,43 +1,49 @@
+
 import { ArrowUpRight, BookOpen, Clock3 } from "lucide-react";
 
 function CourseCard({ course, onBuy }) {
   return (
     <article className="group overflow-hidden rounded-2xl border border-black/[0.08] bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl">
-      <div className="relative flex h-48 items-center justify-center overflow-hidden bg-[#111111] p-6 text-white">
-        {course.thumbnail ? (
+      <div className="relative h-48 overflow-hidden bg-neutral-900">
+        {course.thumbnail?.url ? (
           <img
-            src={course.thumbnail}
+            src={course.thumbnail.url}
             alt={course.title}
             className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
           />
         ) : (
-          <BookOpen size={52} strokeWidth={1} />
+          <div className="flex h-full items-center justify-center text-white">
+            <BookOpen size={48} strokeWidth={1} />
+          </div>
         )}
 
-        <span className="absolute left-4 top-4 rounded-full border border-white/20 bg-black/40 px-3 py-1 text-xs text-white backdrop-blur">
+        <span className="absolute left-4 top-4 rounded-full border border-white/20 bg-black/60 px-3 py-1 text-xs text-white backdrop-blur">
           {course.category || "Course"}
         </span>
       </div>
 
       <div className="p-5">
-        <h3 className="text-lg font-semibold tracking-tight">
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-xs font-medium uppercase tracking-wider text-neutral-400">
+            {course.level || "BEGINNER"}
+          </span>
+          <span className="flex items-center gap-1 text-xs text-neutral-500">
+            <BookOpen size={14} />
+            Online course
+          </span>
+        </div>
+
+        <h3 className="mt-3 text-lg font-semibold tracking-tight">
           {course.title}
         </h3>
 
         <p className="mt-2 line-clamp-2 min-h-10 text-sm leading-5 text-neutral-500">
-          {course.description || "Explore the course and start learning."}
+          {course.description || "Explore this course and start learning."}
         </p>
 
-        <div className="mt-5 flex items-center gap-4 text-xs text-neutral-500">
-          <span className="flex items-center gap-1.5">
-            <BookOpen size={15} />
-            {course.lessonCount ?? "—"} lessons
-          </span>
-
-          <span className="flex items-center gap-1.5">
-            <Clock3 size={15} />
-            {course.duration || "Self-paced"}
-          </span>
+        <div className="mt-5 flex items-center gap-2 text-xs text-neutral-500">
+          <Clock3 size={15} />
+          Self-paced learning
         </div>
 
         <div className="mt-5 flex items-center justify-between border-t border-black/[0.07] pt-4">
