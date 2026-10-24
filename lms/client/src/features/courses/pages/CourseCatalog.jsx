@@ -49,19 +49,76 @@ const [purchaseError, setPurchaseError] = useState("");
 
 const handleBuy = async (course) => {
   try {
-     console.log("BUY BUTTON CLICKED:", course._id);
-
     setPurchaseError("");
     setBuyingCourseId(course._id);
 
+    // Step 1: Backend se Razorpay order create karo
     const result = await createPayment(course._id);
+    const order = result.data;
 
-    console.log("Payment order created:", result);
+    // Step 2: Checkout script loaded hai ya nahi
+    if (!window.Razorpay) {
+      throw new Error(
+        "Razorpay Checkout load nahi hua. Page refresh karke try karo."
+      );
+    }
+
+    // Step 3: Razorpay Checkout open karo
+    const options = {
+      key: order.keyId,
+      amount: order.amount,
+      currency: order.currency,
+      name: "LearnHub",
+      description: course.title,
+      order_id: order.orderId,
+
+      handler: async (response) => {
+        try {
+          // Step 4: Real payment response backend ko bhejo
+          const verification = await verifyPayment({
+            orderId: response.razorpay_order_id,
+            paymentId: response.razorpay_payment_id,
+            signature: response.razorpay_signature,
+          });
+
+          console.log("Payment verified:", verification);
+          alert("Payment successful! Course access confirmation check karo.");
+        } catch (error) {
+          console.error("Payment verification failed:", error);
+          setPurchaseError(
+            error.response?.data?.message ||
+              "Payment verify nahi ho paya. Support se contact karo."
+          );
+        }
+      },
+
+      modal: {
+        ondismiss: () => {
+          console.log("Razorpay Checkout closed.");
+        },
+      },
+
+      theme: {
+        color: "#171717",
+      },
+    };
+
+    const razorpay = new window.Razorpay(options);
+
+    razorpay.on("payment.failed", (response) => {
+      console.error("Razorpay payment failed:", response.error);
+      setPurchaseError(
+        response.error?.description || "Payment failed. Dobara try karo."
+      );
+    });
+
+    razorpay.open();
   } catch (error) {
-    console.error("Payment creation failed:", error);
-
+    console.error("Payment start failed:", error);
     setPurchaseError(
-      error.response?.data?.message || "Payment start nahi ho paya."
+      error.response?.data?.message ||
+        error.message ||
+        "Payment start nahi ho paya."
     );
   } finally {
     setBuyingCourseId(null);
