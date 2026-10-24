@@ -8,6 +8,7 @@ import {
   deleteCourseController,
   publishCourseController,
   unpublishCourseController,
+  getPublishedCoursesController
 } from "../controllers/course.controllers.js";
 
 import { authMiddleware } from "../middleware/auth.middleware.js";
@@ -40,6 +41,8 @@ router.get(
   roleMiddleware("INSTRUCTOR"),
   getSingleCourseController
 );
+// Public: anyone can view published courses
+router.get("/published", getPublishedCoursesController);
 
 router.patch(
   "/:courseId",
