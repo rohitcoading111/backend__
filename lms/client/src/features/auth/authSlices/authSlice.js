@@ -208,7 +208,12 @@ const authSlice = createSlice({
 },
 });
 
-export const { setCredentials, logout, clearAuthError,setGoogleAuth } =
-  authSlice.actions;
+export const {
+  setCredentials,
+  logout,
+  clearAuthError,
+  setGoogleAuth,
+  setAccessToken,
+} = authSlice.actions;
 
 export default authSlice.reducer;
