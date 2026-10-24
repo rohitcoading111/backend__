@@ -1,7 +1,7 @@
 
 import { ArrowUpRight, BookOpen, Clock3 } from "lucide-react";
 
-function CourseCard({ course, onBuy }) {
+function CourseCard({ course, onBuy,isPurchased }) {
   return (
     <article className="group overflow-hidden rounded-2xl border border-black/[0.08] bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl">
       <div className="relative h-48 overflow-hidden bg-neutral-900">
@@ -59,14 +59,13 @@ function CourseCard({ course, onBuy }) {
           </div>
 
           <button
-            type="button"
-            onClick={() => onBuy(course)}
-            disabled={typeof course.price !== "number"}
-            className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-3 text-sm font-medium text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            Buy now
-            <ArrowUpRight size={16} />
-          </button>
+  type="button"
+  onClick={() => onBuy(course, isPurchased)}
+  className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-3 text-sm font-medium text-white transition hover:bg-neutral-800"
+>
+  {isPurchased ? "Already Enrolled" : "Buy Now"}
+  <ArrowUpRight size={16} />
+</button>
         </div>
       </div>
     </article>

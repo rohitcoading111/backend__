@@ -9,10 +9,14 @@ import CourseCard from "../components/CourseCard";
 import { getPublishedCourses } from "../services/courseService";
 import { useEffect } from "react";
 import { createPayment,verifyPayment } from "../../payments/services/paymentService";
+import { useNavigate } from "react-router-dom";
+import { getMyEnrollments } from "../../enrollments/services/enrollmentService";
+
 
 function CourseCatalog() {
   const [search, setSearch] = useState("");
-
+  const navigate = useNavigate();
+const [purchasedCourseIds, setPurchasedCourseIds] = useState(new Set());
   // Actual backend API connect karne ke baad yahan courses aayenge.
 const [courses, setCourses] = useState([]);
 const [loading, setLoading] = useState(true);
@@ -39,6 +43,25 @@ useEffect(() => {
   fetchCourses();
 }, []);
 
+useEffect(() => {
+  const fetchEnrollments = async () => {
+    try {
+      const result = await getMyEnrollments();
+      const enrollments = result?.data?.enrollments ?? [];
+
+      const courseIds = enrollments
+        .map((enrollment) => enrollment.course?._id)
+        .filter(Boolean);
+
+      setPurchasedCourseIds(new Set(courseIds));
+    } catch (error) {
+      console.error("Enrollments fetch error:", error);
+    }
+  };
+
+  fetchEnrollments();
+}, []);
+
   const filteredCourses = courses.filter((course) =>
     course.title?.toLowerCase().includes(search.toLowerCase())
   );
@@ -47,7 +70,11 @@ useEffect(() => {
 const [buyingCourseId, setBuyingCourseId] = useState(null);
 const [purchaseError, setPurchaseError] = useState("");
 
-const handleBuy = async (course) => {
+const handleBuy = async (course, isPurchased = false) => {
+  if (isPurchased) {
+    navigate("/dashboard", { replace: true });
+    return;
+  }
   try {
     setPurchaseError("");
     setBuyingCourseId(course._id);
@@ -80,6 +107,10 @@ const handleBuy = async (course) => {
             paymentId: response.razorpay_payment_id,
             signature: response.razorpay_signature,
           });
+
+          if (verification.success) {
+          navigate("/dashboard", { replace: true });
+          }
 
           console.log("Payment verified:", verification);
           alert("Payment successful! Course access confirmation check karo.");
@@ -217,10 +248,11 @@ const handleBuy = async (course) => {
   <div className="mt-7 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
     {filteredCourses.map((course) => (
       <CourseCard
-        key={course._id}
-        course={course}
-        onBuy={handleBuy}
-      />
+  key={course._id}
+  course={course}
+  onBuy={handleBuy}
+  isPurchased={purchasedCourseIds.has(course._id)}
+/>
     ))}
   </div>
 ) : (
