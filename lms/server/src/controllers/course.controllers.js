@@ -1,4 +1,4 @@
-import { createCourse,getCourse,getSingleCourse,updateCourse,deleteCourse,publishCourse,unpublishCourse} from "../services/course.services.js";
+import { createCourse,getCourse,getSingleCourse,updateCourse,deleteCourse,publishCourse,unpublishCourse,getAllPublishedCourses} from "../services/course.services.js";
 
 export const createCourseController = async (req, res) => {
   try {
@@ -79,6 +79,29 @@ export const getSingleCourseController = async (req, res) => {
     });
   }
 };
+
+
+export const getPublishedCoursesController = async (req, res) => {
+  try {
+    const courses = await getAllPublishedCourses();
+
+    return res.status(200).json({
+      success: true,
+      message: "Published courses fetched successfully",
+      data: {
+        courses,
+      },
+    });
+  } catch (error) {
+    console.error("Get published courses error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch published courses",
+    });
+  }
+};
+
 
 
 export const updateCourseController = async (req, res) => {
