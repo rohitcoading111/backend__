@@ -43,10 +43,30 @@ useEffect(() => {
     course.title?.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleBuy = (course) => {
-    // Next step: selected course ko checkout page par bhejenge.
-    console.log("Selected course:", course._id);
-  };
+  
+const [buyingCourseId, setBuyingCourseId] = useState(null);
+const [purchaseError, setPurchaseError] = useState("");
+
+const handleBuy = async (course) => {
+  try {
+     console.log("BUY BUTTON CLICKED:", course._id);
+
+    setPurchaseError("");
+    setBuyingCourseId(course._id);
+
+    const result = await createPayment(course._id);
+
+    console.log("Payment order created:", result);
+  } catch (error) {
+    console.error("Payment creation failed:", error);
+
+    setPurchaseError(
+      error.response?.data?.message || "Payment start nahi ho paya."
+    );
+  } finally {
+    setBuyingCourseId(null);
+  }
+};
 
   return (
   <div className="h-screen overflow-y-auto bg-[#f7f7f5] text-[#171717]">
@@ -120,6 +140,11 @@ useEffect(() => {
                 className="w-full bg-transparent text-sm outline-none placeholder:text-neutral-400"
               />
             </label>
+            {purchaseError && (
+  <p className="mt-5 rounded-xl bg-red-50 p-4 text-sm text-red-600">
+    {purchaseError}
+  </p>
+)}
           </div>
 
          
