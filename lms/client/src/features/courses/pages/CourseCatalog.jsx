@@ -8,7 +8,7 @@ import {
 import CourseCard from "../components/CourseCard";
 import { getPublishedCourses } from "../services/courseService";
 import { useEffect } from "react";
-import { createPayment } from "../../payments/services/paymentService";
+import { createPayment,verifyPayment } from "../../payments/services/paymentService";
 
 function CourseCatalog() {
   const [search, setSearch] = useState("");
