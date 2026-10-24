@@ -6,12 +6,37 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import CourseCard from "../components/CourseCard";
+import { getPublishedCourses } from "../services/courseService";
+import { useEffect } from "react";
 
 function CourseCatalog() {
   const [search, setSearch] = useState("");
 
   // Actual backend API connect karne ke baad yahan courses aayenge.
-  const courses = [];
+const [courses, setCourses] = useState([]);
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState("");
+
+useEffect(() => {
+  const fetchCourses = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const result = await getPublishedCourses();
+      setCourses(result?.data?.courses ?? []);
+    } catch (err) {
+      console.error("Courses fetch error:", err);
+      setError(
+        err.response?.data?.message || "Courses load nahi ho paaye."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchCourses();
+}, []);
 
   const filteredCourses = courses.filter((course) =>
     course.title?.toLowerCase().includes(search.toLowerCase())
@@ -23,7 +48,7 @@ function CourseCatalog() {
   };
 
   return (
-    <div className="h-screen overflow-y-auto bg-[#f7f7f5] text-[#171717]">
+  <div className="h-screen overflow-y-auto bg-[#f7f7f5] text-[#171717]">
       <header className="border-b border-black/[0.07] bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5 sm:px-8">
           <div className="flex items-center gap-3">
@@ -96,35 +121,43 @@ function CourseCatalog() {
             </label>
           </div>
 
-          {filteredCourses.length > 0 ? (
-            <div className="mt-7 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-              {filteredCourses.map((course) => (
-                <CourseCard
-                  key={course._id}
-                  course={course}
-                  onBuy={handleBuy}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="mt-7 rounded-2xl border border-dashed border-black/15 bg-white px-6 py-16 text-center sm:py-20">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f7f7f5]">
-                <BookOpen size={25} strokeWidth={1.5} />
-              </div>
+         
+{loading ? (
+  <div className="mt-7 py-16 text-center text-sm text-neutral-500">
+    Loading courses...
+  </div>
+) : error ? (
+  <div className="mt-7 py-16 text-center text-sm text-red-600">
+    {error}
+  </div>
+) : filteredCourses.length > 0 ? (
+  <div className="mt-7 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+    {filteredCourses.map((course) => (
+      <CourseCard
+        key={course._id}
+        course={course}
+        onBuy={handleBuy}
+      />
+    ))}
+  </div>
+) : (
+  <div className="mt-7 rounded-2xl border border-dashed border-black/15 bg-white px-6 py-16 text-center sm:py-20">
+    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f7f7f5]">
+      <BookOpen size={25} strokeWidth={1.5} />
+    </div>
 
-              <h3 className="mt-5 text-lg font-semibold">
-                {search
-                  ? "No matching courses"
-                  : "Courses will appear here"}
-              </h3>
+    <h3 className="mt-5 text-lg font-semibold">
+      {search ? "No matching courses" : "No published courses yet"}
+    </h3>
 
-              <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-neutral-500">
-                {search
-                  ? "Try a different search term."
-                  : "Connect the published courses API to display available courses and their prices here."}
-              </p>
-            </div>
-          )}
+    <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-neutral-500">
+      {search
+        ? "Try a different search term."
+        : "Published courses will appear here."}
+    </p>
+  </div>
+)}
+
         </section>
 
         <footer className="mt-14 border-t border-black/[0.07] py-6 text-xs text-neutral-400">

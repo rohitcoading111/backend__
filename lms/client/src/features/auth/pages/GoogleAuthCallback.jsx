@@ -47,7 +47,7 @@ function GoogleAuthCallback() {
           })
         );
 
-        navigate("/dashboard", { replace: true });
+       navigate("/courses", { replace: true });
       } catch (err) {
         setError(
           err.response?.data?.message ||

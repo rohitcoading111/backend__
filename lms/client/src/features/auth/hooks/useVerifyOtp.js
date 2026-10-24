@@ -82,7 +82,7 @@ function useVerifyOtp() {
 
   if (response?.user) {
     // Redux auth state should be updated by the fulfilled reducer.
-    navigate("/dashboard", { replace: true });
+    navigate("/courses", { replace: true });
   } else if (flow === "register") {
     setLocalError(
       "Registration verified, but user details were not returned."

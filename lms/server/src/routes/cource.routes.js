@@ -34,6 +34,8 @@ router.get(
   roleMiddleware("INSTRUCTOR"),
   getMyCourses
 );
+// Public: anyone can view published courses
+router.get("/published", getPublishedCoursesController);
 
 router.get(
   "/:courseId",
@@ -41,8 +43,8 @@ router.get(
   roleMiddleware("INSTRUCTOR"),
   getSingleCourseController
 );
-// Public: anyone can view published courses
-router.get("/published", getPublishedCoursesController);
+
+
 
 router.patch(
   "/:courseId",
