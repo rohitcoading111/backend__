@@ -73,6 +73,17 @@ export const getSingleCourse = async (courseId, instructorId) => {
   return course;
 };
 
+
+export const getAllPublishedCourses = async () => {
+  const courses = await courseModel
+    .find({ isPublished: true })
+    .select("-__v")
+    .sort({ createdAt: -1 });
+
+  return courses;
+};
+
+
 export const updateCourse = async ({
   courseId,
   instructorId,
