@@ -1,13 +1,13 @@
 
-import {
-  ArrowRight,
-  BookOpen,
-} from "lucide-react";
+import { ArrowRight, BookOpen } from "lucide-react";
+import CourseCard from "./CourseCard.jsx";
 
 function MyCourses({
   enrollments = [],
   loading = false,
   error = "",
+  onCourseClick,
+  onBrowseCourses,
 }) {
   return (
     <article
@@ -21,7 +21,7 @@ function MyCourses({
           </p>
 
           <h3 className="mt-2 text-lg font-semibold tracking-tight">
-            My Courses
+            Continue learning
           </h3>
         </div>
 
@@ -47,66 +47,46 @@ function MyCourses({
             />
 
             <h4 className="mt-3 text-sm font-semibold">
-              No courses yet
+              No courses purchased yet
             </h4>
 
             <p className="mt-1 text-xs text-neutral-500">
-              Your purchased courses will appear here.
+              Explore our courses to start learning.
             </p>
+
+            <button
+              type="button"
+              onClick={onBrowseCourses}
+              className="mt-4 rounded-xl bg-black px-4 py-2.5 text-sm text-white transition hover:bg-neutral-800"
+            >
+              Browse Courses
+            </button>
           </div>
         ) : (
           <div className="space-y-3">
-            {enrollments.map((enrollment) => {
-              const course = enrollment.course;
-
-              if (!course?._id) return null;
-
-              return (
-                <button
-                  key={enrollment._id}
-                  type="button"
-                  onClick={() => {
-                    // Course details route hum next step mein connect karenge.
-                    window.location.href = `/courses/${course._id}`;
-                  }}
-                  className="group flex w-full items-center gap-4 rounded-xl border border-black/[0.07] p-3 text-left transition hover:border-black/20 hover:shadow-md"
-                >
-                  {course.thumbnail?.url ? (
-                    <img
-                      src={course.thumbnail.url}
-                      alt={course.title}
-                      className="h-20 w-24 shrink-0 rounded-lg object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-20 w-24 shrink-0 items-center justify-center rounded-lg bg-[#f7f7f5]">
-                      <BookOpen size={25} />
-                    </div>
-                  )}
-
-                  <div className="min-w-0 flex-1">
-                    <h4 className="truncate text-sm font-semibold">
-                      {course.title}
-                    </h4>
-
-                    <p className="mt-1 line-clamp-2 text-xs leading-5 text-neutral-500">
-                      {course.description ||
-                        "Continue learning this course."}
-                    </p>
-
-                    <span className="mt-2 inline-flex items-center gap-1 text-xs font-medium">
-                      Continue learning
-                      <ArrowRight
-                        size={14}
-                        className="transition group-hover:translate-x-1"
-                      />
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
+            {enrollments.map((enrollment) => (
+              <CourseCard
+                key={enrollment._id}
+                enrollment={enrollment}
+                onClick={onCourseClick}
+              />
+            ))}
           </div>
         )}
       </div>
+
+      {enrollments.length > 0 && !loading && !error && (
+        <div className="border-t border-black/[0.06] px-5 py-4 sm:px-7">
+          <button
+            type="button"
+            onClick={onBrowseCourses}
+            className="flex items-center gap-2 text-sm font-medium text-neutral-600 transition hover:text-black"
+          >
+            Explore more courses
+            <ArrowRight size={15} />
+          </button>
+        </div>
+      )}
     </article>
   );
 }
