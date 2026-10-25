@@ -3,7 +3,7 @@ import UsersTable from "../components/UsersTable.jsx";
 import useAdminUsers from "../hooks/useAdminUsers.js";
 
 function AdminDashboard() {
-  const { users, loading, error, refreshUsers } = useAdminUsers();
+  const { users, loading, error, refreshUsers,updateUserInList } = useAdminUsers();
 
   return (
     <main className="min-h-screen bg-[#f7f7f5] p-6 sm:p-10">
@@ -63,7 +63,10 @@ function AdminDashboard() {
               Loading users...
             </p>
           ) : error ? null : (
-            <UsersTable users={users} />
+            <UsersTable
+                users={users}
+                onRoleUpdated={updateUserInList}
+                />
           )}
         </section>
       </div>

@@ -37,7 +37,23 @@ function useAdminUsers() {
     fetchUsers();
   }, [fetchUsers]);
 
-  return { users, loading, error, refreshUsers: fetchUsers };
+
+const updateUserInList = (updatedUser) => {
+  const newUsers = [];
+
+  for (const user of users) {
+    if (user._id === updatedUser.id) {
+      newUsers.push({ ...user, ...updatedUser });
+    } else {
+      newUsers.push(user);
+    }
+  }
+
+  setUsers(newUsers);
+};
+
+
+  return { users, loading, error, refreshUsers: fetchUsers ,updateUserInList};
 }
 
 export default useAdminUsers;
