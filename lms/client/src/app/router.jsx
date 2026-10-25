@@ -11,6 +11,8 @@ import ModulesPage from "../features/modules/pages/ModulesPage.jsx";
 import ProtectedRoute from "../routes/ProtectedRoute.jsx";
 import PublicOnlyRoute from "../routes/PublicOnlyRoute.jsx";
 
+import AdminDashboard from "../features/admin/pages/AdminDashboard.jsx";
+
 export const router = createBrowserRouter([
   {
     element: <PublicOnlyRoute />,
@@ -28,6 +30,7 @@ export const router = createBrowserRouter([
         path: "/courses/:courseId/modules",
         element: <ModulesPage />,
       },
+     
     ],
   },
   {
@@ -38,4 +41,8 @@ export const router = createBrowserRouter([
     path: "/auth/google/callback",
     element: <GoogleAuthCallback />,
   },
+   {
+        path:"/adminDashboard",
+        element:<AdminDashboard/>
+     }  
 ]);
