@@ -65,13 +65,11 @@ function Dashboard() {
       ?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleCourseClick = (course) => {
-    if (!course?._id) return;
+ const handleCourseClick = (course) => {
+  if (!course?._id) return;
 
-    // Actual course-learning route will be connected
-    // once its route is confirmed.
-    console.log("Selected course:", course._id);
-  };
+  navigate(`/courses/${course._id}/modules`);
+};
 
   const handleBrowseCourses = () => {
     navigate("/courses");

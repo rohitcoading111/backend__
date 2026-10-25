@@ -7,6 +7,9 @@ import Dashboard from "../features/dashboard/pages/Dashboard";
 import VerifyOtp from "../features/auth/pages/VerifyOtp";
 import GoogleAuthCallback from "../features/auth/pages/GoogleAuthCallback";
 import CourseCatalog from "../features/courses/pages/CourseCatalog";
+import ModulesPage from "../features/modules/pages/ModulesPage.jsx";
+
+// Existing <Routes> ke andar:
 
 export const router = createBrowserRouter([
   {
@@ -33,4 +36,10 @@ export const router = createBrowserRouter([
     path: "/auth/google/callback",
     element: <GoogleAuthCallback />,
   },
+ {
+ path:"/courses/:courseId/modules",
+  element:<ModulesPage />
+ }
+ 
+
 ]);
