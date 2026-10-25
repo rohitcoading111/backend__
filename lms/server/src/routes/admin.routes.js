@@ -1,8 +1,9 @@
 import express from "express";
-import { updateUserRole } from "../controllers/admin.controllers.js";
+import { updateUserRole,getAllUsers } from "../controllers/admin.controllers.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { roleMiddleware } from "../middleware/role.middleware.js";
 import { roleValidation } from "../validators/admin.validator.js";
+
 
 const router = express.Router();
 
@@ -12,6 +13,13 @@ router.patch(
   roleMiddleware("ADMIN"),
   roleValidation,
   updateUserRole
+);
+
+router.get(
+  "/users",
+  authMiddleware,
+  roleMiddleware("ADMIN"),
+  getAllUsers
 );
 
 export default router;
