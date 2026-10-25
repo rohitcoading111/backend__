@@ -3,7 +3,7 @@ import {
   markLectureComplete,
   getCourseProgress,
   getLearningSummary,
-} from "../services/progress.service.js";
+} from "../services/progress.services.js";
 
 // 1. Mark lecture as complete
 export const completeLecture = async (req, res) => {
