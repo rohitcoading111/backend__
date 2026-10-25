@@ -1,16 +1,41 @@
 
 import { ArrowUpRight, Target } from "lucide-react";
+import useLearningProgress from "../hooks/useLearningProgress.js";
 
-function LearningProgress({
-  overallProgress = 0,
-  completedLessons = 0,
-  totalLessons = 0,
-  learningHours = 0,
-}) {
+function LearningProgress() {
+  const { summary, loading, error, refreshProgress } =
+    useLearningProgress();
+
   const progress = Math.min(
     100,
-    Math.max(0, Number(overallProgress) || 0)
+    Math.max(0, Number(summary.overallProgress) || 0)
   );
+
+  if (loading) {
+    return (
+      <article className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7">
+        <p className="text-sm text-neutral-500">
+          Loading your learning progress...
+        </p>
+      </article>
+    );
+  }
+
+  if (error) {
+    return (
+      <article className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7">
+        <p className="text-sm text-red-600">{error}</p>
+
+        <button
+          type="button"
+          onClick={refreshProgress}
+          className="mt-3 rounded-lg bg-black px-4 py-2 text-sm text-white"
+        >
+          Try again
+        </button>
+      </article>
+    );
+  }
 
   return (
     <article className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7">
@@ -70,9 +95,9 @@ function LearningProgress({
       <div className="mt-7 grid grid-cols-2 gap-4 border-t border-black/[0.06] pt-5">
         <div>
           <p className="text-2xl font-semibold tracking-tight">
-            {completedLessons}
+            {summary.completedLessons}
             <span className="text-sm font-normal text-neutral-400">
-              {totalLessons > 0 ? ` / ${totalLessons}` : ""}
+              {" / "}{summary.totalLessons}
             </span>
           </p>
 
@@ -83,7 +108,7 @@ function LearningProgress({
 
         <div>
           <p className="text-2xl font-semibold tracking-tight">
-            {learningHours}
+            {summary.learningHours}
             <span className="ml-1 text-sm font-normal text-neutral-400">
               hrs
             </span>

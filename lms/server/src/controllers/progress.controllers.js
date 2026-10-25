@@ -8,7 +8,7 @@ import {
 // 1. Mark lecture as complete
 export const completeLecture = async (req, res) => {
   try {
-    const studentId = req.user?._id;
+    const studentId = req.user?.id;
     const { lectureId } = req.params;
 
     if (!studentId) {
@@ -49,7 +49,7 @@ export const completeLecture = async (req, res) => {
 // 2. Get progress for a particular course
 export const fetchCourseProgress = async (req, res) => {
   try {
-    const studentId = req.user?._id;
+    const studentId = req.user?.id;
     const { courseId } = req.params;
 
     if (!studentId) {
@@ -89,7 +89,7 @@ export const fetchCourseProgress = async (req, res) => {
 // 3. Get overall learning summary for dashboard
 export const fetchLearningSummary = async (req, res) => {
   try {
-    const studentId = req.user?._id;
+    const studentId = req.user?.id;
 
     if (!studentId) {
       return res.status(401).json({
