@@ -13,6 +13,7 @@ import PublicOnlyRoute from "../routes/PublicOnlyRoute.jsx";
 
 import AdminDashboard from "../features/admin/pages/AdminDashboard.jsx";
 
+import LiveClassesPage from "../features/liveClasses/pages/LiveClassesPage.jsx";
 export const router = createBrowserRouter([
   {
     element: <PublicOnlyRoute />,
@@ -44,5 +45,9 @@ export const router = createBrowserRouter([
    {
         path:"/adminDashboard",
         element:<AdminDashboard/>
-     }  
+     }  ,
+   
+{  path:"/live-classes",
+  element:<LiveClassesPage />}
+
 ]);

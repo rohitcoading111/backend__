@@ -79,10 +79,9 @@ function ModulesPage() {
     };
   }, [courseId]);
 
-  const handleLiveClasses = () => {
-    console.log("Live Classes clicked", { courseId });
-    // TODO: Connect Live Classes route later.
-  };
+ const handleLiveClasses = () => {
+  navigate("/live-classes");
+};
 
   const totalModules = modules.length;
 
