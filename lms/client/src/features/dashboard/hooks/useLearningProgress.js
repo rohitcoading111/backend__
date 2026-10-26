@@ -1,24 +1,24 @@
-
 import { useCallback, useEffect, useState } from "react";
 import { getLearningSummary } from "../services/progressService.js";
 
-function useLearningProgress() {
-  const [summary, setSummary] = useState({
-    enrolledCourses: 0,
-    totalLessons: 0,
-    completedLessons: 0,
-    overallProgress: 0,
-    learningHours: 0,
-  });
+const INITIAL_SUMMARY = {
+  enrolledCourses: 0,
+  totalLessons: 0,
+  completedLessons: 0,
+  overallProgress: 0,
+  learningHours: 0,
+};
 
+const useLearningProgress = () => {
+  const [summary, setSummary] = useState(INITIAL_SUMMARY);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const fetchLearningProgress = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError("");
+    setLoading(true);
+    setError("");
 
+    try {
       const response = await getLearningSummary();
 
       if (!response?.success || !response?.data?.summary) {
@@ -27,7 +27,15 @@ function useLearningProgress() {
         );
       }
 
-      setSummary(response.data.summary);
+      const data = response.data.summary;
+
+      setSummary({
+        enrolledCourses: Number(data.enrolledCourses) || 0,
+        totalLessons: Number(data.totalLessons) || 0,
+        completedLessons: Number(data.completedLessons) || 0,
+        overallProgress: Number(data.overallProgress) || 0,
+        learningHours: Number(data.learningHours) || 0,
+      });
     } catch (err) {
       console.error("Learning progress error:", err);
 
@@ -51,6 +59,6 @@ function useLearningProgress() {
     error,
     refreshProgress: fetchLearningProgress,
   };
-}
+};
 
 export default useLearningProgress;

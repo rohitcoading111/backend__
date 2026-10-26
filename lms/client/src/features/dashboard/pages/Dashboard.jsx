@@ -17,7 +17,8 @@ import MyCourses from "../components/MyCourses.jsx";
 import LearningProgress from "../components/LearningProgress.jsx";
 import LiveClasses from "../components/LiveClasses.jsx";
 import LearningActivity from "../components/LearningActivity.jsx";
-
+import useLearningProgress from "../hooks/useLearningProgress.js";
+import useMyCourses from "../hooks/useMyCourses.js";
 function Dashboard() {
   const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
@@ -40,6 +41,21 @@ function Dashboard() {
         .join("")
         .toUpperCase()
     : "S";
+
+  const {
+  summary,
+  loading: progressLoading,
+  error: progressError,
+  refreshProgress,
+} = useLearningProgress();
+
+const {
+  enrollments,
+  loading: coursesLoading,
+  error: coursesError,
+  refreshCourses,
+} = useMyCourses();
+
 
   const handleLogout = async () => {
     try {
@@ -128,12 +144,13 @@ function Dashboard() {
           </section>
 
           {/* Stats */}
-          <DashboardStats
-            enrolledCourses={enrolledCoursesCount}
-            completedLessons={0}
-            learningHours={0}
-            overallProgress={0}
-          />
+      <DashboardStats
+  enrolledCourses={summary.enrolledCourses}
+  completedLessons={summary.completedLessons}
+  learningHours={summary.learningHours}
+  overallProgress={summary.overallProgress}
+  loading={progressLoading}
+/>
 
           {/* Learning hero */}
           <section className="mt-9">
@@ -170,11 +187,14 @@ function Dashboard() {
 
           {/* My enrolled courses */}
           <section id="my-courses" className="mt-5 scroll-mt-28">
-            <MyCourses
-              onCourseClick={handleCourseClick}
-              onBrowseCourses={handleBrowseCourses}
-               onEnrollmentsLoaded={(enrollments) => {setEnrolledCoursesCount(enrollments.length);}}
-            />
+           <MyCourses
+  enrollments={enrollments}
+  loading={coursesLoading}
+  error={coursesError}
+  onRetry={refreshCourses}
+  onCourseClick={handleCourseClick}
+  onBrowseCourses={handleBrowseCourses}
+/>
           </section>
 
           {/* Learning progress */}

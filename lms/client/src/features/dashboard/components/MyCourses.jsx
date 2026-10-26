@@ -1,64 +1,14 @@
-
-import { useEffect, useState } from "react";
 import { ArrowRight, BookOpen } from "lucide-react";
-import { getMyEnrollments } from "../../enrollments/services/enrollmentService.js";
 import CourseCard from "./CourseCard.jsx";
 
-function MyCourses({ onCourseClick, onBrowseCourses,onEnrollmentsLoaded }) {
-  const [enrollments, setEnrollments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const fetchEnrollments = async () => {
-      try {
-        setLoading(true);
-        setError("");
-
-        const response = await getMyEnrollments();
-
-        if (!response?.success) {
-          throw new Error(
-            response?.message || "Failed to load enrolled courses."
-          );
-        }
-
-        const fetchedEnrollments = response?.data?.enrollments;
-
-        if (!Array.isArray(fetchedEnrollments)) {
-          throw new Error("Invalid enrollments response.");
-        }
-
-       if (!cancelled) {
-  setEnrollments(fetchedEnrollments);
-  onEnrollmentsLoaded?.(fetchedEnrollments);
-}
-      } catch (error) {
-        console.error("Fetch enrollments error:", error);
-
-        if (!cancelled) {
-          setError(
-            error?.response?.data?.message ||
-              error?.message ||
-              "Unable to load your courses."
-          );
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchEnrollments();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
+function MyCourses({
+  enrollments = [],
+  loading = false,
+  error = "",
+  onRetry,
+  onCourseClick,
+  onBrowseCourses,
+}) {
   return (
     <article
       id="my-courses"
@@ -89,7 +39,7 @@ function MyCourses({ onCourseClick, onBrowseCourses,onEnrollmentsLoaded }) {
             <p>{error}</p>
             <button
               type="button"
-              onClick={() => window.location.reload()}
+              onClick={onRetry}
               className="mt-2 font-semibold underline"
             >
               Retry
@@ -97,10 +47,7 @@ function MyCourses({ onCourseClick, onBrowseCourses,onEnrollmentsLoaded }) {
           </div>
         ) : enrollments.length === 0 ? (
           <div className="rounded-xl border border-dashed border-black/15 p-7 text-center">
-            <BookOpen
-              size={30}
-              className="mx-auto text-neutral-400"
-            />
+            <BookOpen size={30} className="mx-auto text-neutral-400" />
             <h4 className="mt-3 text-sm font-semibold">
               No courses purchased yet
             </h4>
@@ -121,6 +68,9 @@ function MyCourses({ onCourseClick, onBrowseCourses,onEnrollmentsLoaded }) {
               <CourseCard
                 key={enrollment._id}
                 enrollment={enrollment}
+                completedLessons={enrollment.completedLessons}
+                totalLessons={enrollment.totalLessons}
+                progress={enrollment.progress}
                 onClick={onCourseClick}
               />
             ))}
@@ -128,7 +78,7 @@ function MyCourses({ onCourseClick, onBrowseCourses,onEnrollmentsLoaded }) {
         )}
       </div>
 
-      {enrollments.length > 0 && !loading && !error && (
+      {!loading && !error && enrollments.length > 0 && (
         <div className="border-t border-black/[0.06] px-5 py-4 sm:px-7">
           <button
             type="button"
