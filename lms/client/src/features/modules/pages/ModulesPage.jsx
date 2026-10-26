@@ -82,6 +82,9 @@ function ModulesPage() {
  const handleLiveClasses = () => {
   navigate("/live-classes");
 };
+const handleExploreModule = (moduleId) => {
+  navigate(`/courses/${courseId}/modules/${moduleId}/lectures`);
+};
 
   const totalModules = modules.length;
 
@@ -315,24 +318,21 @@ function ModulesPage() {
                     </span>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      console.log("Module clicked", {
-                        moduleId: module._id,
-                        moduleTitle: module.title,
-                        courseId,
-                      });
-                      // TODO: Navigate to this module's lectures.
-                    }}
-                    className="mt-5 flex w-full items-center justify-between rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-indigo-600 hover:bg-indigo-600 hover:text-white"
-                  >
-                    Explore module
-                    <ArrowRight
-                      size={16}
-                      className="transition group-hover:translate-x-1"
-                    />
-                  </button>
+                  
+<button
+  type="button"
+  onClick={() => {
+    navigate(`/courses/${courseId}/modules/${module._id}/lectures`);
+  }}
+  className="mt-5 flex w-full items-center justify-between rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-indigo-600 hover:bg-indigo-600 hover:text-white"
+>
+  Explore module
+  <ArrowRight
+    size={16}
+    className="transition group-hover:translate-x-1"
+  />
+</button>
+
                 </article>
               ))}
             </div>
