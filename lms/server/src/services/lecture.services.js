@@ -275,7 +275,28 @@ export const getLectures = async ({
     module: moduleId,
   }).sort({ order: 1 });
 
-  return lectures;
+  let completedIds = new Set();
+
+if (userRole === "STUDENT") {
+  const enrollment = await Enrollment.findOne({
+    student: userId,
+    course: course._id,
+    status: "ACTIVE",
+  });
+
+  if (enrollment) {
+    completedIds = new Set(
+      (enrollment.completedLectures || []).map(
+        (id) => id.toString()
+      )
+    );
+  }
+}
+
+return lectures.map((lecture) => ({
+  ...lecture.toObject(),
+  isCompleted: completedIds.has(lecture._id.toString()),
+}));
 };
 
 

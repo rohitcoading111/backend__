@@ -62,7 +62,13 @@ const useModuleLectures = (moduleId) => {
         throw new Error("Invalid lectures response.");
       }
 
-      setLectures(fetchedLectures);
+setLectures(fetchedLectures);
+
+setCompletedLectureIds(
+  fetchedLectures
+    .filter((lecture) => lecture.isCompleted)
+    .map((lecture) => lecture._id)
+);
 
       setSelectedLectureId((currentId) => {
         if (

@@ -204,18 +204,17 @@ export const getLecturesController = async (req, res) => {
     });
 
     // Do not send raw ImageKit video URLs yet
-    const lectureData = lectures.map((lecture) => ({
-      _id: lecture._id,
-      title: lecture.title,
-      notes: lecture.notes,
-      module: lecture.module,
-      order: lecture.order,
-
-      videoAvailable: Boolean(lecture.video?.fileId),
-
-      createdAt: lecture.createdAt,
-      updatedAt: lecture.updatedAt,
-    }));
+   const lectureData = lectures.map((lecture) => ({
+  _id: lecture._id,
+  title: lecture.title,
+  notes: lecture.notes,
+  module: lecture.module,
+  order: lecture.order,
+  videoAvailable: Boolean(lecture.video?.fileId),
+  isCompleted: Boolean(lecture.isCompleted),
+  createdAt: lecture.createdAt,
+  updatedAt: lecture.updatedAt,
+}));
 
     return res.status(200).json({
       success: true,
