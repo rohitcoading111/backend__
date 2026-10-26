@@ -1,63 +1,57 @@
-
 import { useCallback, useEffect, useState } from "react";
 
+import { getMyEnrollments } from "../../enrollments/services/enrollmentService.js";
+
 import {
-  
   getActiveLiveSession,
   joinLiveSession,
 } from "../services/liveClassService.js";
-import getMyEnrolledCourses from "../../enrollments/services/enrollmentService.js"
 
-function useLiveClasses() {
+const useLiveClasses = () => {
   const [liveCourses, setLiveCourses] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [joiningSessionId, setJoiningSessionId] = useState(null);
 
+  // Fetch enrolled courses and check their live sessions
   const fetchLiveCourses = useCallback(async () => {
     try {
       setIsLoading(true);
       setError("");
 
-      // Step 1: Fetch the logged-in student's enrollments.
-      const enrollmentResponse = await getMyEnrolledCourses();
+      // 1. Fetch courses in which the student is enrolled
+      const enrollmentResponse = await getMyEnrollments();
 
       if (!enrollmentResponse?.success) {
         throw new Error(
-          enrollmentResponse?.message ||
-            "Failed to fetch enrolled courses."
+          enrollmentResponse?.message || "Failed to fetch enrolled courses."
         );
       }
 
-      const enrollments =
-        enrollmentResponse?.data?.enrollments;
+      const enrollments = enrollmentResponse?.data?.enrollments;
 
       if (!Array.isArray(enrollments)) {
         throw new Error("Invalid enrollment response.");
       }
 
-      // Step 2: Keep enrollments that have a populated course.
+      // 2. Extract course objects from enrollments
       const enrolledCourses = enrollments
         .filter((enrollment) => enrollment.course?._id)
         .map((enrollment) => enrollment.course);
 
-      // Step 3: Check each course for an active live session.
+      // 3. Check the active live session for each enrolled course
       const coursesWithLiveStatus = await Promise.all(
         enrolledCourses.map(async (course) => {
           try {
-            const response = await getActiveLiveSession(
-              course._id
-            );
+            const response = await getActiveLiveSession(course._id);
 
             return {
               course,
-              activeSession: response?.success
-                ? response.data
-                : null,
+              activeSession: response?.success ? response.data : null,
               liveCheckError: "",
             };
           } catch (error) {
-            // A 404 is expected when no session is live.
+            // No active session is a normal situation
             if (error?.response?.status === 404) {
               return {
                 course,
@@ -66,8 +60,6 @@ function useLiveClasses() {
               };
             }
 
-            // Keep the course visible if its live status
-            // could not be checked because of another error.
             return {
               course,
               activeSession: null,
@@ -79,8 +71,11 @@ function useLiveClasses() {
         })
       );
 
+      // 4. Update the UI with course and live-session information
       setLiveCourses(coursesWithLiveStatus);
     } catch (error) {
+      setLiveCourses([]);
+
       setError(
         error?.response?.data?.message ||
           error?.message ||
@@ -91,8 +86,8 @@ function useLiveClasses() {
     }
   }, []);
 
-  // Join an active session and return its access details.
-  const joinCourseLiveSession = async (sessionId) => {
+  // Join a live session
+  const joinCourseLiveSession = useCallback(async (sessionId) => {
     try {
       setJoiningSessionId(sessionId);
 
@@ -104,18 +99,19 @@ function useLiveClasses() {
         );
       }
 
-      // Contains sessionId, roomId, courseId, token and liveKitUrl
-      // according to the backend service you shared.
+      // Return token, room ID, and LiveKit URL to the page
       return response.data;
     } finally {
       setJoiningSessionId(null);
     }
-  };
+  }, []);
 
+  // Fetch courses when the hook is first used
   useEffect(() => {
     fetchLiveCourses();
   }, [fetchLiveCourses]);
 
+  // Expose data and functions to the page
   return {
     liveCourses,
     isLoading,
@@ -124,6 +120,6 @@ function useLiveClasses() {
     refreshLiveCourses: fetchLiveCourses,
     joinCourseLiveSession,
   };
-}
+};
 
 export default useLiveClasses;
