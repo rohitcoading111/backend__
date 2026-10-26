@@ -366,3 +366,72 @@ export const getLectureVideo = async ({
     videoUrl: lecture.video.url,
   };
 };
+
+export const markLectureCompleted = async ({
+  lectureId,
+  studentId,
+}) => {
+  const lecture = await Lecture.findById(lectureId);
+
+  if (!lecture) {
+    throw new Error("Lecture not found");
+  }
+
+  const module = await Module.findById(lecture.module);
+
+  if (!module) {
+    throw new Error("Module not found");
+  }
+
+  const enrollment = await Enrollment.findOne({
+    student: studentId,
+    course: module.course,
+    status: "ACTIVE",
+  });
+
+  if (!enrollment) {
+    throw new Error("Active enrollment not found");
+  }
+
+  // Same lecture ko baar-baar add nahi karega
+  const updatedEnrollment = await Enrollment.findOneAndUpdate(
+    {
+      _id: enrollment._id,
+      student: studentId,
+      course: module.course,
+      status: "ACTIVE",
+    },
+    {
+      $addToSet: {
+        completedLectures: lecture._id,
+      },
+    },
+    {
+      new: true,
+    }
+  );
+
+  const courseModules = await Module.find({
+    course: module.course,
+  }).select("_id");
+
+  const moduleIds = courseModules.map((item) => item._id);
+
+  const totalLectures = await Lecture.countDocuments({
+    module: { $in: moduleIds },
+  });
+
+  const completedCount = updatedEnrollment.completedLectures.length;
+
+  const progress = totalLectures
+    ? Math.round((completedCount / totalLectures) * 100)
+    : 0;
+
+  return {
+    lectureId: lecture._id,
+    completed: true,
+    completedCount,
+    totalLectures,
+    progress,
+  };
+};

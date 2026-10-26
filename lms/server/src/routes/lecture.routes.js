@@ -5,7 +5,8 @@ import {
   getLecturesController,
   updateLectureController,
   deleteLectureController,
-  getLectureVideoController
+  getLectureVideoController,
+  markLectureCompletedController
 } from "../controllers/lecture.controllers.js";
 
 
@@ -69,6 +70,11 @@ router.get(
   "/lectures/:lectureId/video",
   authMiddleware,
   getLectureVideoController
+);
+
+router.patch(
+  "/:lectureId/complete",
+  markLectureCompletedController
 );
 
 export default router;

@@ -1,4 +1,4 @@
-import { createLecture,updateLecture,deleteLecture,getLectures,getLectureVideo } from "../services/lecture.services.js";
+import { createLecture,updateLecture,deleteLecture,getLectures,getLectureVideo,markLectureCompleted } from "../services/lecture.services.js";
 
 export const createLectureController = async (req, res) => {
   try {
@@ -319,6 +319,37 @@ export const getLectureVideoController = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to fetch lecture video",
+    });
+  }
+};
+
+export const markLectureCompletedController = async (req, res) => {
+  try {
+    const result = await markLectureCompleted({
+      lectureId: req.params.lectureId,
+      studentId: req.user.id,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Lecture marked as completed",
+      data: result,
+    });
+  } catch (error) {
+    const statusCode =
+      error.message === "Lecture not found" ||
+      error.message === "Module not found"
+        ? 404
+        : error.message === "Active enrollment not found"
+          ? 403
+          : 500;
+
+    return res.status(statusCode).json({
+      success: false,
+      message:
+        statusCode === 500
+          ? "Failed to complete lecture"
+          : error.message,
     });
   }
 };

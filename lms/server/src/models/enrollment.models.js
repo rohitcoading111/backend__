@@ -29,10 +29,17 @@ const enrollmentSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    completedLectures: [
+   {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Lecture",
+   },
+],
   },
   {
     timestamps: true,
-  }
+  },
+  
 );
 
 // Ek student ka ek course mein sirf ek enrollment record
