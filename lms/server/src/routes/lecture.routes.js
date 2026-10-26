@@ -5,7 +5,9 @@ import {
   getLecturesController,
   updateLectureController,
   deleteLectureController,
+  getLectureVideoController
 } from "../controllers/lecture.controllers.js";
+
 
 import {
   validateLecture,
@@ -13,7 +15,6 @@ import {
   validateLectureId,
   validateModuleId,
   checkValidation,
-  getLectureVideoController
 } from "../validators/lecture.validator.js";
 
 import { authMiddleware } from "../middleware/auth.middleware.js";

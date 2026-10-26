@@ -13,3 +13,17 @@ export const getModuleLectures = async (moduleId) => {
 
   return response.data;
 };
+
+
+
+export const getLectureVideo = async (lectureId) => {
+  if (!lectureId) {
+    throw new Error("Lecture ID is required.");
+  }
+
+  const response = await api.get(
+    `/lectures/${lectureId}/video`
+  );
+
+  return response.data;
+};
