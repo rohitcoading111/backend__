@@ -1,47 +1,61 @@
+
 import { useState } from "react";
 import { updateUserRole } from "../services/adminService.js";
 
-function UsersTable({ users, onRoleUpdated }) {
+function UsersTable({ users, onUserUpdated }) {
+  // Stores the ID of the user currently being updated.
   const [updatingUserId, setUpdatingUserId] = useState(null);
-  const [error, setError] = useState("");
+
+  // Stores errors from role updates.
+  const [roleUpdateError, setRoleUpdateError] = useState("");
 
   const handleRoleChange = async (user) => {
-    const nextRole =
+    // Decide which role the user should receive next.
+    const newRole =
       user.role === "STUDENT" ? "INSTRUCTOR" : "STUDENT";
 
+    // Ask for confirmation before making the API request.
     const confirmed = window.confirm(
-      `Change ${user.name || "this user's"} role to ${nextRole}?`
+      `Change ${user.name || "this user's"} role to ${newRole}?`
     );
 
     if (!confirmed) return;
 
     try {
       setUpdatingUserId(user._id);
-      setError("");
+      setRoleUpdateError("");
 
-      const response = await updateUserRole(user._id, nextRole);
 
-      if (!response?.success) {
-        throw new Error(response?.message || "Failed to update role");
-      }
+const response = await updateUserRole(user._id, newRole);
 
-      onRoleUpdated?.(response.data);
-    } catch (err) {
-      setError(
-        err?.response?.data?.message ||
-          err?.message ||
+if (!response?.success) {
+  throw new Error(response?.message || "Failed to update role");
+}
+
+// Backend se aaya updated user.
+const updatedUser = response.data;
+
+// Wahi updatedUser parent ke function ko bhejo.
+onUserUpdated?.(updatedUser);
+
+    } catch (error) {
+      setRoleUpdateError(
+        error?.response?.data?.message ||
+          error?.message ||
           "Unable to update user role"
       );
     } finally {
+      // Allow buttons to be used again after the request finishes.
       setUpdatingUserId(null);
     }
   };
 
   return (
     <div>
-      {error && (
+      {/* Display role-update errors inside the table. */}
+      {roleUpdateError && (
         <p className="border-b border-red-100 bg-red-50 p-4 text-sm text-red-600">
-          {error}
+          {roleUpdateError}
         </p>
       )}
 
@@ -95,7 +109,7 @@ function UsersTable({ users, onRoleUpdated }) {
                       ) : (
                         <button
                           type="button"
-                          disabled={isUpdating || Boolean(updatingUserId)}
+                          disabled={Boolean(updatingUserId)}
                           onClick={() => handleRoleChange(user)}
                           className="whitespace-nowrap rounded-lg border border-indigo-200 px-3 py-2 text-xs font-semibold text-indigo-700 transition hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-50"
                         >
