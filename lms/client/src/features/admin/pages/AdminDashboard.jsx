@@ -2,6 +2,7 @@
 import AdminStats from "../components/AdminStats.jsx";
 import UsersTable from "../components/UsersTable.jsx";
 import useAdminUsers from "../hooks/useAdminUsers.js";
+import { useNavigate } from "react-router-dom";
 
 function AdminDashboard() {
   // Get the users list, loading state, errors, and update functions.
@@ -12,7 +13,7 @@ function AdminDashboard() {
     fetchUsers,
     updateUserInList,
   } = useAdminUsers();
-
+ const navigate = useNavigate();
   return (
     <main className="min-h-screen bg-[#f7f7f5] p-6 sm:p-10">
       <div className="mx-auto max-w-7xl">
@@ -32,15 +33,32 @@ function AdminDashboard() {
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={fetchUsers}
-            disabled={isLoadingUsers}
-            className="rounded-xl border border-black/10 bg-white px-4 py-2.5 text-sm font-medium transition hover:bg-neutral-50 disabled:opacity-50"
-          >
-            {isLoadingUsers ? "Loading..." : "Refresh users"}
-          </button>
+         <div className="flex flex-wrap items-center justify-between gap-4">
+
+
+  <div className="flex flex-wrap gap-3">
+    {/* Go to Dashboard button */}
+    <button
+      type="button"
+      onClick={() => navigate("/dashboard")}
+      className="rounded-xl border border-black/10 bg-white px-4 py-2.5 text-sm font-medium transition hover:bg-neutral-50"
+    >
+      ← Go to Dashboard
+    </button>
+
+    {/* Existing Refresh Users button */}
+    <button
+      type="button"
+      onClick={fetchUsers}
+      disabled={isLoadingUsers}
+      className="rounded-xl border border-black/10 bg-white px-4 py-2.5 text-sm font-medium transition hover:bg-neutral-50 disabled:opacity-50"
+    >
+      {isLoadingUsers ? "Loading..." : "Refresh users"}
+    </button>
+  </div>
+</div>
         </div>
+        
 
         {/* Show fetch errors and allow retrying. */}
         {usersError && (
