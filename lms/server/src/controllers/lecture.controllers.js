@@ -1,4 +1,4 @@
-import { createLecture,updateLecture,deleteLecture,getLectures } from "../services/lecture.services.js";
+import { createLecture,updateLecture,deleteLecture,getLectures,getLectureVideo } from "../services/lecture.services.js";
 
 export const createLectureController = async (req, res) => {
   try {
@@ -258,6 +258,67 @@ export const getLecturesController = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to fetch lectures",
+    });
+  }
+};
+
+export const getLectureVideoController = async (req, res) => {
+  try {
+    const { lectureId } = req.params;
+
+    const videoData = await getLectureVideo({
+      lectureId,
+      userId: req.user.id,
+      userRole: req.user.role,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Lecture video fetched successfully",
+      data: {
+        lecture: {
+          _id: videoData.lectureId,
+          title: videoData.title,
+        },
+        videoUrl: videoData.videoUrl,
+      },
+    });
+  } catch (error) {
+    console.error("Get Lecture Video Error:", error);
+
+    if (
+      error.message === "Invalid lecture or user ID" ||
+      error.name === "CastError"
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid lecture or user ID",
+      });
+    }
+
+    if (
+      error.message === "Lecture not found" ||
+      error.message === "Module not found" ||
+      error.message === "Course not found" ||
+      error.message === "Course is not available" ||
+      error.message === "Video not available"
+    ) {
+      return res.status(404).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    if (error.message === "Access denied") {
+      return res.status(403).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch lecture video",
     });
   }
 };

@@ -3,6 +3,8 @@ import Module from "../models/module.models.js";
 import courseModel from "../models/course.models.js";
 import imagekit from "../config/imagekit.js";
 import { toFile } from "@imagekit/nodejs";
+import Enrollment from "../models/enrollment.models.js";
+import Payment from "../models/payment.models.js";
 
 export const createLecture = async ({
   moduleId,
@@ -274,4 +276,93 @@ export const getLectures = async ({
   }).sort({ order: 1 });
 
   return lectures;
+};
+
+
+// Get a lecture's video after checking access permissions
+export const getLectureVideo = async ({
+  lectureId,
+  userId,
+  userRole,
+}) => {
+  if (!lectureId || !userId) {
+    throw new Error("Invalid lecture or user ID");
+  }
+
+  // 1. Find the lecture
+  const lecture = await Lecture.findById(lectureId);
+
+  if (!lecture) {
+    throw new Error("Lecture not found");
+  }
+
+  // 2. Find the module
+  const existingModule = await Module.findById(lecture.module);
+
+  if (!existingModule) {
+    throw new Error("Module not found");
+  }
+
+  // 3. Find the course
+  const course = await courseModel.findById(
+    existingModule.course
+  );
+
+  if (!course) {
+    throw new Error("Course not found");
+  }
+
+  // 4. Validate role
+  if (!["STUDENT", "INSTRUCTOR", "ADMIN"].includes(userRole)) {
+    throw new Error("Access denied");
+  }
+
+  // 5. Check course access for students
+  if (userRole === "STUDENT") {
+    if (course.status !== "PUBLISHED") {
+      throw new Error("Course is not available");
+    }
+
+    const enrollment = await Enrollment.findOne({
+      student: userId,
+      course: course._id,
+      status: "ACTIVE",
+    });
+
+    if (!enrollment) {
+      throw new Error("Access denied");
+    }
+
+    const payment = await Payment.findOne({
+      _id: enrollment.paymentId,
+      student: userId,
+      course: course._id,
+      status: "PAID",
+      signatureVerified: true,
+    });
+
+    if (!payment) {
+      throw new Error("Access denied");
+    }
+  }
+
+  // 6. Instructors can access only their own courses
+  if (
+    userRole === "INSTRUCTOR" &&
+    course.instructor.toString() !== userId.toString()
+  ) {
+    throw new Error("Access denied");
+  }
+
+  // 7. Check video availability
+  if (!lecture.video?.url || !lecture.video?.fileId) {
+    throw new Error("Video not available");
+  }
+
+  // 8. Return the video URL only to authorized users
+  return {
+    lectureId: lecture._id,
+    title: lecture.title,
+    videoUrl: lecture.video.url,
+  };
 };

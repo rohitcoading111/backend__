@@ -13,6 +13,7 @@ import {
   validateLectureId,
   validateModuleId,
   checkValidation,
+  getLectureVideoController
 } from "../validators/lecture.validator.js";
 
 import { authMiddleware } from "../middleware/auth.middleware.js";
@@ -61,6 +62,12 @@ router.delete(
   validateLectureId,
   checkValidation,
   deleteLectureController
+);
+
+router.get(
+  "/lectures/:lectureId/video",
+  authMiddleware,
+  getLectureVideoController
 );
 
 export default router;
