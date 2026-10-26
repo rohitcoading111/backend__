@@ -27,3 +27,12 @@ export const getLectureVideo = async (lectureId) => {
 
   return response.data;
 };
+
+
+export const completeLecture = async (lectureId) => {
+  const response = await api.patch(
+    `/lectures/${lectureId}/complete`
+  );
+
+  return response.data;
+};

@@ -92,6 +92,8 @@ const ModuleLecturesPage = () => {
     markLectureCompleted,
     retryVideo,
     refreshLectures,
+    completionLoading,
+  completionError,
   } = useModuleLectures(moduleId);
 
   // Back to modules
@@ -435,6 +437,41 @@ const ModuleLecturesPage = () => {
                       "No notes have been added for this lecture yet."}
                   </p>
                 </div>
+
+                
+<div className="mt-6">
+  <button
+    type="button"
+    onClick={markLectureCompleted}
+    disabled={
+      !selectedLecture ||
+      completionLoading ||
+      completedLectureIds.includes(selectedLecture._id)
+    }
+    className={`flex items-center gap-2 rounded-xl px-5 py-3 font-semibold text-white transition ${
+      selectedLecture &&
+      completedLectureIds.includes(selectedLecture._id)
+        ? "bg-emerald-600 cursor-not-allowed"
+        : "bg-indigo-600 hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+    }`}
+  >
+    {completionLoading ? (
+      "Saving..."
+    ) : selectedLecture &&
+      completedLectureIds.includes(selectedLecture._id) ? (
+      "✓ Completed"
+    ) : (
+      "✓ Mark as Completed"
+    )}
+  </button>
+
+  {completionError && (
+    <p className="mt-2 text-sm text-red-600">
+      {completionError}
+    </p>
+  )}
+</div>
+
 
                 {/* Previous / Next */}
                 <div className="mt-8 flex flex-col justify-between gap-3 border-t border-slate-100 pt-6 sm:flex-row">

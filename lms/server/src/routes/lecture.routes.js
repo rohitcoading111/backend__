@@ -72,8 +72,13 @@ router.get(
   getLectureVideoController
 );
 
+
 router.patch(
-  "/:lectureId/complete",
+  "/lectures/:lectureId/complete",
+  authMiddleware,
+  roleMiddleware("STUDENT"),
+  validateLectureId,
+  checkValidation,
   markLectureCompletedController
 );
 

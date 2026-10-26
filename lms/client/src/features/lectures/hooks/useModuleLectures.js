@@ -1,8 +1,9 @@
-
 import { useCallback, useEffect, useMemo, useState } from "react";
+
 import {
   getModuleLectures,
   getLectureVideo,
+  completeLecture,
 } from "../services/lectureService.js";
 
 const useModuleLectures = (moduleId) => {
@@ -17,9 +18,14 @@ const useModuleLectures = (moduleId) => {
   const [videoError, setVideoError] = useState("");
   const [videoRetry, setVideoRetry] = useState(0);
 
+  // Completed lecture IDs
   const [completedLectureIds, setCompletedLectureIds] = useState([]);
 
-  // Find the selected lecture from the fetched list.
+  // Completion button states
+  const [completionLoading, setCompletionLoading] = useState(false);
+  const [completionError, setCompletionError] = useState("");
+
+  // Find currently selected lecture
   const selectedLecture = useMemo(
     () =>
       lectures.find(
@@ -28,7 +34,7 @@ const useModuleLectures = (moduleId) => {
     [lectures, selectedLectureId]
   );
 
-  // Fetch all lectures belonging to this module.
+  // Fetch lectures for the current module
   const fetchLectures = useCallback(async () => {
     if (!moduleId) {
       setLectures([]);
@@ -58,7 +64,6 @@ const useModuleLectures = (moduleId) => {
 
       setLectures(fetchedLectures);
 
-      // Keep the current selection if it still exists.
       setSelectedLectureId((currentId) => {
         if (
           currentId &&
@@ -74,6 +79,7 @@ const useModuleLectures = (moduleId) => {
     } catch (err) {
       setLectures([]);
       setSelectedLectureId(null);
+
       setError(
         err?.response?.data?.message ||
           err?.message ||
@@ -84,7 +90,7 @@ const useModuleLectures = (moduleId) => {
     }
   }, [moduleId]);
 
-  // Load the selected lecture's authorized video URL.
+  // Fetch video for the selected lecture
   useEffect(() => {
     let cancelled = false;
 
@@ -143,48 +149,94 @@ const useModuleLectures = (moduleId) => {
     };
   }, [selectedLecture, videoRetry]);
 
-  // Fetch lectures when the module changes.
+  // Load lectures when module changes
   useEffect(() => {
     setSelectedLectureId(null);
     setCompletedLectureIds([]);
     setVideoUrl("");
+    setCompletionError("");
+
     fetchLectures();
   }, [fetchLectures]);
 
+  // Select a lecture
   const selectLecture = useCallback((lectureId) => {
     setSelectedLectureId(lectureId);
+    setCompletionError("");
   }, []);
 
+  // Current lecture index
   const currentIndex = lectures.findIndex(
     (lecture) => lecture._id === selectedLectureId
   );
 
+  // Previous lecture
   const goToPreviousLecture = useCallback(() => {
     if (currentIndex > 0) {
       setSelectedLectureId(lectures[currentIndex - 1]._id);
     }
   }, [currentIndex, lectures]);
 
+  // Next lecture
   const goToNextLecture = useCallback(() => {
-    if (currentIndex >= 0 && currentIndex < lectures.length - 1) {
+    if (
+      currentIndex >= 0 &&
+      currentIndex < lectures.length - 1
+    ) {
       setSelectedLectureId(lectures[currentIndex + 1]._id);
     }
   }, [currentIndex, lectures]);
 
-  const markLectureCompleted = useCallback(() => {
-    if (!selectedLectureId) return;
+  // Mark lecture as completed in the backend
+  const markLectureCompleted = useCallback(async () => {
+    if (!selectedLectureId || completionLoading) {
+      return;
+    }
 
-    setCompletedLectureIds((previous) =>
-      previous.includes(selectedLectureId)
-        ? previous
-        : [...previous, selectedLectureId]
-    );
-  }, [selectedLectureId]);
+    // Avoid unnecessary duplicate requests
+    if (completedLectureIds.includes(selectedLectureId)) {
+      return;
+    }
 
+    try {
+      setCompletionLoading(true);
+      setCompletionError("");
+
+      const response = await completeLecture(selectedLectureId);
+
+      if (!response?.success) {
+        throw new Error(
+          response?.message || "Could not complete lecture."
+        );
+      }
+
+      // Update frontend state after backend success
+      setCompletedLectureIds((previous) =>
+        previous.includes(selectedLectureId)
+          ? previous
+          : [...previous, selectedLectureId]
+      );
+    } catch (err) {
+      setCompletionError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Could not complete lecture."
+      );
+    } finally {
+      setCompletionLoading(false);
+    }
+  }, [
+    selectedLectureId,
+    completionLoading,
+    completedLectureIds,
+  ]);
+
+  // Retry loading the video
   const retryVideo = useCallback(() => {
     setVideoRetry((previous) => previous + 1);
   }, []);
 
+  // Local progress calculation
   const completedCount = completedLectureIds.length;
 
   const progressPercentage = lectures.length
@@ -195,18 +247,26 @@ const useModuleLectures = (moduleId) => {
     lectures,
     selectedLecture,
     currentIndex,
+
     isLoading,
     error,
+
     videoUrl,
     videoLoading,
     videoError,
+
     completedLectureIds,
     completedCount,
     progressPercentage,
+
+    completionLoading,
+    completionError,
+
     selectLecture,
     goToPreviousLecture,
     goToNextLecture,
     markLectureCompleted,
+
     retryVideo,
     refreshLectures: fetchLectures,
   };
