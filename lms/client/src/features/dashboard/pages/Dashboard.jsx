@@ -224,7 +224,7 @@ const {
               classes={[]}
               loading={false}
               onViewClasses={() => {
-                // Connect the live classes route when available.
+                navigate("/live-classes")
               }}
               onJoinClass={handleJoinClass}
             />

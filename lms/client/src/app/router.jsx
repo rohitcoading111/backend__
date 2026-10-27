@@ -45,6 +45,9 @@ export const router = createBrowserRouter([
       },
 
       { path: "/live-classes", element: <LiveClassesPage /> },
+   
+     { path:"/live-classes", element:<LiveClassesPage />},
+
     ],
   },
 

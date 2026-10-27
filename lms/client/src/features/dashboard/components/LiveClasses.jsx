@@ -78,7 +78,7 @@ function LiveClasses({
                   <span className="flex items-center gap-1.5">
                     <CalendarDays size={14} />
                     {new Date(liveClass.date).toLocaleDateString()}
-                  </span
+                  </span>
                 )}
 
                 {liveClass.time && (
@@ -93,7 +93,6 @@ function LiveClasses({
                 <button
                   type="button"
                   onClick={() => onJoinClass?.(liveClass)}
-
                   className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-800"
                 >
                   Join class
