@@ -136,21 +136,21 @@ export const getCourseProgress = async ({
 };
 
 // 3. Get overall learning summary for dashboard
+
 export const getLearningSummary = async ({ studentId }) => {
   if (!mongoose.isValidObjectId(studentId)) {
     throw new Error("Invalid student ID.");
   }
 
+  // Step 1: Get all active enrollments and their completed lectures
   const enrollments = await Enrollment.find({
     student: studentId,
     status: "ACTIVE",
   })
-    .select("course")
+    .select("course completedLectures")
     .lean();
 
-  const courseIds = enrollments.map(
-    (enrollment) => enrollment.course
-  );
+  const courseIds = enrollments.map((enrollment) => enrollment.course);
 
   if (courseIds.length === 0) {
     return {
@@ -162,6 +162,7 @@ export const getLearningSummary = async ({ studentId }) => {
     };
   }
 
+  // Step 2: Get all modules belonging to enrolled courses
   const modules = await Module.find({
     course: { $in: courseIds },
   })
@@ -170,10 +171,34 @@ export const getLearningSummary = async ({ studentId }) => {
 
   const moduleIds = modules.map((module) => module._id);
 
+  // Step 3: Count all lectures across enrolled courses
   const totalLessons = await Lecture.countDocuments({
     module: { $in: moduleIds },
   });
 
+  // Step 4: Count unique completed lecture IDs from enrollments
+  const completedLectureIds = new Set();
+
+  for (const enrollment of enrollments) {
+    for (const lectureId of enrollment.completedLectures || []) {
+      completedLectureIds.add(String(lectureId));
+    }
+  }
+
+  // Prevent completed count from exceeding total lessons
+  const completedLessons = Math.min(
+    completedLectureIds.size,
+    totalLessons
+  );
+
+  // Step 5: Calculate overall progress
+  const overallProgress =
+    totalLessons === 0
+      ? 0
+      : Math.round((completedLessons / totalLessons) * 100);
+
+  // Step 6: Get tracked learning time
+  // Keep existing time tracking; do not invent learning hours.
   const progressResult = await LessonProgress.aggregate([
     {
       $match: {
@@ -184,25 +209,12 @@ export const getLearningSummary = async ({ studentId }) => {
     {
       $group: {
         _id: null,
-        completedLessons: {
-          $sum: {
-            $cond: ["$isCompleted", 1, 0],
-          },
-        },
         totalSeconds: {
           $sum: "$timeSpentSeconds",
         },
       },
     },
   ]);
-
-  const completedLessons =
-    progressResult[0]?.completedLessons || 0;
-
-  const overallProgress =
-    totalLessons === 0
-      ? 0
-      : Math.round((completedLessons / totalLessons) * 100);
 
   const learningHours = Number(
     ((progressResult[0]?.totalSeconds || 0) / 3600).toFixed(2)
@@ -216,3 +228,4 @@ export const getLearningSummary = async ({ studentId }) => {
     learningHours,
   };
 };
+
