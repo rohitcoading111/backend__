@@ -69,6 +69,11 @@ const {
       setLoggingOut(false);
     }
   };
+  const handleJoinClass = (liveClass) => {
+  navigate("/live-classes", {
+    state: { liveClass },
+  });
+};
 
   const scrollToSection = (id) => {
     setSidebarOpen(false);
@@ -221,9 +226,7 @@ const {
               onViewClasses={() => {
                 // Connect the live classes route when available.
               }}
-              onJoinClass={(liveClass) => {
-                console.log("Join live class:", liveClass);
-              }}
+              onJoinClass={handleJoinClass}
             />
 
             <div id="achievements" className="scroll-mt-28">
