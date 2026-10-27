@@ -1,16 +1,12 @@
-
 import { ArrowUpRight, Target } from "lucide-react";
-import useLearningProgress from "../hooks/useLearningProgress.js";
 
-function LearningProgress() {
-  const { summary, loading, error, refreshProgress } =
-    useLearningProgress();
-
-  const progress = Math.min(
-    100,
-    Math.max(0, Number(summary.overallProgress) || 0)
-  );
-
+function LearningProgress({
+  summary,
+  progress = 0,
+  loading = false,
+  error = "",
+  onRetry,
+}) {
   if (loading) {
     return (
       <article className="rounded-2xl border border-black/[0.07] bg-white p-5 sm:p-7">
@@ -28,7 +24,7 @@ function LearningProgress() {
 
         <button
           type="button"
-          onClick={refreshProgress}
+          onClick={onRetry}
           className="mt-3 rounded-lg bg-black px-4 py-2 text-sm text-white"
         >
           Try again

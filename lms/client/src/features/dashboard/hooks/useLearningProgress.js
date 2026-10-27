@@ -15,10 +15,10 @@ const useLearningProgress = () => {
   const [error, setError] = useState("");
 
   const fetchLearningProgress = useCallback(async () => {
-    setLoading(true);
-    setError("");
-
     try {
+      setLoading(true);
+      setError("");
+
       const response = await getLearningSummary();
 
       if (!response?.success || !response?.data?.summary) {
@@ -29,13 +29,15 @@ const useLearningProgress = () => {
 
       const data = response.data.summary;
 
-      setSummary({
+      const normalizedSummary = {
         enrolledCourses: Number(data.enrolledCourses) || 0,
         totalLessons: Number(data.totalLessons) || 0,
         completedLessons: Number(data.completedLessons) || 0,
         overallProgress: Number(data.overallProgress) || 0,
         learningHours: Number(data.learningHours) || 0,
-      });
+      };
+
+      setSummary(normalizedSummary);
     } catch (err) {
       console.error("Learning progress error:", err);
 
@@ -53,8 +55,14 @@ const useLearningProgress = () => {
     fetchLearningProgress();
   }, [fetchLearningProgress]);
 
+  const progress = Math.min(
+    100,
+    Math.max(0, summary.overallProgress)
+  );
+
   return {
     summary,
+    progress,
     loading,
     error,
     refreshProgress: fetchLearningProgress,

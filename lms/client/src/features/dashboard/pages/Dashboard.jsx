@@ -47,6 +47,7 @@ function Dashboard() {
   loading: progressLoading,
   error: progressError,
   refreshProgress,
+  progress
 } = useLearningProgress();
 
 const {
@@ -55,6 +56,7 @@ const {
   error: coursesError,
   refreshCourses,
 } = useMyCourses();
+
 
 
   const handleLogout = async () => {
@@ -199,12 +201,13 @@ const {
 
           {/* Learning progress */}
           <section id="my-progress" className="mt-5 scroll-mt-28">
-            <LearningProgress
-              overallProgress={0}
-              completedLessons={0}
-              totalLessons={0}
-              learningHours={0}
-            />
+           <LearningProgress
+  summary={summary}
+  progress={progress}
+  loading={progressLoading}
+  error={progressError}
+  onRetry={refreshProgress}
+/>
           </section>
 
           {/* Live classes and activity */}
