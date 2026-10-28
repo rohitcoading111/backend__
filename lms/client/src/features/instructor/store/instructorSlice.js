@@ -1,6 +1,15 @@
 
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
+import {
+  fetchInstructorCourses,
+  addInstructorCourse,
+  editInstructorCourse,
+  removeInstructorCourse,
+  publishInstructorCourse,
+  unpublishInstructorCourse,
+} from "../thunks/instructorCourseThunks";
+
 
 const instructorSlice = createSlice({
   name: "instructor",
