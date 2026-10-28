@@ -4,6 +4,7 @@ function CourseCard({
   onDelete,
   onPublish,
   onUnpublish,
+  onAddModule
 }) {
   return (
     <article className="rounded-xl border border-gray-300 bg-white p-5 text-black">
@@ -60,7 +61,16 @@ function CourseCard({
           >
             Unpublish
           </button>
+          
+
         )}
+           <button
+           type="button"
+           onClick={() => onAddModule(course)}
+           className="rounded-lg bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700"
+            >
+           + Add Module
+          </button>
       </div>
     </article>
   );

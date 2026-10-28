@@ -7,6 +7,7 @@ function CourseList({
   onDelete,
   onPublish,
   onUnpublish,
+  onAddModule,
 }) {
   if (!courses || courses.length === 0) {
     return (
@@ -32,6 +33,7 @@ function CourseList({
           onDelete={onDelete}
           onPublish={onPublish}
           onUnpublish={onUnpublish}
+          onAddModule={onAddModule}
         />
       ))}
     </div>

@@ -1,6 +1,6 @@
-
 import { useState } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import {
   BookOpen,
   Layers,
@@ -15,6 +15,7 @@ import CourseForm from "../components/CourseForm";
 import CourseList from "../components/CourseList";
 import useCourseForm from "../hooks/useCourseForm";
 import useInstructorCourses from "../hooks/useInstructorCourses";
+import ModuleManagement from "../components/ModuleManagement.jsx"
 
 const NAV_ITEMS = [
   { id: "courses", label: "My Courses", icon: BookOpen },
@@ -25,6 +26,7 @@ const NAV_ITEMS = [
 
 export default function InstructorDashboard() {
   const user = useSelector((state) => state.auth.user);
+  const navigate = useNavigate();
 
   const [activeSection, setActiveSection] = useState("courses");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -83,6 +85,22 @@ export default function InstructorDashboard() {
     setIsFormOpen(false);
     setSelectedCourse(null);
   }
+
+function handleAddModule(course) {
+  setActiveSection("modules");
+  setSelectedCourse(null);
+  setIsFormOpen(false);
+  setSidebarOpen(false);
+
+  navigate("/instructor-dashboard", {
+    replace: false,
+    state: {
+      activeSection: "modules",
+      courseId: course._id,
+      courseTitle: course.title,
+    },
+  });
+}
 
   return (
     <div className="min-h-screen bg-white text-black">
@@ -249,6 +267,7 @@ export default function InstructorDashboard() {
                         onDelete={handleDelete}
                         onPublish={handlePublish}
                         onUnpublish={handleUnpublish}
+                        onAddModule={handleAddModule}
                       />
                     )}
                   </div>
@@ -256,12 +275,9 @@ export default function InstructorDashboard() {
               </>
             )}
 
-            {activeSection === "modules" && (
-              <SectionPlaceholder
-                title="Module management"
-                description="Select one of your courses to manage its modules."
-              />
-            )}
+           {activeSection === "modules" && (
+          <ModuleManagement courses={courses} />
+         )}
 
             {activeSection === "lectures" && (
               <SectionPlaceholder
