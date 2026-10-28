@@ -3,12 +3,12 @@ import courseModel from "../models/course.models.js";
 import Lecture from "../models/lecture.models.js"
 import imagekit from "../config/imagekit.js";
 
+
 export const createModule = async ({
   courseId,
   instructorId,
   title,
   description,
-  order,
 }) => {
   if (!courseId || !instructorId) {
     throw new Error("Invalid course or instructor ID");
@@ -23,24 +23,23 @@ export const createModule = async ({
     throw new Error("Course not found or access denied");
   }
 
-  const existingModule = await Module.findOne({
+  // Find the highest existing order for this course
+  const lastModule = await Module.findOne({
     course: courseId,
-    order,
-  });
+  }).sort({ order: -1 });
 
-  if (existingModule) {
-    throw new Error("Module order already exists");
-  }
+  const nextOrder = lastModule ? lastModule.order + 1 : 1;
 
   const module = await Module.create({
     title,
     description,
     course: courseId,
-    order,
+    order: nextOrder,
   });
 
   return module;
 };
+
 
 export const updateModule = async ({
   moduleId,
