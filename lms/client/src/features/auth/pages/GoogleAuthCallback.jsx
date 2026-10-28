@@ -40,14 +40,22 @@ function GoogleAuthCallback() {
           throw new Error("Google authentication response is incomplete.");
         }
 
-        dispatch(
-          setGoogleAuth({
-            user: response.user,
-            accessToken: response.accessToken,
-          })
-        );
+      dispatch(
+  setGoogleAuth({
+    user: response.user,
+    accessToken: response.accessToken,
+  })
+);
 
-       navigate("/courses", { replace: true });
+const role = response.user.role;
+
+if (role === "INSTRUCTOR") {
+  navigate("/instructor-dashboard", { replace: true });
+} else if (role === "STUDENT") {
+  navigate("/courses", { replace: true });
+} else {
+  throw new Error(`Unsupported user role: ${role}`);
+}
       } catch (err) {
         setError(
           err.response?.data?.message ||
