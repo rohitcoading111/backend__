@@ -66,16 +66,18 @@ export default function InstructorDashboard() {
     setIsFormOpen(true);
   }
 
-  async function handleCourseSubmit(courseData) {
-    try {
-      await submitCourse(courseData);
-      setIsFormOpen(false);
-      setSelectedCourse(null);
-      await refreshCourses();
-    } catch {
-      // Form error is shown through Redux state.
-    }
+ async function handleCourseSubmit(courseData) {
+  try {
+    await submitCourse(courseData);
+
+    setIsFormOpen(false);
+    setSelectedCourse(null);
+
+    await refreshCourses();
+  } catch (error) {
+    console.error("Course submission failed:", error);
   }
+}
 
   function handleCancelForm() {
     setIsFormOpen(false);
