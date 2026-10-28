@@ -7,10 +7,14 @@ import {
   Video,
   Radio,
   Plus,
-  LogOut,
   Menu,
   X,
 } from "lucide-react";
+
+import CourseForm from "../components/CourseForm";
+import CourseList from "../components/CourseList";
+import useCourseForm from "../hooks/useCourseForm";
+import useInstructorCourses from "../hooks/useInstructorCourses";
 
 const NAV_ITEMS = [
   { id: "courses", label: "My Courses", icon: BookOpen },
@@ -24,13 +28,59 @@ export default function InstructorDashboard() {
 
   const [activeSection, setActiveSection] = useState("courses");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(null);
 
   const instructorName = user?.name?.trim() || "Instructor";
 
-  const handleSectionChange = (section) => {
+  const {
+    submitCourse,
+    loading: formLoading,
+    error: formError,
+  } = useCourseForm(selectedCourse);
+
+  const {
+    courses,
+    loading: coursesLoading,
+    error: coursesError,
+    refreshCourses,
+    handleDelete,
+    handlePublish,
+    handleUnpublish,
+  } = useInstructorCourses();
+
+  function handleSectionChange(section) {
     setActiveSection(section);
     setSidebarOpen(false);
-  };
+    setIsFormOpen(false);
+    setSelectedCourse(null);
+  }
+
+  function handleCreateCourse() {
+    setSelectedCourse(null);
+    setIsFormOpen(true);
+  }
+
+  function handleEditCourse(course) {
+    setSelectedCourse(course);
+    setIsFormOpen(true);
+  }
+
+  async function handleCourseSubmit(courseData) {
+    try {
+      await submitCourse(courseData);
+      setIsFormOpen(false);
+      setSelectedCourse(null);
+      await refreshCourses();
+    } catch {
+      // Form error is shown through Redux state.
+    }
+  }
+
+  function handleCancelForm() {
+    setIsFormOpen(false);
+    setSelectedCourse(null);
+  }
 
   return (
     <div className="min-h-screen bg-white text-black">
@@ -55,7 +105,9 @@ export default function InstructorDashboard() {
 
           <div>
             <h1 className="font-semibold tracking-tight">LearnHub</h1>
-            <p className="text-xs text-neutral-500">Instructor workspace</p>
+            <p className="text-xs text-neutral-500">
+              Instructor workspace
+            </p>
           </div>
 
           <button
@@ -116,7 +168,9 @@ export default function InstructorDashboard() {
 
             <div>
               <h2 className="font-semibold">
-                {NAV_ITEMS.find((item) => item.id === activeSection)?.label}
+                {NAV_ITEMS.find(
+                  (item) => item.id === activeSection
+                )?.label}
               </h2>
               <p className="text-xs text-neutral-500">
                 Manage your teaching workspace
@@ -124,16 +178,16 @@ export default function InstructorDashboard() {
             </div>
           </div>
 
-          {activeSection === "courses" && (
+          {activeSection === "courses" && !isFormOpen && (
             <button
               type="button"
-              onClick={() => {
-                // Course creation form will be connected here.
-              }}
+              onClick={handleCreateCourse}
               className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-800"
             >
               <Plus size={16} />
-              <span className="hidden sm:inline">Create course</span>
+              <span className="hidden sm:inline">
+                Create course
+              </span>
             </button>
           )}
         </header>
@@ -151,31 +205,53 @@ export default function InstructorDashboard() {
 
           <section className="rounded-2xl border border-neutral-200 p-6 sm:p-8">
             {activeSection === "courses" && (
-              <div>
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h3 className="text-lg font-semibold">My courses</h3>
-                    <p className="mt-1 text-sm text-neutral-500">
-                      Create courses and manage their content.
-                    </p>
-                  </div>
-                  <BookOpen size={22} />
-                </div>
+              <>
+                {isFormOpen ? (
+                  <div className="mx-auto max-w-2xl">
+                    <CourseForm
+                      initialCourse={selectedCourse}
+                      onSubmit={handleCourseSubmit}
+                      onCancel={handleCancelForm}
+                      loading={formLoading}
+                    />
 
-                <div className="mt-8 rounded-xl border border-dashed border-neutral-300 px-5 py-12 text-center">
-                  <BookOpen
-                    size={30}
-                    className="mx-auto text-neutral-400"
-                  />
-                  <h4 className="mt-4 font-medium">
-                    Your courses will appear here
-                  </h4>
-                  <p className="mx-auto mt-2 max-w-sm text-sm text-neutral-500">
-                    Connect the course API to load your courses and manage
-                    their details.
-                  </p>
-                </div>
-              </div>
+                    {formError && (
+                      <p className="mt-4 text-sm text-red-600">
+                        {formError}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div>
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold">
+                        My courses
+                      </h3>
+                      <p className="mt-1 text-sm text-neutral-500">
+                        Create courses and manage their content.
+                      </p>
+                    </div>
+
+                    {coursesLoading ? (
+                      <p className="py-8 text-center text-sm text-neutral-500">
+                        Loading courses...
+                      </p>
+                    ) : coursesError ? (
+                      <p className="py-8 text-center text-sm text-red-600">
+                        {coursesError}
+                      </p>
+                    ) : (
+                      <CourseList
+                        courses={courses}
+                        onEdit={handleEditCourse}
+                        onDelete={handleDelete}
+                        onPublish={handlePublish}
+                        onUnpublish={handleUnpublish}
+                      />
+                    )}
+                  </div>
+                )}
+              </>
             )}
 
             {activeSection === "modules" && (

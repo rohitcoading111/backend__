@@ -7,6 +7,8 @@ import {
   unpublishCourse,
 } from "../services/instructorCourseService.js";
 
+import { createAsyncThunk } from "@reduxjs/toolkit";
+
 // Fetch instructor's courses
 export const fetchInstructorCourses = createAsyncThunk(
   "instructor/fetchCourses",
