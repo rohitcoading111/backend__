@@ -17,6 +17,8 @@ import LiveClassesPage from "../features/liveClasses/pages/LiveClassesPage.jsx";
 import ProtectedRoute from "../routes/ProtectedRoute.jsx";
 import PublicOnlyRoute from "../routes/PublicOnlyRoute.jsx";
 
+import InstructorDashboard from "../features/instructor/pages/InstructorDashboard.jsx"
+
 export const router = createBrowserRouter([
   // Routes accessible only to logged-out users
   {
@@ -66,4 +68,8 @@ export const router = createBrowserRouter([
     path: "/adminDashboard",
     element: <AdminDashboard />,
   },
+  {
+    path:"/instructor-dashboard",
+    element:<InstructorDashboard/>
+  }
 ]);
