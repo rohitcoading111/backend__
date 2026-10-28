@@ -40,9 +40,7 @@ const moduleSlice = createSlice({
 
         // Adjust this if your backend returns a different response shape.
         const response = action.payload;
-        state.modules = Array.isArray(response)
-          ? response
-          : response?.modules ?? [];
+        state.modules = response?.data?.modules ?? [];
       })
       .addCase(fetchCourseModules.rejected, (state, action) => {
         state.loading = false;
