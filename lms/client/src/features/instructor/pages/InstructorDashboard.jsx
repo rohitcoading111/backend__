@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
+import { LayoutDashboard, LogOut } from "lucide-react";
+import { logoutUser } from "../../auth//authThunk/authThunks.js";
+import { useDispatch } from "react-redux";
 import {
   BookOpen,
   Layers,
@@ -28,6 +31,24 @@ export default function InstructorDashboard() {
   const user = useSelector((state) => state.auth.user);
   const navigate = useNavigate();
   const location = useLocation();
+
+  const dispatch = useDispatch();
+  const [loggingOut, setLoggingOut] = useState(false);
+
+   const handleDashboardRedirect = () => {
+    navigate("/dashboard");
+     };
+
+   const handleLogout = async () => {
+     try {
+    setLoggingOut(true);
+    await dispatch(logoutUser()).unwrap();
+    navigate("/login", { replace: true });
+    } catch (error) {
+    console.error("Logout failed:", error);
+     setLoggingOut(false);
+   }
+ };
 
   const [activeSection, setActiveSection] = useState("courses");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -188,14 +209,39 @@ export default function InstructorDashboard() {
           </nav>
         </div>
 
+        
+
         <div className="mt-auto border-t border-neutral-200 p-4">
-          <div className="truncate px-2 text-sm font-medium">
-            {instructorName}
-          </div>
-          <div className="px-2 pt-1 text-xs text-neutral-500">
-            Instructor account
-          </div>
-        </div>
+  <div className="truncate px-2 text-sm font-medium">
+    {instructorName}
+  </div>
+
+  <div className="px-2 pt-1 text-xs text-neutral-500">
+    Instructor account
+  </div>
+
+  {/* Dashboard Redirect Button */}
+  <button
+    type="button"
+    onClick={() => navigate("/dashboard")}
+    className="mt-4 flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm text-neutral-700 transition hover:bg-neutral-100"
+  >
+    <LayoutDashboard size={18} />
+    Dashboard
+  </button>
+
+  {/* Logout Button */}
+  <button
+    type="button"
+    onClick={handleLogout}
+    disabled={loggingOut}
+    className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm text-neutral-600 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+  >
+    <LogOut size={18} />
+    {loggingOut ? "Logging out..." : "Log out"}
+  </button>
+</div>
+        
       </aside>
 
       <div className="min-h-screen lg:pl-64">
