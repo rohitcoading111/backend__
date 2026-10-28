@@ -13,14 +13,12 @@ import ModuleLecturesPage from "../features/lectures/pages/ModuleLecturesPage.js
 
 import AdminDashboard from "../features/admin/pages/AdminDashboard.jsx";
 import LiveClassesPage from "../features/liveClasses/pages/LiveClassesPage.jsx";
+import InstructorDashboard from "../features/instructor/pages/InstructorDashboard.jsx";
 
 import ProtectedRoute from "../routes/ProtectedRoute.jsx";
 import PublicOnlyRoute from "../routes/PublicOnlyRoute.jsx";
 
-import InstructorDashboard from "../features/instructor/pages/InstructorDashboard.jsx"
-
 export const router = createBrowserRouter([
-  // Routes accessible only to logged-out users
   {
     element: <PublicOnlyRoute />,
     children: [
@@ -29,47 +27,50 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // Routes protected by authentication
+  // Student routes
   {
-    element: <ProtectedRoute />,
+    element: <ProtectedRoute allowedRoles={["STUDENT"]} />,
     children: [
       { path: "/dashboard", element: <Dashboard /> },
       { path: "/courses", element: <CourseCatalog /> },
-
       {
         path: "/courses/:courseId/modules",
         element: <ModulesPage />,
       },
-
       {
         path: "/courses/:courseId/modules/:moduleId/lectures",
         element: <ModuleLecturesPage />,
       },
-
       { path: "/live-classes", element: <LiveClassesPage /> },
-   
-     { path:"/live-classes", element:<LiveClassesPage />},
-
     ],
   },
 
-  // Authentication callback routes
+  // Instructor routes
   {
-    path: "/verify-otp",
-    element: <VerifyOtp />,
+    element: <ProtectedRoute allowedRoles={["INSTRUCTOR"]} />,
+    children: [
+      {
+        path: "/instructor-dashboard",
+        element: <InstructorDashboard />,
+      },
+    ],
   },
+
+  // Admin routes
+  {
+    element: <ProtectedRoute allowedRoles={["ADMIN"]} />,
+    children: [
+      {
+        path: "/adminDashboard",
+        element: <AdminDashboard />,
+      },
+    ],
+  },
+
+  // Authentication callbacks
+  { path: "/verify-otp", element: <VerifyOtp /> },
   {
     path: "/auth/google/callback",
     element: <GoogleAuthCallback />,
   },
-
-  // Admin dashboard
-  {
-    path: "/adminDashboard",
-    element: <AdminDashboard />,
-  },
-  {
-    path:"/instructor-dashboard",
-    element:<InstructorDashboard/>
-  }
 ]);

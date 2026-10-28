@@ -1,17 +1,33 @@
+
 import { Navigate, Outlet } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 function PublicOnlyRoute() {
-  const { user, isAuthenticated, isLoading } = useSelector(
+  const { user, isAuthenticated, status } = useSelector(
     (state) => state.auth
   );
 
-  if (isLoading) {
-    return <div className="p-6 text-center">Checking session...</div>;
+  if (status === "loading") {
+    return (
+      <div className="p-6 text-center">
+        Checking session...
+      </div>
+    );
   }
 
   if (isAuthenticated && user) {
-    return <Navigate to="/dashboard" replace />;
+    const roleDashboard = {
+      STUDENT: "/dashboard",
+      INSTRUCTOR: "/instructor-dashboard",
+      ADMIN: "/adminDashboard",
+    };
+
+    return (
+      <Navigate
+        to={roleDashboard[user.role] || "/login"}
+        replace
+      />
+    );
   }
 
   return <Outlet />;

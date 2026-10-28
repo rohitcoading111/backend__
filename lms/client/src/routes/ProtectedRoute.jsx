@@ -1,16 +1,20 @@
+
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-function ProtectedRoute() {
+function ProtectedRoute({ allowedRoles }) {
   const location = useLocation();
 
-  // Is selector ko tere actual authSlice ke according set karenge.
-  const { user, isAuthenticated, isLoading } = useSelector(
+  const { user, isAuthenticated, status } = useSelector(
     (state) => state.auth
   );
 
-  if (isLoading) {
-    return <div className="p-6 text-center">Checking session...</div>;
+  if (status === "loading") {
+    return (
+      <div className="p-6 text-center">
+        Checking session...
+      </div>
+    );
   }
 
   if (!isAuthenticated || !user) {
@@ -19,6 +23,21 @@ function ProtectedRoute() {
         to="/login"
         replace
         state={{ from: location }}
+      />
+    );
+  }
+
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
+    const roleDashboard = {
+      STUDENT: "/dashboard",
+      INSTRUCTOR: "/instructor-dashboard",
+      ADMIN: "/adminDashboard",
+    };
+
+    return (
+      <Navigate
+        to={roleDashboard[user.role] || "/login"}
+        replace
       />
     );
   }
