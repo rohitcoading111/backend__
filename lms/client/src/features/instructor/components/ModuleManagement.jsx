@@ -1,47 +1,25 @@
-import { useState } from "react";
-import { Layers, Plus, X } from "lucide-react";
-  import { useEffect} from "react";
-import { useLocation } from "react-router-dom";
+
+import { Layers, Plus, X, Trash2 } from "lucide-react";
+import useModules from "../hooks/useModules";
+
 export default function ModuleManagement({ courses = [] }) {
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-
-
-  const location = useLocation();
-
-const [selectedCourseId, setSelectedCourseId] = useState(
-  location.state?.courseId || ""
-);
-
-useEffect(() => {
-  if (location.state?.courseId) {
-    setSelectedCourseId(location.state.courseId);
-  }
-}, [location.state?.courseId]);
-
-  const selectedCourse = courses.find(
-    (course) => course._id === selectedCourseId
-  );
-
-  function handleCreateModule(event) {
-
-    event.preventDefault();
-
-    if (!selectedCourseId || !title.trim()) return;
-
-    // Temporary: API integration will be added next.
-    console.log("Module details:", {
-      courseId: selectedCourseId,
-      title: title.trim(),
-      description: description.trim(),
-    });
-
-    // Reset form and close it after submission
-    setTitle("");
-    setDescription("");
-    setIsFormOpen(false);
-  }
+  const {
+    modules,
+    loading,
+    error,
+    selectedCourseId,
+    selectedCourse,
+    isFormOpen,
+    title,
+    description,
+    setTitle,
+    setDescription,
+    handleCourseChange,
+    openCreateForm,
+    closeCreateForm,
+    handleCreateModule,
+    handleDeleteModule,
+  } = useModules(courses);
 
   return (
     <div>
@@ -52,24 +30,23 @@ useEffect(() => {
             <Layers size={20} />
             Module Management
           </h3>
-
           <p className="mt-1 text-sm text-neutral-500">
-            Select a course to manage its modules.
+            Manage modules inside your courses.
           </p>
         </div>
 
         <button
           type="button"
           disabled={!selectedCourseId}
-          onClick={() => setIsFormOpen(true)}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-40"
+          onClick={openCreateForm}
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm text-white hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Plus size={16} />
           Create Module
         </button>
       </div>
 
-      {/* Course Selection */}
+      {/* Course selection */}
       <div className="mt-6 max-w-md">
         <label
           htmlFor="module-course"
@@ -81,12 +58,9 @@ useEffect(() => {
         <select
           id="module-course"
           value={selectedCourseId}
-          onChange={(event) => {
-            setSelectedCourseId(event.target.value);
-            setIsFormOpen(false);
-            setTitle("");
-            setDescription("");
-          }}
+          onChange={(event) =>
+            handleCourseChange(event.target.value)
+          }
           className="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm outline-none focus:border-black"
         >
           <option value="">Choose a course</option>
@@ -99,23 +73,22 @@ useEffect(() => {
         </select>
       </div>
 
-      {/* Selected Course */}
+      {/* Selected course */}
       {selectedCourse && (
         <div className="mt-6 rounded-xl border border-neutral-200 p-4">
           <p className="text-xs text-neutral-500">Selected course</p>
-
-          <h4 className="mt-1 font-medium">{selectedCourse.title}</h4>
+          <h4 className="mt-1 font-medium">
+            {selectedCourse.title}
+          </h4>
         </div>
       )}
 
-      {/* Empty State */}
-      {courses.length === 0 && (
-        <p className="mt-6 rounded-xl bg-neutral-50 p-4 text-sm text-neutral-500">
-          Create a course first to start adding modules.
-        </p>
+      {/* Error */}
+      {error && (
+        <p className="mt-4 text-sm text-red-600">{error}</p>
       )}
 
-      {/* Create Module Form */}
+      {/* Create form */}
       {isFormOpen && selectedCourse && (
         <form
           onSubmit={handleCreateModule}
@@ -124,7 +97,6 @@ useEffect(() => {
           <div className="mb-5 flex items-center justify-between">
             <div>
               <h4 className="font-semibold">Create Module</h4>
-
               <p className="mt-1 text-sm text-neutral-500">
                 Course: {selectedCourse.title}
               </p>
@@ -132,9 +104,9 @@ useEffect(() => {
 
             <button
               type="button"
-              onClick={() => setIsFormOpen(false)}
+              onClick={closeCreateForm}
               aria-label="Close form"
-              className="rounded-lg p-2 transition hover:bg-neutral-100"
+              className="rounded-lg p-2 hover:bg-neutral-100"
             >
               <X size={18} />
             </button>
@@ -146,10 +118,8 @@ useEffect(() => {
           >
             Module Title
           </label>
-
           <input
             id="module-title"
-            type="text"
             required
             value={title}
             onChange={(event) => setTitle(event.target.value)}
@@ -163,12 +133,11 @@ useEffect(() => {
           >
             Description
           </label>
-
           <textarea
             id="module-description"
             value={description}
             onChange={(event) => setDescription(event.target.value)}
-            placeholder="What will students learn in this module?"
+            placeholder="What will students learn?"
             rows={4}
             className="mb-5 w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:border-black"
           />
@@ -176,21 +145,69 @@ useEffect(() => {
           <div className="flex gap-3">
             <button
               type="submit"
-              className="rounded-xl bg-black px-5 py-3 text-sm font-medium text-white transition hover:bg-neutral-800"
+              disabled={loading}
+              className="rounded-xl bg-black px-5 py-3 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-50"
             >
-              Save Module
+              {loading ? "Saving..." : "Save Module"}
             </button>
 
             <button
               type="button"
-              onClick={() => setIsFormOpen(false)}
-              className="rounded-xl border border-neutral-200 px-5 py-3 text-sm font-medium transition hover:bg-neutral-50"
+              onClick={closeCreateForm}
+              className="rounded-xl border border-neutral-200 px-5 py-3 text-sm hover:bg-neutral-50"
             >
               Cancel
             </button>
           </div>
         </form>
       )}
+
+      {/* Module list */}
+      <div className="mt-8">
+        <h4 className="mb-4 font-semibold">Course Modules</h4>
+
+        {!selectedCourseId ? (
+          <p className="text-sm text-neutral-500">
+            Select a course to view its modules.
+          </p>
+        ) : loading ? (
+          <p className="text-sm text-neutral-500">
+            Loading modules...
+          </p>
+        ) : modules.length === 0 ? (
+          <p className="rounded-xl bg-neutral-50 p-4 text-sm text-neutral-500">
+            No modules found for this course. Create your first module.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {modules.map((module) => (
+              <div
+                key={module._id}
+                className="flex items-center justify-between gap-4 rounded-xl border border-neutral-200 p-4"
+              >
+                <div>
+                  <h5 className="font-medium">{module.title}</h5>
+                  {module.description && (
+                    <p className="mt-1 text-sm text-neutral-500">
+                      {module.description}
+                    </p>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={() => handleDeleteModule(module._id)}
+                  aria-label={`Delete ${module.title}`}
+                  className="rounded-lg p-2 text-red-600 hover:bg-red-50 disabled:opacity-50"
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
