@@ -1,14 +1,25 @@
-
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
 
+import {
+  fetchCourseModules,
+  addModule,
+  editModule,
+  removeModule,
+} from "../thunks/moduleThunks";
+
 export default function useModules(courses = []) {
+  const dispatch = useDispatch();
   const location = useLocation();
+
+  const { modules, loading, error } = useSelector(
+    (state) => state.modules
+  );
 
   const [selectedCourseId, setSelectedCourseId] = useState(
     location.state?.courseId || ""
   );
-
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -23,6 +34,12 @@ export default function useModules(courses = []) {
     }
   }, [location.state?.courseId]);
 
+  useEffect(() => {
+    if (selectedCourseId) {
+      dispatch(fetchCourseModules(selectedCourseId));
+    }
+  }, [dispatch, selectedCourseId]);
+
   function handleCourseChange(courseId) {
     setSelectedCourseId(courseId);
     setIsFormOpen(false);
@@ -32,6 +49,9 @@ export default function useModules(courses = []) {
 
   function openCreateForm() {
     if (!selectedCourseId) return;
+
+    setTitle("");
+    setDescription("");
     setIsFormOpen(true);
   }
 
@@ -39,22 +59,57 @@ export default function useModules(courses = []) {
     setIsFormOpen(false);
   }
 
-  function handleCreateModule(event) {
+  async function handleCreateModule(event) {
     event.preventDefault();
 
     if (!selectedCourseId || !title.trim()) return;
 
-    // Temporary until the module API is connected.
-    const moduleData = {
-      courseId: selectedCourseId,
-      title: title.trim(),
-      description: description.trim(),
-    };
+    try {
+      await dispatch(
+        addModule({
+          courseId: selectedCourseId,
+          moduleData: {
+            title: title.trim(),
+            description: description.trim(),
+          },
+        })
+      ).unwrap();
 
-    console.log("Module data:", moduleData);
+      setTitle("");
+      setDescription("");
+      setIsFormOpen(false);
+
+      // Refresh modules from the backend.
+      await dispatch(fetchCourseModules(selectedCourseId)).unwrap();
+    } catch (err) {
+      console.error("Module creation failed:", err);
+    }
+  }
+
+  async function handleUpdateModule(moduleId, moduleData) {
+    try {
+      await dispatch(
+        editModule({ moduleId, moduleData })
+      ).unwrap();
+
+      await dispatch(fetchCourseModules(selectedCourseId)).unwrap();
+    } catch (err) {
+      console.error("Module update failed:", err);
+    }
+  }
+
+  async function handleDeleteModule(moduleId) {
+    try {
+      await dispatch(removeModule(moduleId)).unwrap();
+    } catch (err) {
+      console.error("Module deletion failed:", err);
+    }
   }
 
   return {
+    modules,
+    loading,
+    error,
     selectedCourseId,
     selectedCourse,
     isFormOpen,
@@ -66,5 +121,7 @@ export default function useModules(courses = []) {
     openCreateForm,
     closeCreateForm,
     handleCreateModule,
+    handleUpdateModule,
+    handleDeleteModule,
   };
 }
