@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   BookOpen,
   Layers,
@@ -15,7 +15,7 @@ import CourseForm from "../components/CourseForm";
 import CourseList from "../components/CourseList";
 import useCourseForm from "../hooks/useCourseForm";
 import useInstructorCourses from "../hooks/useInstructorCourses";
-import ModuleManagement from "../components/ModuleManagement.jsx"
+import ModuleManagement from "../components/ModuleManagement.jsx";
 
 const NAV_ITEMS = [
   { id: "courses", label: "My Courses", icon: BookOpen },
@@ -27,11 +27,19 @@ const NAV_ITEMS = [
 export default function InstructorDashboard() {
   const user = useSelector((state) => state.auth.user);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [activeSection, setActiveSection] = useState("courses");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
+
+  // Sync activeSection and route state if passed from navigation
+  useEffect(() => {
+    if (location.state?.activeSection) {
+      setActiveSection(location.state.activeSection);
+    }
+  }, [location.state]);
 
   const instructorName = user?.name?.trim() || "Instructor";
 
@@ -68,39 +76,55 @@ export default function InstructorDashboard() {
     setIsFormOpen(true);
   }
 
- async function handleCourseSubmit(courseData) {
-  try {
-    await submitCourse(courseData);
-
-    setIsFormOpen(false);
-    setSelectedCourse(null);
-
-    await refreshCourses();
-  } catch (error) {
-    console.error("Course submission failed:", error);
+  async function handleCourseSubmit(courseData) {
+    try {
+      await submitCourse(courseData);
+      setIsFormOpen(false);
+      setSelectedCourse(null);
+      await refreshCourses();
+    } catch (error) {
+      console.error("Course submission failed:", error);
+    }
   }
-}
 
   function handleCancelForm() {
     setIsFormOpen(false);
     setSelectedCourse(null);
   }
 
-function handleAddModule(course) {
-  setActiveSection("modules");
-  setSelectedCourse(null);
-  setIsFormOpen(false);
-  setSidebarOpen(false);
+  function handleAddModule(course) {
+    setActiveSection("modules");
+    setSelectedCourse(null);
+    setIsFormOpen(false);
+    setSidebarOpen(false);
 
-  navigate("/instructor-dashboard", {
-    replace: false,
-    state: {
-      activeSection: "modules",
-      courseId: course._id,
-      courseTitle: course.title,
-    },
-  });
-}
+    navigate("/instructor-dashboard", {
+      replace: false,
+      state: {
+        activeSection: "modules",
+        courseId: course._id,
+        courseTitle: course.title,
+      },
+    });
+  }
+
+  function handleAddLecture({ courseId, courseTitle, moduleId, moduleTitle }) {
+    setActiveSection("lectures");
+    setSelectedCourse(null);
+    setIsFormOpen(false);
+    setSidebarOpen(false);
+
+    navigate("/instructor-dashboard", {
+      replace: false,
+      state: {
+        activeSection: "lectures",
+        lectureCourseId: courseId,
+        lectureCourseTitle: courseTitle,
+        lectureModuleId: moduleId,
+        lectureModuleTitle: moduleTitle,
+      },
+    });
+  }
 
   return (
     <div className="min-h-screen bg-white text-black">
@@ -275,14 +299,11 @@ function handleAddModule(course) {
               </>
             )}
 
-           {activeSection === "modules" && (
-          <ModuleManagement courses={courses} />
-         )}
-
-            {activeSection === "lectures" && (
-              <SectionPlaceholder
-                title="Lecture management"
-                description="Select a course and module to manage video lessons."
+            {activeSection === "modules" && (
+              <ModuleManagement
+                courses={courses}
+                onAddLecture={handleAddLecture}
+                initialCourseId={location.state?.courseId}
               />
             )}
 
