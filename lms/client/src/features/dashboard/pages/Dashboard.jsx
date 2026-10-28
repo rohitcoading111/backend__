@@ -21,6 +21,7 @@ import useLearningProgress from "../hooks/useLearningProgress.js";
 import useMyCourses from "../hooks/useMyCourses.js";
 function Dashboard() {
   const user = useSelector((state) => state.auth.user);
+  console.log("USER DATA FROM REDUX:", user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 

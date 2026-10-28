@@ -32,12 +32,12 @@ function DashboardHeader({
       <div className="flex items-center gap-3 sm:gap-5">
         <div className="hidden text-right sm:block">
           <p className="text-sm font-semibold">
-            {user?.name || "Student"}
-          </p>
+  {user?.name?.trim() || "Learner"}
+</p>
 
-          <p className="mt-0.5 text-xs text-neutral-500">
-            Student account
-          </p>
+<p className="mt-0.5 text-xs text-neutral-500">
+  {user?.email || "Your account"}
+</p>
         </div>
 
         <div className="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-sm font-semibold">
