@@ -23,7 +23,7 @@ export const getActiveLiveSessionService = async (courseId) => {
 // 4. End live session (Instructor)
 export const endLiveSessionService = async (sessionId) => {
   const response = await api.patch(
-    `/${sessionId}/end`
+    `/live-sessions/${sessionId}/end`
   );
 
   return response.data.data;

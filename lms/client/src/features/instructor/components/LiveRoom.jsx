@@ -1,12 +1,20 @@
-
 import { useLocation } from "react-router-dom";
 import { useEffect, useRef } from "react";
 import { Track } from "livekit-client";
+
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+
+import { endLiveSessionThunk } from "../thunks/liveSessionThunk";
 
 import useLiveRoom from "../hooks/useLiveRoom";
 
 function LiveRoom() {
   const location = useLocation();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [isEnding, setIsEnding] = useState(false);
 
   const { session, token, liveKitUrl } = location.state || {};
 
@@ -71,6 +79,35 @@ function LiveRoom() {
     );
   }
 
+  const handleEndLive = async () => {
+  if (!session?._id || isEnding) return;
+
+  const confirmed = window.confirm(
+    "Are you sure you want to end this live class?"
+  );
+
+  if (!confirmed) return;
+
+  try {
+    setIsEnding(true);
+
+    // Backend API call
+    await dispatch(
+      endLiveSessionThunk(session._id)
+    ).unwrap();
+
+    // Disconnect instructor from LiveKit
+    room?.disconnect();
+
+    // Redirect to instructor dashboard
+    navigate("/instructor-dashboard");
+
+  } catch (error) {
+    console.error("End live error:", error);
+    alert(error || "Failed to end live session");
+    setIsEnding(false);
+  }
+};
   return (
     <div className="min-h-screen bg-gray-950 text-white p-6">
 
@@ -197,6 +234,14 @@ function LiveRoom() {
               ? "Stop Sharing"
               : "Share Screen"}
           </button>
+
+          <button
+  onClick={handleEndLive}
+  disabled={!isConnected || isEnding}
+  className="px-5 py-2 rounded-lg bg-red-600 hover:bg-red-700 disabled:opacity-50 font-medium"
+>
+  {isEnding ? "Ending..." : "End Live"}
+</button>
 
         </div>
       </div>
