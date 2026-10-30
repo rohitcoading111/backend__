@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { LayoutDashboard, LogOut } from "lucide-react";
 import { logoutUser } from "../../auth//authThunk/authThunks.js";
 import { useDispatch } from "react-redux";
+import LectureWorkspace from "../components/LectureWorkspace";
 
 import LectureForm from "../components/LectureForm";
 import {
@@ -355,29 +356,9 @@ export default function InstructorDashboard() {
               />
             )}
 
-                    {activeSection === "lectures" && (
-                     <div>
-                     <div className="mb-6">
-                     <h3 className="text-lg font-semibold">
-                           Add Lecture
-                      </h3>
-
-                          <p className="mt-1 text-sm text-neutral-500">
-                          {location.state?.lectureCourseTitle} / {location.state?.lectureModuleTitle}
-                          </p>
-                          </div>
-
-                          {location.state?.lectureModuleId ? (
-                            <LectureForm
-                            moduleId={location.state.lectureModuleId}
-                                                        />
-                             ) : (
-                          <p className="text-sm text-neutral-500">
-                           Please select a module first to create a lecture.
-                            </p>
-                             )}
-                        </div>
-                      )}
+                  {activeSection === "lectures" && (
+  <LectureWorkspace courses={courses} />
+)}
 
      
 

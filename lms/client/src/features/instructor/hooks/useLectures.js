@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { createLectureThunk ,getLecturesThunk } from "../thunks/lectureThunk";
-
+import { useEffect } from "react";
 
 function useLectures(moduleId) {
 
 
   const dispatch = useDispatch();
 
-    const { lecture, loading, error } = useSelector(
-    (state) => state.lectures
-  );
+  const { lecture, lectures, loading, error } = useSelector(
+  (state) => state.lectures
+);
 
   useEffect(() => {
   if (moduleId) {
