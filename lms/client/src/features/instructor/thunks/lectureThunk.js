@@ -35,13 +35,13 @@ export const getLecturesThunk = createAsyncThunk(
 
 export const updateLectureThunk = createAsyncThunk(
   "lectures/update",
-  async ({moduleId,formData},thunkAPI)=>{
+  async ({ lectureId, formData }, thunkAPI) => {
     try {
-      return await updateLectureService(moduleId,formData);
+      return await updateLectureService(lectureId, formData);
     } catch (error) {
-       return thunkAPI.rejectWithValue(
+      return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Failed to update lecture"
       );
     }
   }
-)
+);

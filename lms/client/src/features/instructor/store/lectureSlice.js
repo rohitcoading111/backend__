@@ -70,9 +70,9 @@ const lecture = createSlice({
           })
 
         .addCase(updateLectureThunk.rejected, (state, action) => {
-           state.loading = false
-           state.error = error
-          })
+  state.loading = false;
+  state.error = action.payload || action.error.message;
+})
        },
 })
 

@@ -1,8 +1,8 @@
 
-import { UploadCloud, Video, Plus, } from "lucide-react";
+import { UploadCloud, Video, Plus } from "lucide-react";
 import useLectures from "../hooks/useLectures";
 
-function LectureForm({moduleId}) {
+function LectureForm({ moduleId, editingLecture, onClose }) {
   const {
     title,
     setTitle,
@@ -15,8 +15,8 @@ function LectureForm({moduleId}) {
     handleSubmit,
     error,
     loading,
-    lectures
-  } = useLectures(moduleId);
+  } = useLectures(moduleId, editingLecture, onClose);
+
   return (
     <div className="w-full max-w-2xl rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
 
@@ -27,11 +27,13 @@ function LectureForm({moduleId}) {
         </div>
 
         <h2 className="text-2xl font-semibold tracking-tight">
-          Add New Lecture
+          {editingLecture ? "Update Lecture" : "Add New Lecture"}
         </h2>
 
         <p className="mt-2 text-sm text-neutral-500">
-          Add a new lecture to your selected module.
+          {editingLecture
+            ? "Update your existing lecture details."
+            : "Add a new lecture to your selected module."}
         </p>
       </div>
 
@@ -49,7 +51,7 @@ function LectureForm({moduleId}) {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Enter lecture title"
-            className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none transition placeholder:text-neutral-400 focus:border-black focus:ring-2 focus:ring-black/5"
+            className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:border-black"
           />
         </div>
 
@@ -65,7 +67,7 @@ function LectureForm({moduleId}) {
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Write something about this lecture..."
-            className="w-full resize-y rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none transition placeholder:text-neutral-400 focus:border-black focus:ring-2 focus:ring-black/5"
+            className="w-full resize-y rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:border-black"
           />
         </div>
 
@@ -82,12 +84,8 @@ function LectureForm({moduleId}) {
             value={order}
             onChange={(e) => setOrder(e.target.value)}
             placeholder="e.g. 1"
-            className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none transition placeholder:text-neutral-400 focus:border-black focus:ring-2 focus:ring-black/5"
+            className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:border-black"
           />
-
-          <p className="text-xs text-neutral-400">
-            Set the position of this lecture inside the module.
-          </p>
         </div>
 
         {/* Video Upload */}
@@ -98,12 +96,16 @@ function LectureForm({moduleId}) {
 
           <label
             htmlFor="video"
-            className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-neutral-200 bg-neutral-50 px-5 py-9 text-center transition hover:border-neutral-400 hover:bg-neutral-100"
+            className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-neutral-200 bg-neutral-50 px-5 py-9 text-center hover:bg-neutral-100"
           >
             <UploadCloud size={30} className="mb-3 text-neutral-500" />
 
             <p className="text-sm font-medium text-neutral-700">
-              {video ? video.name : "Choose a video to upload"}
+              {video
+                ? video.name
+                : editingLecture
+                  ? "Choose a new video (optional)"
+                  : "Choose a video to upload"}
             </p>
 
             <p className="mt-1 text-xs text-neutral-400">
@@ -118,68 +120,38 @@ function LectureForm({moduleId}) {
               className="sr-only"
             />
           </label>
-          {error && (
-      <p className="text-sm text-red-500">
-       {error}
-      </p>
-      )}
         </div>
 
-        {/* Submit Button */}
-        <div className="border-t border-neutral-100 pt-5">
+        {/* Error */}
+        {error && (
+          <p className="text-sm text-red-500">{error}</p>
+        )}
+
+        {/* Buttons */}
+        <div className="flex flex-wrap gap-3 border-t border-neutral-100 pt-5">
           <button
             type="submit"
             disabled={loading}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-black px-5 py-3.5 text-sm font-medium text-white transition hover:bg-neutral-800 sm:w-fit"
+            className="flex items-center justify-center gap-2 rounded-xl bg-black px-5 py-3.5 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-50"
           >
             <Plus size={18} />
-             {loading ? "Creating Lecture..." : "Add Lecture"}
+            {loading
+              ? "Saving..."
+              : editingLecture
+                ? "Update Lecture"
+                : "Add Lecture"}
+          </button>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-xl border border-neutral-200 px-5 py-3.5 text-sm font-medium"
+          >
+            Cancel
           </button>
         </div>
 
       </form>
-
-      
-{/* Lecture List */}
-<div className="mt-10 border-t border-neutral-200 pt-6">
-  <h3 className="mb-5 text-lg font-semibold">
-    Module Lectures
-  </h3>
-
-  {loading ? (
-    <p className="text-sm text-neutral-500">
-      Loading lectures...
-    </p>
-  ) : lectures.length === 0 ? (
-    <p className="text-sm text-neutral-500">
-      No lectures added yet.
-    </p>
-  ) : (
-    <div className="space-y-3">
-      {lectures.map((lecture) => (
-        <div
-          key={lecture._id}
-          className="flex items-center justify-between rounded-xl border border-neutral-200 p-4"
-        >
-          <div>
-            <h4 className="font-medium">
-              {lecture.order}. {lecture.title}
-            </h4>
-
-            <p className="mt-1 text-sm text-neutral-500">
-              {lecture.notes}
-            </p>
-          </div>
-
-          <span className="text-xs text-neutral-500">
-            {lecture.videoAvailable ? "Video available" : "No video"}
-          </span>
-        </div>
-      ))}
-    </div>
-  )}
-</div>
-
     </div>
   );
 }

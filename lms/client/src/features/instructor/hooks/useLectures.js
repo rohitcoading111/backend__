@@ -73,8 +73,16 @@ function useLectures(moduleId,editingLecture) {
     formData.append("order", Number(order));
     formData.append("video", video);
 
-   try {
+try {
   if (editingLecture) {
+    console.log("Editing Lecture Object:", editingLecture);
+  console.log("Editing Lecture ID:", editingLecture?._id);
+
+  if (!editingLecture?._id) {
+    console.error("Lecture ID is missing!");
+    return;
+  }
+
     await dispatch(
       updateLectureThunk({
         lectureId: editingLecture._id,
@@ -90,21 +98,20 @@ function useLectures(moduleId,editingLecture) {
     ).unwrap();
   }
 
-  // Reset after successful create or update
   setTitle("");
   setNotes("");
   setOrder(1);
   setVideo(null);
 
-  // Refresh lecture list
   await dispatch(getLecturesThunk(moduleId)).unwrap();
+
+  onClose?.();
 
 } catch (error) {
   console.error(error);
 }
-  };
 
-
+  }
 
 
   return {

@@ -1,23 +1,65 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import useModules from "../hooks/useModules";
 import LectureForm from "./LectureForm";
-import { useEffect } from "react";
+import { getLecturesThunk } from "../thunks/lectureThunk";
+
 function LectureWorkspace({ courses = [] }) {
+  const dispatch = useDispatch();
+
+  const [editingLecture, setEditingLecture] = useState(null);
+  const [selectedModuleId, setSelectedModuleId] = useState("");
+  const [isFormOpen, setIsFormOpen] = useState(false);
+
   const {
     modules,
-    loading,
-    error,
+    loading: modulesLoading,
+    error: modulesError,
     selectedCourseId,
-    selectedCourse,
     handleCourseChange,
   } = useModules(courses);
 
-  const [selectedModuleId, setSelectedModuleId] = useState("");
+  const {
+    lectures,
+    loading: lecturesLoading,
+    error: lecturesError,
+  } = useSelector((state) => state.lectures);
 
-  // Clear selected module when course changes
+  // Reset when course changes
   useEffect(() => {
     setSelectedModuleId("");
+    setIsFormOpen(false);
+    setEditingLecture(null);
   }, [selectedCourseId]);
+
+  // Fetch lectures whenever module changes
+  useEffect(() => {
+    if (selectedModuleId) {
+      dispatch(getLecturesThunk(selectedModuleId));
+    }
+  }, [selectedModuleId, dispatch]);
+
+  const handleModuleChange = (moduleId) => {
+    setSelectedModuleId(moduleId);
+    setIsFormOpen(false);
+    setEditingLecture(null);
+  };
+
+  const handleAddLecture = () => {
+    setEditingLecture(null);
+    setIsFormOpen(true);
+  };
+
+  const handleEditLecture = (lecture) => {
+    setEditingLecture(lecture);
+    setIsFormOpen(true);
+  };
+
+  const handleCloseForm = () => {
+    setIsFormOpen(false);
+    setEditingLecture(null);
+  };
 
   return (
     <div className="space-y-6">
@@ -34,20 +76,14 @@ function LectureWorkspace({ courses = [] }) {
 
       {/* Course Selection */}
       <div className="max-w-xl">
-        <label
-          htmlFor="lecture-course"
-          className="mb-2 block text-sm font-medium"
-        >
+        <label className="mb-2 block text-sm font-medium">
           Select Course
         </label>
 
         <select
-          id="lecture-course"
           value={selectedCourseId}
-          onChange={(event) =>
-            handleCourseChange(event.target.value)
-          }
-          className="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm outline-none focus:border-black"
+          onChange={(e) => handleCourseChange(e.target.value)}
+          className="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm"
         >
           <option value="">Choose a course</option>
 
@@ -62,24 +98,18 @@ function LectureWorkspace({ courses = [] }) {
       {/* Module Selection */}
       {selectedCourseId && (
         <div className="max-w-xl">
-          <label
-            htmlFor="lecture-module"
-            className="mb-2 block text-sm font-medium"
-          >
+          <label className="mb-2 block text-sm font-medium">
             Select Module
           </label>
 
           <select
-            id="lecture-module"
             value={selectedModuleId}
-            onChange={(event) =>
-              setSelectedModuleId(event.target.value)
-            }
-            disabled={loading}
-            className="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm outline-none focus:border-black disabled:opacity-50"
+            onChange={(e) => handleModuleChange(e.target.value)}
+            disabled={modulesLoading}
+            className="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm"
           >
             <option value="">
-              {loading ? "Loading modules..." : "Choose a module"}
+              {modulesLoading ? "Loading modules..." : "Choose a module"}
             </option>
 
             {modules.map((module) => (
@@ -89,26 +119,93 @@ function LectureWorkspace({ courses = [] }) {
             ))}
           </select>
 
-          {error && (
+          {modulesError && (
             <p className="mt-2 text-sm text-red-600">
-              {error}
-            </p>
-          )}
-
-          {!loading && modules.length === 0 && (
-            <p className="mt-2 text-sm text-neutral-500">
-              No modules found for this course.
+              {modulesError}
             </p>
           )}
         </div>
       )}
 
+      {/* Existing Lectures */}
+      {selectedModuleId && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">
+            Existing Lectures
+          </h3>
+
+          {lecturesLoading ? (
+            <p className="text-sm text-neutral-500">
+              Loading lectures...
+            </p>
+          ) : lecturesError ? (
+            <p className="text-sm text-red-600">
+              {lecturesError}
+            </p>
+          ) : lectures.length === 0 ? (
+            <p className="rounded-xl bg-neutral-50 p-4 text-sm text-neutral-500">
+              No lectures added yet.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {lectures.map((lecture) => (
+                <div
+                  key={lecture._id}
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-neutral-200 bg-white p-4"
+                >
+                  <div>
+                    <h4 className="font-medium">
+                      {lecture.order}. {lecture.title}
+                    </h4>
+
+                    <p className="mt-1 text-sm text-neutral-500">
+                      {lecture.notes}
+                    </p>
+
+                    <p className="mt-1 text-xs text-neutral-500">
+                      {lecture.videoAvailable
+                        ? "Video available"
+                        : "No video"}
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleEditLecture(lecture)}
+                    className="rounded-lg border border-neutral-200 px-4 py-2 text-sm hover:bg-neutral-50"
+                  >
+                    Edit
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Add Lecture Button */}
+      {selectedModuleId && !isFormOpen && (
+        <button
+          type="button"
+          onClick={handleAddLecture}
+          className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+        >
+          + Add Lecture
+        </button>
+      )}
+
       {/* Lecture Form */}
-      {selectedModuleId ? (
-        <LectureForm moduleId={selectedModuleId} />
-      ) : (
+      {selectedModuleId && isFormOpen && (
+        <LectureForm
+          moduleId={selectedModuleId}
+          editingLecture={editingLecture}
+          onClose={handleCloseForm}
+        />
+      )}
+
+      {!selectedModuleId && (
         <p className="rounded-xl bg-neutral-50 p-4 text-sm text-neutral-500">
-          Please select a module to create and manage lectures.
+          Please select a module to manage lectures.
         </p>
       )}
 
