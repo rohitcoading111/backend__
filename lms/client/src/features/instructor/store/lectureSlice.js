@@ -2,7 +2,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
   createLectureThunk,
-  getLecturesThunk
+  getLecturesThunk,
+  updateLectureThunk
 } from "../thunks/lectureThunk";
 
 const lecture = createSlice({
@@ -51,10 +52,29 @@ const lecture = createSlice({
       .addCase(getLecturesThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error.message;
-        });  
+        })
+       .addCase(updateLectureThunk.pending, (state) => {
+          state.loading = true;
+        })
+
+        .addCase(updateLectureThunk.fulfilled, (state, action) => {
+          const updatedLecture = action.payload.data.lecture;
+          state.lectures = state.lectures.map((lecture) => {
+          if(lecture._id === updatedLecture._id){
+            return updatedLecture
+          }
+          return lecture;
+          });
+          state.loading = false;
+          state.error = null;
+          })
+
+        .addCase(updateLectureThunk.rejected, (state, action) => {
+           state.loading = false
+           state.error = error
+          })
        },
-  
-});
+})
 
 export const { clearLectureError } = lecture.actions;
 

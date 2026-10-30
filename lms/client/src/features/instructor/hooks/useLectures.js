@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createLectureThunk ,getLecturesThunk } from "../thunks/lectureThunk";
+import { createLectureThunk ,getLecturesThunk, updateLectureThunk } from "../thunks/lectureThunk";
 import { useEffect } from "react";
 
-function useLectures(moduleId) {
+function useLectures(moduleId,editingLecture) {
 
 
   const dispatch = useDispatch();
@@ -24,6 +24,20 @@ function useLectures(moduleId) {
   const [notes, setNotes] = useState("");
   const [order, setOrder] = useState(1);
   const [video, setVideo] = useState(null);
+
+  useEffect(() => {
+  if (editingLecture) {
+    setTitle(editingLecture.title);
+    setNotes(editingLecture.notes);
+    setOrder(editingLecture.order);
+    setVideo(null);
+  } else {
+    setTitle("");
+    setNotes("");
+    setOrder(1);
+    setVideo(null);
+  }
+}, [editingLecture]);
 
   const handleSubmit =async (e) => {
   e.preventDefault();
@@ -59,21 +73,35 @@ function useLectures(moduleId) {
     formData.append("order", Number(order));
     formData.append("video", video);
 
-    try {
-      await dispatch(
+   try {
+  if (editingLecture) {
+    await dispatch(
+      updateLectureThunk({
+        lectureId: editingLecture._id,
+        formData,
+      })
+    ).unwrap();
+  } else {
+    await dispatch(
       createLectureThunk({
-      moduleId,
-      formData,
-    })
-     ).unwrap();
-     setTitle("");
-     setNotes("");
-     setOrder(1);
-     setVideo(null);
+        moduleId,
+        formData,
+      })
+    ).unwrap();
+  }
 
-    } catch (error) {
-      console.error(error);
-    }
+  // Reset after successful create or update
+  setTitle("");
+  setNotes("");
+  setOrder(1);
+  setVideo(null);
+
+  // Refresh lecture list
+  await dispatch(getLecturesThunk(moduleId)).unwrap();
+
+} catch (error) {
+  console.error(error);
+}
   };
 
 
