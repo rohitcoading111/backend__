@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import useModules from "../hooks/useModules";
 import LectureForm from "./LectureForm";
-import { getLecturesThunk } from "../thunks/lectureThunk";
+import { getLecturesThunk,deleteLectureThunk } from "../thunks/lectureThunk";
 
 function LectureWorkspace({ courses = [] }) {
   const dispatch = useDispatch();
@@ -60,6 +60,20 @@ function LectureWorkspace({ courses = [] }) {
     setIsFormOpen(false);
     setEditingLecture(null);
   };
+  const handleDeleteLecture = async (lectureId) => {
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete this lecture?"
+  );
+
+  if (!confirmDelete) return;
+
+  try {
+    await dispatch(deleteLectureThunk(lectureId)).unwrap();
+  } catch (error) {
+    console.error("Delete lecture error:", error);
+    alert(error);
+  }
+};
 
   return (
     <div className="space-y-6">
@@ -176,6 +190,12 @@ function LectureWorkspace({ courses = [] }) {
                   >
                     Edit
                   </button>
+
+                  <button
+  onClick={() => handleDeleteLecture(lecture._id)}
+>
+  Delete
+</button>
                 </div>
               ))}
             </div>

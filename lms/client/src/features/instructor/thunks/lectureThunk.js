@@ -3,7 +3,8 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
   createLectureService,
   getLecturesService,
-  updateLectureService
+  updateLectureService,
+  deleteLectureService
 } from "../services/lecture.services";
 
 export const createLectureThunk = createAsyncThunk(
@@ -41,6 +42,19 @@ export const updateLectureThunk = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Failed to update lecture"
+      );
+    }
+  }
+);
+
+export const deleteLectureThunk = createAsyncThunk(
+  "lectures/delete",
+  async (lectureId, thunkAPI) => {
+    try {
+      return await deleteLectureService(lectureId);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Failed to delete lecture"
       );
     }
   }

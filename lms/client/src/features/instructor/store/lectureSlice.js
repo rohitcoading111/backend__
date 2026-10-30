@@ -3,7 +3,8 @@ import { createSlice } from "@reduxjs/toolkit";
 import {
   createLectureThunk,
   getLecturesThunk,
-  updateLectureThunk
+  updateLectureThunk,
+  deleteLectureThunk
 } from "../thunks/lectureThunk";
 
 const lecture = createSlice({
@@ -70,6 +71,25 @@ const lecture = createSlice({
           })
 
         .addCase(updateLectureThunk.rejected, (state, action) => {
+         state.loading = false;
+         state.error = action.payload || action.error.message;
+        })
+        .addCase(deleteLectureThunk.pending, (state) => {
+                 state.loading = true;
+                 state.error = null;
+                })
+
+          .addCase(deleteLectureThunk.fulfilled, (state, action) => {
+  state.loading = false;
+
+  const deletedLectureId = action.meta.arg;
+
+  state.lectures = state.lectures.filter(
+    (lecture) => lecture._id !== deletedLectureId
+  );
+})
+
+.addCase(deleteLectureThunk.rejected, (state, action) => {
   state.loading = false;
   state.error = action.payload || action.error.message;
 })
