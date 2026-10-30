@@ -5,6 +5,7 @@ import { LayoutDashboard, LogOut } from "lucide-react";
 import { logoutUser } from "../../auth//authThunk/authThunks.js";
 import { useDispatch } from "react-redux";
 import LectureWorkspace from "../components/LectureWorkspace";
+import LiveSessionWorkspace from "../components/LiveSessionWorkspace.jsx";
 
 import LectureForm from "../components/LectureForm";
 import {
@@ -362,12 +363,9 @@ export default function InstructorDashboard() {
 
      
 
-            {activeSection === "live-classes" && (
-              <SectionPlaceholder
-                title="Live classes"
-                description="Create and manage live sessions for your courses."
-              />
-            )}
+           {activeSection === "live-classes" && (
+  <LiveSessionWorkspace />
+)}
           </section>
         </main>
       </div>
