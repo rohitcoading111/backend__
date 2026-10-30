@@ -1,7 +1,13 @@
 
 import { UploadCloud, Video, Plus } from "lucide-react";
+import { useState } from "react";
 
 function LectureForm() {
+  const [title, setTitle] = useState("");
+  const [notes, setNotes] = useState("");
+  const [order, setOrder] = useState(1);
+  const [video, setVideo] = useState(null);
+
   return (
     <div className="w-full max-w-2xl rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
 
@@ -24,16 +30,15 @@ function LectureForm() {
 
         {/* Lecture Title */}
         <div className="space-y-2">
-          <label
-            htmlFor="title"
-            className="text-sm font-medium text-neutral-700"
-          >
+          <label htmlFor="title" className="text-sm font-medium text-neutral-700">
             Lecture Title
           </label>
 
           <input
             id="title"
             type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
             placeholder="Enter lecture title"
             className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none transition placeholder:text-neutral-400 focus:border-black focus:ring-2 focus:ring-black/5"
           />
@@ -41,16 +46,15 @@ function LectureForm() {
 
         {/* Lecture Notes */}
         <div className="space-y-2">
-          <label
-            htmlFor="notes"
-            className="text-sm font-medium text-neutral-700"
-          >
+          <label htmlFor="notes" className="text-sm font-medium text-neutral-700">
             Lecture Description / Notes
           </label>
 
           <textarea
             id="notes"
             rows={4}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
             placeholder="Write something about this lecture..."
             className="w-full resize-y rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none transition placeholder:text-neutral-400 focus:border-black focus:ring-2 focus:ring-black/5"
           />
@@ -58,10 +62,7 @@ function LectureForm() {
 
         {/* Lecture Order */}
         <div className="space-y-2">
-          <label
-            htmlFor="order"
-            className="text-sm font-medium text-neutral-700"
-          >
+          <label htmlFor="order" className="text-sm font-medium text-neutral-700">
             Lecture Order
           </label>
 
@@ -69,6 +70,8 @@ function LectureForm() {
             id="order"
             type="number"
             min="1"
+            value={order}
+            onChange={(e) => setOrder(e.target.value)}
             placeholder="e.g. 1"
             className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none transition placeholder:text-neutral-400 focus:border-black focus:ring-2 focus:ring-black/5"
           />
@@ -80,10 +83,7 @@ function LectureForm() {
 
         {/* Video Upload */}
         <div className="space-y-2">
-          <label
-            htmlFor="video"
-            className="text-sm font-medium text-neutral-700"
-          >
+          <label htmlFor="video" className="text-sm font-medium text-neutral-700">
             Lecture Video
           </label>
 
@@ -94,7 +94,7 @@ function LectureForm() {
             <UploadCloud size={30} className="mb-3 text-neutral-500" />
 
             <p className="text-sm font-medium text-neutral-700">
-              Choose a video to upload
+              {video ? video.name : "Choose a video to upload"}
             </p>
 
             <p className="mt-1 text-xs text-neutral-400">
@@ -105,6 +105,7 @@ function LectureForm() {
               id="video"
               type="file"
               accept="video/*"
+              onChange={(e) => setVideo(e.target.files[0] || null)}
               className="sr-only"
             />
           </label>
