@@ -1,6 +1,9 @@
 
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { createLectureService } from "../services/lecture.services";
+import {
+  createLectureService,
+  getLecturesService
+} from "../services/lecture.services";
 
 export const createLectureThunk = createAsyncThunk(
   "lectures/create",
@@ -10,6 +13,20 @@ export const createLectureThunk = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Failed to create lecture"
+      );
+    }
+  }
+);
+
+
+export const getLecturesThunk = createAsyncThunk(
+  "lectures/fetch",
+  async (moduleId, thunkAPI) => {
+    try {
+      return await getLecturesService(moduleId);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Failed to fetch lectures"
       );
     }
   }
