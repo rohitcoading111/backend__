@@ -1,13 +1,24 @@
 import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { createLectureThunk } from "../thunks/lectureThunk";
 
-function useLectures() {
+
+function useLectures(moduleId) {
+
+
+  const dispatch = useDispatch();
+
+    const { lecture, loading, error } = useSelector(
+    (state) => state.lecture
+  );
+
 
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
   const [order, setOrder] = useState(1);
   const [video, setVideo] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit =async (e) => {
   e.preventDefault();
 
   // Title validation
@@ -40,14 +51,25 @@ function useLectures() {
     formData.append("notes", notes);
     formData.append("order", Number(order));
     formData.append("video", video);
- 
-};
+
+    try {
+      await dispatch(
+      createLectureThunk({
+      moduleId,
+      formData,
+    })
+     ).unwrap();
+     setTitle("");
+     setNotes("");
+     setOrder(1);
+     setVideo(null);
+
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
 
-  // Loading and error states
-
-
-  // Submit handler
 
 
   return {
@@ -58,7 +80,11 @@ function useLectures() {
   order,
   setOrder,
   video,
-  setVideo
+  setVideo,
+  handleSubmit,
+  lecture,
+  loading,
+  error
 };
 
 

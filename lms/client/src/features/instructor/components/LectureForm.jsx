@@ -1,8 +1,8 @@
 
-import { UploadCloud, Video, Plus } from "lucide-react";
-import { useState } from "react";
+import { UploadCloud, Video, Plus, } from "lucide-react";
+import useLectures from "../hooks/useLectures";
 
-function LectureForm() {
+function LectureForm({moduleId}) {
   const {
     title,
     setTitle,
@@ -13,7 +13,7 @@ function LectureForm() {
     video,
     setVideo,
     handleSubmit
-  } = useLectures();
+  } = useLectures(moduleId);
   return (
     <div className="w-full max-w-2xl rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
 
@@ -115,16 +115,22 @@ function LectureForm() {
               className="sr-only"
             />
           </label>
+          {error && (
+      <p className="text-sm text-red-500">
+       {error}
+      </p>
+      )}
         </div>
 
         {/* Submit Button */}
         <div className="border-t border-neutral-100 pt-5">
           <button
-            type="button"
+            type="submit"
+            disabled={loading}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-black px-5 py-3.5 text-sm font-medium text-white transition hover:bg-neutral-800 sm:w-fit"
           >
             <Plus size={18} />
-            Add Lecture
+             {loading ? "Creating Lecture..." : "Add Lecture"}
           </button>
         </div>
 
