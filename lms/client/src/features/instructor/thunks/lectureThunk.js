@@ -2,7 +2,8 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
   createLectureService,
-  getLecturesService
+  getLecturesService,
+  updateLectureService
 } from "../services/lecture.services";
 
 export const createLectureThunk = createAsyncThunk(
@@ -31,3 +32,16 @@ export const getLecturesThunk = createAsyncThunk(
     }
   }
 );
+
+export const updateLectureThunk = createAsyncThunk(
+  "lectures/update",
+  async ({moduleId,formData},thunkAPI)=>{
+    try {
+      return await updateLectureService(moduleId,formData);
+    } catch (error) {
+       return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Failed to update lecture"
+      );
+    }
+  }
+)

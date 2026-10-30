@@ -12,8 +12,26 @@ export const createLectureService = async (moduleId, formData) => {
 
 // Get all lectures of a module
 export const getLecturesService = async (moduleId) => {
+  const response = await api.get(`/lectures/module/${moduleId}`);
+  return response.data;
+};
 
-  const response = api.get(`/lectures/module/${moduleId}`);
-  return (await response).data;
 
+// Update Lecture
+export const updateLectureService = async (lectureId, formData) => {
+  const response = await api.patch(
+    `/lectures/${lectureId}`,
+    formData
+  );
+
+  return response.data;
+};
+
+// Delete Lecture
+export const deleteLectureService = async (lectureId) => {
+  const response = await api.delete(
+    `/lectures/${lectureId}`
+  );
+
+  return response.data;
 };
