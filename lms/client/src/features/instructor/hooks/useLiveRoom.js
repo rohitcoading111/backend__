@@ -5,8 +5,8 @@ import { Room, RoomEvent } from "livekit-client";
 function useLiveRoom(token, liveKitUrl) {
   const [room, setRoom] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [isMicEnabled, setIsMicEnabled] = useState(true);
-  const [isCameraEnabled, setIsCameraEnabled] = useState(true);
+const [isMicEnabled, setIsMicEnabled] = useState(false);
+const [isCameraEnabled, setIsCameraEnabled] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -14,20 +14,39 @@ function useLiveRoom(token, liveKitUrl) {
 
     const liveRoom = new Room();
 
-    const connectToRoom = async () => {
-      try {
-        await liveRoom.connect(liveKitUrl, token);
+  const connectToRoom = async () => {
+  try {
+    await liveRoom.connect(liveKitUrl, token);
 
-        setRoom(liveRoom);
-        setIsConnected(true);
+    setRoom(liveRoom);
+    setIsConnected(true);
+    setError(null);
 
-        await liveRoom.localParticipant.setCameraEnabled(true);
-        await liveRoom.localParticipant.setMicrophoneEnabled(true);
-      } catch (err) {
-        console.error("LiveKit connection error:", err);
-        setError(err.message);
-      }
-    };
+    // Camera permission
+    try {
+      await liveRoom.localParticipant.setCameraEnabled(true);
+      setIsCameraEnabled(true);
+    } catch (cameraError) {
+      console.error("Camera error:", cameraError);
+      setIsCameraEnabled(false);
+      setError(`Camera: ${cameraError.message}`);
+    }
+
+    // Microphone permission
+    try {
+      await liveRoom.localParticipant.setMicrophoneEnabled(true);
+      setIsMicEnabled(true);
+    } catch (micError) {
+      console.error("Microphone error:", micError);
+      setIsMicEnabled(false);
+      setError(`Microphone: ${micError.message}`);
+    }
+
+  } catch (err) {
+    console.error("LiveKit connection error:", err);
+    setError(`Connection: ${err.message}`);
+  }
+};
 
     connectToRoom();
 

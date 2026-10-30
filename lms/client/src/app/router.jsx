@@ -15,6 +15,8 @@ import AdminDashboard from "../features/admin/pages/AdminDashboard.jsx";
 import LiveClassesPage from "../features/liveClasses/pages/LiveClassesPage.jsx";
 import InstructorDashboard from "../features/instructor/pages/InstructorDashboard.jsx";
 
+import LiveRoom from "../features/instructor/components/LiveRoom.jsx";
+
 import ProtectedRoute from "../routes/ProtectedRoute.jsx";
 import PublicOnlyRoute from "../routes/PublicOnlyRoute.jsx";
 
@@ -45,16 +47,20 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // Instructor routes
-  {
-    element: <ProtectedRoute allowedRoles={["INSTRUCTOR"]} />,
-    children: [
-      {
-        path: "/instructor-dashboard",
-        element: <InstructorDashboard />,
-      },
-    ],
-  },
+// Instructor routes
+{
+  element: <ProtectedRoute allowedRoles={["INSTRUCTOR"]} />,
+  children: [
+    {
+      path: "/instructor-dashboard",
+      element: <InstructorDashboard />,
+    },
+    {
+      path: "/instructor/live-room",
+      element: <LiveRoom />,
+    },
+  ],
+},
 
   // Admin routes
   {

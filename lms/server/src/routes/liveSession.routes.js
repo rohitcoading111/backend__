@@ -14,7 +14,7 @@ import {
 const router = express.Router();
 
 router.post(
-  "/live-sessions",
+  "/",
   authMiddleware,
   roleMiddleware("INSTRUCTOR"),
   createLiveSessionValidator,
