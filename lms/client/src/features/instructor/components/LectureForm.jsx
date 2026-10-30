@@ -3,11 +3,17 @@ import { UploadCloud, Video, Plus } from "lucide-react";
 import { useState } from "react";
 
 function LectureForm() {
-  const [title, setTitle] = useState("");
-  const [notes, setNotes] = useState("");
-  const [order, setOrder] = useState(1);
-  const [video, setVideo] = useState(null);
-
+  const {
+    title,
+    setTitle,
+    notes,
+    setNotes,
+    order,
+    setOrder,
+    video,
+    setVideo,
+    handleSubmit
+  } = useLectures();
   return (
     <div className="w-full max-w-2xl rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
 
@@ -26,7 +32,7 @@ function LectureForm() {
         </p>
       </div>
 
-      <form className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-5">
 
         {/* Lecture Title */}
         <div className="space-y-2">
