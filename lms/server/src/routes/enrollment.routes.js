@@ -13,7 +13,7 @@ const router = express.Router();
 router.get(
   "/my-enrollments",
   authMiddleware,
-  roleMiddleware("STUDENT"),
+  roleMiddleware("STUDENT", "INSTRUCTOR"),
   getMyEnrollmentsController
 );
 
