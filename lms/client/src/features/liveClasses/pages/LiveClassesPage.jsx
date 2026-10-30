@@ -1,25 +1,34 @@
-
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   BookOpen,
   RefreshCw,
   Video,
+  Maximize2,
+  Minimize2,
 } from "lucide-react";
+
+import { useState, useRef, useEffect } from "react";
+
+
 
 import {
   LiveKitRoom,
-  VideoConference,
   RoomAudioRenderer,
+  VideoTrack,
+  useTracks,
 } from "@livekit/components-react";
+import "./LiveClassesPage.css";
 
+import { Track } from "livekit-client";
+
+import StudentClassroomLayout from "../components/LiveClassesPage.jsx";
 import "@livekit/components-styles";
 import useLiveClasses from "../hooks/useLiveClasses.js";
 
 function LiveClassesPage() {
   const navigate = useNavigate();
-
+  const [isMaximized, setIsMaximized] = useState(false);
   const {
     liveCourses,
     isLoading,
@@ -28,6 +37,44 @@ function LiveClassesPage() {
     refreshLiveCourses,
     joinCourseLiveSession,
   } = useLiveClasses();
+
+
+
+const classroomRef = useRef(null);
+
+// Browser fullscreen status synchronize karna
+useEffect(() => {
+  const handleFullscreenChange = () => {
+    setIsMaximized(
+      document.fullscreenElement === classroomRef.current
+    );
+  };
+
+  document.addEventListener(
+    "fullscreenchange",
+    handleFullscreenChange
+  );
+
+  return () => {
+    document.removeEventListener(
+      "fullscreenchange",
+      handleFullscreenChange
+    );
+  };
+}, []);
+
+// Maximize / Restore
+const handleToggleFullscreen = async () => {
+  try {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+    } else if (classroomRef.current) {
+      await classroomRef.current.requestFullscreen();
+    }
+  } catch (error) {
+    console.error("Fullscreen error:", error);
+  }
+};
 
   // Credentials returned after the backend authorizes joining.
   const [roomCredentials, setRoomCredentials] = useState(null);
@@ -51,38 +98,87 @@ function LiveClassesPage() {
   };
 
   // Show the LiveKit classroom after a successful join response.
-  if (roomCredentials) {
-    return (
-      <main className="min-h-screen bg-slate-950 p-4 text-white">
-        <div className="mx-auto mb-4 flex max-w-7xl items-center justify-between gap-3">
-          <h1 className="text-xl font-semibold">Live Classroom</h1>
 
+
+
+
+if (roomCredentials) {
+  return (
+    <main
+      ref={classroomRef}
+      className="flex h-screen min-h-0 w-full flex-col overflow-hidden bg-slate-950 text-white"
+    >
+      {/* Header */}
+      <header className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 py-3 sm:px-6">
+
+        <h1 className="text-lg font-semibold">
+          Live Classroom
+        </h1>
+
+        <div className="flex items-center gap-2">
+
+          {/* Maximize / Restore */}
           <button
             type="button"
-            onClick={() => setRoomCredentials(null)}
+            onClick={handleToggleFullscreen}
+            className="flex items-center gap-2 rounded-lg border border-white/20 px-3 py-2 text-sm hover:bg-white/10"
+          >
+            {isMaximized ? (
+              <>
+                <Minimize2 size={16} />
+                <span>Restore</span>
+              </>
+            ) : (
+              <>
+                <Maximize2 size={16} />
+                <span>Maximize</span>
+              </>
+            )}
+          </button>
+
+          {/* Leave */}
+          <button
+            type="button"
+            onClick={async () => {
+              if (document.fullscreenElement) {
+                await document.exitFullscreen();
+              }
+
+              setRoomCredentials(null);
+            }}
             className="rounded-lg border border-white/20 px-4 py-2 text-sm hover:bg-white/10"
           >
             Leave classroom
           </button>
-        </div>
 
-        <div className="mx-auto max-w-7xl overflow-hidden rounded-2xl">
-          <LiveKitRoom
-            key={roomCredentials.sessionId}
-            serverUrl={roomCredentials.liveKitUrl}
-            token={roomCredentials.token}
-            connect={true}
-            audio={true}
-            video={true}
-            onDisconnected={() => setRoomCredentials(null)}
-          >
-            <RoomAudioRenderer />
-            <VideoConference />
-          </LiveKitRoom>
         </div>
-      </main>
-    );
-  }
+      </header>
+
+      {/* Classroom */}
+      <div className="min-h-0 flex-1 overflow-hidden">
+        <LiveKitRoom
+          key={roomCredentials.sessionId}
+          serverUrl={roomCredentials.liveKitUrl}
+          token={roomCredentials.token}
+          connect={true}
+          audio={false}
+          video={false}
+          onDisconnected={() => setRoomCredentials(null)}
+          style={{
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          <RoomAudioRenderer />
+          <StudentClassroomLayout />
+        </LiveKitRoom>
+      </div>
+    </main>
+  );
+}
+
+
+
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
