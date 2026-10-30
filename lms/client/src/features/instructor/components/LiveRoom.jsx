@@ -15,21 +15,23 @@ function LiveRoom() {
     isConnected,
     isMicEnabled,
     isCameraEnabled,
+    isScreenShareEnabled,
     toggleMic,
     toggleCamera,
+    toggleScreenShare,
     error,
   } = useLiveRoom(token, liveKitUrl);
 
   const videoRef = useRef(null);
+  const screenRef = useRef(null);
 
-  // Attach local camera track to video element
+  // Attach instructor camera track
   useEffect(() => {
-    if (!room || !isCameraEnabled) return;
+    if (!room || !isConnected || !isCameraEnabled) return;
 
-    const publication =
-      room.localParticipant.getTrackPublication(
-        Track.Source.Camera
-      );
+    const publication = room.localParticipant.getTrackPublication(
+      Track.Source.Camera
+    );
 
     const track = publication?.track;
 
@@ -40,7 +42,26 @@ function LiveRoom() {
     return () => {
       track.detach(videoRef.current);
     };
-  }, [room, isCameraEnabled]);
+  }, [room, isConnected, isCameraEnabled]);
+
+  // Attach instructor screen-share track
+  useEffect(() => {
+    if (!room || !isConnected || !isScreenShareEnabled) return;
+
+    const publication = room.localParticipant.getTrackPublication(
+      Track.Source.ScreenShare
+    );
+
+    const track = publication?.track;
+
+    if (!track || !screenRef.current) return;
+
+    track.attach(screenRef.current);
+
+    return () => {
+      track.detach(screenRef.current);
+    };
+  }, [room, isConnected, isScreenShareEnabled]);
 
   if (!token || !liveKitUrl) {
     return (
@@ -76,40 +97,66 @@ function LiveRoom() {
         </span>
       </div>
 
-      {/* Camera Preview */}
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-6xl mx-auto space-y-6">
 
-        <div className="aspect-video bg-gray-900 rounded-xl overflow-hidden flex items-center justify-center border border-gray-700">
-
-          {isCameraEnabled && isConnected ? (
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="text-center text-gray-400">
-              <p className="text-lg">
-                {isCameraEnabled
-                  ? "Connecting camera..."
-                  : "Camera is off"}
-              </p>
+        {/* Screen Share Preview */}
+        {isScreenShareEnabled && (
+          <div className="bg-gray-900 rounded-xl overflow-hidden border border-gray-700">
+            <div className="px-4 py-3 border-b border-gray-700">
+              <h2 className="font-semibold">
+                Screen Sharing
+              </h2>
             </div>
-          )}
 
+            <div className="aspect-video">
+              <video
+                ref={screenRef}
+                autoPlay
+                playsInline
+                muted
+                className="w-full h-full object-contain"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Camera Preview */}
+        <div className="bg-gray-900 rounded-xl overflow-hidden border border-gray-700">
+
+          <div className="px-4 py-3 border-b border-gray-700">
+            <h2 className="font-semibold">
+              Instructor Camera
+            </h2>
+          </div>
+
+          <div className="aspect-video flex items-center justify-center">
+
+            {isCameraEnabled && isConnected ? (
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <p className="text-gray-400">
+                Camera is off
+              </p>
+            )}
+
+          </div>
         </div>
 
         {/* Error */}
         {error && (
-          <p className="text-red-400 mt-4 text-center">
+          <p className="text-red-400 text-center">
             {error}
           </p>
         )}
 
         {/* Controls */}
-        <div className="flex justify-center gap-4 mt-6">
+        <div className="flex flex-wrap justify-center gap-4">
 
           <button
             onClick={toggleMic}
@@ -137,8 +184,21 @@ function LiveRoom() {
               : "Turn Camera On"}
           </button>
 
-        </div>
+          <button
+            onClick={toggleScreenShare}
+            disabled={!isConnected}
+            className={`px-6 py-3 rounded-lg font-medium disabled:opacity-50 ${
+              isScreenShareEnabled
+                ? "bg-red-600 hover:bg-red-700"
+                : "bg-blue-600 hover:bg-blue-700"
+            }`}
+          >
+            {isScreenShareEnabled
+              ? "Stop Sharing"
+              : "Share Screen"}
+          </button>
 
+        </div>
       </div>
     </div>
   );
