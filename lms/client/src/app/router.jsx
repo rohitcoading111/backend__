@@ -1,5 +1,5 @@
 
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 
 import Login from "../features/auth/pages/Login";
 import Register from "../features/auth/pages/Register";
@@ -21,6 +21,13 @@ import ProtectedRoute from "../routes/ProtectedRoute.jsx";
 import PublicOnlyRoute from "../routes/PublicOnlyRoute.jsx";
 
 export const router = createBrowserRouter([
+  // Root route - Redirect to Login
+  {
+    path: "/",
+    element: <Navigate to="/login" replace />,
+  },
+
+  // Public routes
   {
     element: <PublicOnlyRoute />,
     children: [
@@ -31,36 +38,39 @@ export const router = createBrowserRouter([
 
   // Student routes
   {
-    element: <ProtectedRoute allowedRoles={["STUDENT","INSTRUCTOR"]} />,
+    element: <ProtectedRoute allowedRoles={["STUDENT", "INSTRUCTOR"]} />,
     children: [
       { path: "/dashboard", element: <Dashboard /> },
       { path: "/courses", element: <CourseCatalog /> },
+
       {
         path: "/courses/:courseId/modules",
         element: <ModulesPage />,
       },
+
       {
         path: "/courses/:courseId/modules/:moduleId/lectures",
         element: <ModuleLecturesPage />,
       },
+
       { path: "/live-classes", element: <LiveClassesPage /> },
     ],
   },
 
-// Instructor routes
-{
-  element: <ProtectedRoute allowedRoles={["INSTRUCTOR"]} />,
-  children: [
-    {
-      path: "/instructor-dashboard",
-      element: <InstructorDashboard />,
-    },
-    {
-      path: "/instructor/live-room",
-      element: <LiveRoom />,
-    },
-  ],
-},
+  // Instructor routes
+  {
+    element: <ProtectedRoute allowedRoles={["INSTRUCTOR"]} />,
+    children: [
+      {
+        path: "/instructor-dashboard",
+        element: <InstructorDashboard />,
+      },
+      {
+        path: "/instructor/live-room",
+        element: <LiveRoom />,
+      },
+    ],
+  },
 
   // Admin routes
   {
@@ -75,6 +85,7 @@ export const router = createBrowserRouter([
 
   // Authentication callbacks
   { path: "/verify-otp", element: <VerifyOtp /> },
+
   {
     path: "/auth/google/callback",
     element: <GoogleAuthCallback />,
