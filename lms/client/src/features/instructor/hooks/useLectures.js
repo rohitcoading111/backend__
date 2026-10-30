@@ -9,7 +9,7 @@ function useLectures(moduleId) {
   const dispatch = useDispatch();
 
     const { lecture, loading, error } = useSelector(
-    (state) => state.lecture
+    (state) => state.lectures
   );
 
 

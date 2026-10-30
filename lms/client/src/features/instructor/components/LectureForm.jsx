@@ -12,7 +12,9 @@ function LectureForm({moduleId}) {
     setOrder,
     video,
     setVideo,
-    handleSubmit
+    handleSubmit,
+    error,
+    loading
   } = useLectures(moduleId);
   return (
     <div className="w-full max-w-2xl rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
