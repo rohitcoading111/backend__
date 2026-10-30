@@ -14,7 +14,8 @@ function LectureForm({moduleId}) {
     setVideo,
     handleSubmit,
     error,
-    loading
+    loading,
+    lectures
   } = useLectures(moduleId);
   return (
     <div className="w-full max-w-2xl rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
@@ -137,6 +138,48 @@ function LectureForm({moduleId}) {
         </div>
 
       </form>
+
+      
+{/* Lecture List */}
+<div className="mt-10 border-t border-neutral-200 pt-6">
+  <h3 className="mb-5 text-lg font-semibold">
+    Module Lectures
+  </h3>
+
+  {loading ? (
+    <p className="text-sm text-neutral-500">
+      Loading lectures...
+    </p>
+  ) : lectures.length === 0 ? (
+    <p className="text-sm text-neutral-500">
+      No lectures added yet.
+    </p>
+  ) : (
+    <div className="space-y-3">
+      {lectures.map((lecture) => (
+        <div
+          key={lecture._id}
+          className="flex items-center justify-between rounded-xl border border-neutral-200 p-4"
+        >
+          <div>
+            <h4 className="font-medium">
+              {lecture.order}. {lecture.title}
+            </h4>
+
+            <p className="mt-1 text-sm text-neutral-500">
+              {lecture.notes}
+            </p>
+          </div>
+
+          <span className="text-xs text-neutral-500">
+            {lecture.videoAvailable ? "Video available" : "No video"}
+          </span>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createLectureThunk } from "../thunks/lectureThunk";
+import { createLectureThunk ,getLecturesThunk } from "../thunks/lectureThunk";
 
 
 function useLectures(moduleId) {
@@ -12,6 +12,13 @@ function useLectures(moduleId) {
     (state) => state.lectures
   );
 
+  useEffect(() => {
+  if (moduleId) {
+    dispatch(getLecturesThunk(moduleId));
+  }
+}, [moduleId, dispatch]);
+ 
+   
 
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
@@ -84,7 +91,8 @@ function useLectures(moduleId) {
   handleSubmit,
   lecture,
   loading,
-  error
+  error,
+  lectures
 };
 
 
