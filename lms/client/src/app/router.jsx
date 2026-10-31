@@ -6,10 +6,11 @@ import Register from "../features/auth/pages/Register";
 import VerifyOtp from "../features/auth/pages/VerifyOtp";
 import GoogleAuthCallback from "../features/auth/pages/GoogleAuthCallback";
 
-import Dashboard from "../features/dashboard/pages/Dashboard";
 import CourseCatalog from "../features/courses/pages/CourseCatalog";
 import ModulesPage from "../features/modules/pages/ModulesPage.jsx";
 import ModuleLecturesPage from "../features/lectures/pages/ModuleLecturesPage.jsx";
+
+import StudentLayout from "../features/dashboard/components/StudentLayout.jsx";
 
 import AdminDashboard from "../features/admin/pages/AdminDashboard.jsx";
 import LiveClassesPage from "../features/liveClasses/pages/LiveClassesPage.jsx";
@@ -21,7 +22,7 @@ import ProtectedRoute from "../routes/ProtectedRoute.jsx";
 import PublicOnlyRoute from "../routes/PublicOnlyRoute.jsx";
 
 export const router = createBrowserRouter([
-  // Root route - Redirect to Login
+  // Root route
   {
     path: "/",
     element: <Navigate to="/login" replace />,
@@ -40,7 +41,8 @@ export const router = createBrowserRouter([
   {
     element: <ProtectedRoute allowedRoles={["STUDENT", "INSTRUCTOR"]} />,
     children: [
-      { path: "/dashboard", element: <Dashboard /> },
+      { path: "/dashboard", element: <StudentLayout /> },
+
       { path: "/courses", element: <CourseCatalog /> },
 
       {
