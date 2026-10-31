@@ -23,3 +23,329 @@ body,
 *::-webkit-scrollbar {
   display: none;
 }
+
+
+@import "tailwindcss";
+
+/* ========================================
+   LEARNHUB - PREMIUM DESIGN SYSTEM
+======================================== */
+
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+
+  color-scheme: dark;
+
+  --background: #080808;
+  --surface: #111111;
+  --surface-hover: #181818;
+  --surface-elevated: #202020;
+
+  --foreground: #ffffff;
+  --foreground-secondary: #a3a3a3;
+  --foreground-muted: #737373;
+
+  --border: rgba(255, 255, 255, 0.09);
+  --border-hover: rgba(255, 255, 255, 0.17);
+
+  --sidebar: #ffffff;
+  --sidebar-text: #171717;
+  --sidebar-muted: #737373;
+  --sidebar-hover: #f5f5f5;
+  --sidebar-active: #171717;
+
+  --radius-card: 18px;
+  --radius-button: 12px;
+
+  --transition-fast: 180ms ease;
+  --transition-normal: 280ms ease;
+  --transition-smooth: 400ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ========================================
+   GLOBAL RESET
+======================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 100px;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* ========================================
+   TEXT SELECTION
+======================================== */
+
+::selection {
+  background: #ffffff;
+  color: #000000;
+}
+
+/* ========================================
+   CUSTOM SCROLLBAR
+======================================== */
+
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: #080808;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333333;
+  border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555555;
+}
+
+/* ========================================
+   PREMIUM SURFACES
+======================================== */
+
+.lh-page {
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.lh-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  transition:
+    transform var(--transition-normal),
+    border-color var(--transition-normal),
+    background-color var(--transition-normal),
+    box-shadow var(--transition-normal);
+}
+
+.lh-card-hover:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-hover);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+}
+
+.lh-surface {
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+/* ========================================
+   PREMIUM BUTTONS
+======================================== */
+
+.lh-button-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  padding: 12px 20px;
+
+  background: #ffffff;
+  color: #080808;
+
+  border: 1px solid #ffffff;
+  border-radius: 999px;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  transition:
+    transform var(--transition-fast),
+    background var(--transition-normal),
+    box-shadow var(--transition-normal);
+}
+
+.lh-button-primary:hover {
+  background: #e5e5e5;
+  box-shadow: 0 5px 20px rgba(255, 255, 255, 0.08);
+}
+
+.lh-button-primary:active {
+  transform: scale(0.96);
+}
+
+.lh-button-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  padding: 11px 18px;
+
+  background: #181818;
+  color: #ffffff;
+
+  border: 1px solid var(--border);
+  border-radius: 12px;
+
+  font-size: 13px;
+  font-weight: 500;
+
+  transition: all var(--transition-normal);
+}
+
+.lh-button-secondary:hover {
+  background: #252525;
+  border-color: var(--border-hover);
+}
+
+/* ========================================
+   PAGE ANIMATIONS
+======================================== */
+
+@keyframes lh-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes lh-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes lh-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes lh-progress {
+  from {
+    width: 0;
+  }
+}
+
+.lh-animate-fade {
+  animation: lh-fade-in 400ms ease both;
+}
+
+.lh-animate-up {
+  animation: lh-slide-up 550ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.lh-animate-scale {
+  animation: lh-scale-in 400ms ease both;
+}
+
+.lh-stagger-1 {
+  animation-delay: 80ms;
+}
+
+.lh-stagger-2 {
+  animation-delay: 150ms;
+}
+
+.lh-stagger-3 {
+  animation-delay: 220ms;
+}
+
+.lh-stagger-4 {
+  animation-delay: 290ms;
+}
+
+/* ========================================
+   PROGRESS BARS
+======================================== */
+
+.lh-progress-track {
+  width: 100%;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #292929;
+}
+
+.lh-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: #ffffff;
+  transition: width 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ========================================
+   FOCUS ACCESSIBILITY
+======================================== */
+
+:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 3px;
+}
+
+/* ========================================
+   REDUCED MOTION
+======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ========================================
+   RESPONSIVE
+======================================== */
+
+@media (max-width: 640px) {
+  :root {
+    --radius-card: 15px;
+  }
+}
