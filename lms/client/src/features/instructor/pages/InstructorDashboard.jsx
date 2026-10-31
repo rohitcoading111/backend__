@@ -442,6 +442,7 @@ export default function InstructorDashboard() {
                       onPublish={handlePublish}
                       onUnpublish={handleUnpublish}
                       onAddModule={handleAddModule}
+                      onCreate={handleCreateCourse}
                     />
                   )}
                 </div>
