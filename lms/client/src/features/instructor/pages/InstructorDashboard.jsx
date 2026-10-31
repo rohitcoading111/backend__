@@ -451,7 +451,7 @@ export default function InstructorDashboard() {
           )}
 
           {activeSection === "modules" && (
-            <section className={LIGHT_PANEL}>
+            <section>
               <ModuleManagement
                 courses={courses}
                 onAddLecture={handleAddLecture}
