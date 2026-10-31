@@ -114,11 +114,12 @@ function ModulesPage() {
       <header className="sticky top-0 z-30 border-b border-white/[0.08] bg-black/75 backdrop-blur-2xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8 lg:px-10">
 
+         
           <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="group inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-neutral-300 transition hover:border-white/30 hover:bg-white hover:text-black"
-          >
+  type="button"
+  onClick={() => navigate("/dashboard")}
+  className="group inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-neutral-300 transition hover:border-white/30 hover:bg-white hover:text-black"
+>
             <ArrowLeft
               size={16}
               className="transition-transform group-hover:-translate-x-1"
