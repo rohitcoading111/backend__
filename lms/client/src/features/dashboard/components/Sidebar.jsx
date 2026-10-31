@@ -12,31 +12,11 @@ import {
 } from "lucide-react";
 
 const navigationItems = [
-  {
-    label: "Overview",
-    icon: LayoutDashboard,
-    href: "#overview",
-  },
-  {
-    label: "My courses",
-    icon: BookOpen,
-    href: "#my-courses",
-  },
-  {
-    label: "Live classes",
-    icon: Radio,
-    href: "#live-classes",
-  },
-  {
-    label: "My progress",
-    icon: Activity,
-    href: "#my-progress",
-  },
-  {
-    label: "Achievements",
-    icon: Trophy,
-    href: "#achievements",
-  },
+  { id: "overview", label: "Overview", icon: LayoutDashboard },
+  { id: "my-courses", label: "My courses", icon: BookOpen },
+  { id: "live-classes", label: "Live classes", icon: Radio },
+  { id: "my-progress", label: "My progress", icon: Activity },
+  { id: "achievements", label: "Achievements", icon: Trophy },
 ];
 
 function Sidebar({
@@ -46,6 +26,8 @@ function Sidebar({
   onClose,
   onLogout,
   loggingOut = false,
+  activeSection = "overview",
+  onNavigate,
 }) {
   return (
     <>
@@ -97,25 +79,33 @@ function Sidebar({
           </p>
 
           <nav className="mt-4 space-y-1">
-            {navigationItems.map(({ label, icon: Icon, href }) => (
-              <a
-                key={label}
-                href={href}
-                onClick={onClose}
-                className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition ${
-                  label === "Overview"
-                    ? "bg-neutral-900 font-medium text-white"
-                    : "text-neutral-600 hover:bg-[#f7f7f5] hover:text-black"
-                }`}
-              >
-                <Icon size={18} strokeWidth={1.8} />
-                <span>{label}</span>
-              </a>
-            ))}
+            {navigationItems.map(({ id, label, icon: Icon }) => {
+              const isActive = activeSection === id;
+
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => {
+                    onNavigate?.(id);
+                    onClose?.();
+                  }}
+                  aria-current={isActive ? "page" : undefined}
+                  className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm transition-all duration-200 ${
+                    isActive
+                      ? "bg-neutral-900 font-medium text-white"
+                      : "text-neutral-600 hover:bg-[#f7f7f5] hover:text-black"
+                  }`}
+                >
+                  <Icon size={18} strokeWidth={1.8} />
+                  <span>{label}</span>
+                </button>
+              );
+            })}
           </nav>
         </div>
 
-        {/* Bottom profile and logout */}
+        {/* Profile */}
         <div className="mt-auto border-t border-black/[0.06] p-4">
           <div className="flex items-center gap-3 rounded-xl bg-[#f7f7f5] p-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-black/10 bg-white text-sm font-semibold">
@@ -126,6 +116,7 @@ function Sidebar({
               <p className="truncate text-sm font-semibold">
                 {user?.name || "Student"}
               </p>
+
               <p className="truncate text-xs text-neutral-500">
                 {user?.email || "Student account"}
               </p>
@@ -138,7 +129,7 @@ function Sidebar({
             type="button"
             onClick={onLogout}
             disabled={loggingOut}
-            className="mt-3 flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm text-neutral-600 transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-3 flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm text-neutral-600 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
           >
             <LogOut size={18} />
             {loggingOut ? "Logging out..." : "Log out"}
