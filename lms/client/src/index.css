@@ -1,39 +1,25 @@
 @import "tailwindcss";
 
-
 html {
   min-height: 100%;
-  overflow-y: auto;
-  scroll-behavior: smooth;
 }
 
 body {
   min-height: 100vh;
-  overflow-y: auto;
 }
 
 #root {
   min-height: 100vh;
-  overflow: visible;
 }
-
-
 
 /* Hide scrollbar everywhere, scrolling still works */
 html,
 body,
 * {
-  scrollbar-width: none;      /* Firefox */
-  -ms-overflow-style: none;   /* old Edge / IE */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 *::-webkit-scrollbar {
-  display: none;              /* Chrome, Safari, new Edge */
-}
-
-/* Respect users who turn off animations */
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
+  display: none;
 }
