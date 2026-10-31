@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+
 import {
   ArrowLeft,
   ArrowRight,
@@ -12,7 +13,10 @@ import {
   Radio,
   Sparkles,
   Video,
+  Loader2,
+  RefreshCw,
 } from "lucide-react";
+
 import { getCourseModules } from "../services/moduleService.js";
 
 function ModulesPage() {
@@ -22,7 +26,9 @@ function ModulesPage() {
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [retryKey, setRetryKey] = useState(0);
 
+  // Fetch modules
   useEffect(() => {
     let cancelled = false;
 
@@ -77,110 +83,161 @@ function ModulesPage() {
     return () => {
       cancelled = true;
     };
-  }, [courseId]);
+  }, [courseId, retryKey]);
 
- const handleLiveClasses = () => {
-  navigate("/live-classes");
-};
-const handleExploreModule = (moduleId) => {
-  navigate(`/courses/${courseId}/modules/${moduleId}/lectures`);
-};
+  const handleLiveClasses = () => {
+    navigate("/live-classes");
+  };
+
+  const handleExploreModule = (moduleId) => {
+    navigate(`/courses/${courseId}/modules/${moduleId}/lectures`);
+  };
 
   const totalModules = modules.length;
 
   return (
-    <main className="min-h-screen bg-[#f6f7fb] text-slate-900">
-      {/* Top navigation */}
-      <header className="border-b border-slate-200/80 bg-white">
+    <main className="relative isolate min-h-screen overflow-hidden bg-[#050505] text-white">
+
+      {/* BACKGROUND LIGHTING */}
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+
+        <div className="absolute -left-64 top-[10%] h-[600px] w-[600px] rounded-full bg-white/[0.055] blur-[150px]" />
+
+        <div className="absolute -right-64 top-[35%] h-[650px] w-[650px] rounded-full bg-neutral-400/[0.06] blur-[160px]" />
+
+        <div className="absolute left-1/2 top-[-350px] h-[550px] w-[900px] -translate-x-1/2 rounded-full bg-white/[0.035] blur-[150px]" />
+
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,#050505_100%)]" />
+      </div>
+
+      {/* HEADER */}
+      <header className="sticky top-0 z-30 border-b border-white/[0.08] bg-black/75 backdrop-blur-2xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8 lg:px-10">
+
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
+            className="group inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-neutral-300 transition hover:border-white/30 hover:bg-white hover:text-black"
           >
-            <ArrowLeft size={16} />
+            <ArrowLeft
+              size={16}
+              className="transition-transform group-hover:-translate-x-1"
+            />
             Back
           </button>
 
-          <div className="flex items-center gap-2 text-sm font-semibold">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white">
-              <GraduationCap size={19} />
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-black">
+              <GraduationCap size={21} />
             </span>
-            <span>LearnHub</span>
+
+            <div>
+              <h1 className="text-sm font-bold tracking-tight">
+                LearnHub
+              </h1>
+              <p className="text-[9px] uppercase tracking-[0.18em] text-neutral-500">
+                Learn without limits
+              </p>
+            </div>
           </div>
+
+          <button
+            type="button"
+            onClick={() => navigate("/dashboard")}
+            className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-neutral-300 transition hover:bg-white hover:text-black"
+          >
+            Dashboard
+          </button>
         </div>
       </header>
 
-      <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
-        {/* Hero section */}
-        <section className="relative overflow-hidden rounded-3xl bg-slate-950 p-6 text-white sm:p-9 lg:p-11">
-          <div className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full bg-indigo-500/20 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-32 right-1/3 h-64 w-64 rounded-full bg-violet-500/15 blur-3xl" />
+      <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-12 lg:px-10">
+
+        {/* HERO SECTION */}
+        <section className="relative isolate overflow-hidden rounded-[28px] border border-white/10 bg-[#090909] p-6 text-white shadow-[0_20px_70px_rgba(0,0,0,0.5)] sm:p-9 lg:p-11">
+
+          {/* Hero lighting */}
+          <div className="pointer-events-none absolute -right-20 -top-32 h-80 w-80 rounded-full bg-white/[0.07] blur-[100px]" />
+
+          <div className="pointer-events-none absolute -bottom-40 right-1/3 h-72 w-72 rounded-full bg-neutral-400/[0.06] blur-[100px]" />
+
+          <div className="pointer-events-none absolute right-0 top-0 h-full w-px bg-linear-to-b from-transparent via-white/20 to-transparent" />
 
           <div className="relative z-10 grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
+
             <div className="max-w-2xl">
-              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-3 py-1.5 text-xs font-medium text-indigo-200">
+
+              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-[10px] font-semibold tracking-[0.18em] text-neutral-300">
                 <Sparkles size={14} />
                 YOUR LEARNING SPACE
               </div>
 
-              <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
+              <h1 className="text-3xl font-semibold tracking-[-0.05em] sm:text-4xl lg:text-5xl">
                 Learn something
-                <span className="block text-indigo-300">
+                <span className="block text-neutral-500">
                   amazing today.
                 </span>
               </h1>
 
-              <p className="mt-4 max-w-xl text-sm leading-7 text-slate-300 sm:text-base">
+              <p className="mt-4 max-w-xl text-sm leading-7 text-neutral-400 sm:text-base">
                 Explore your course modules, build your knowledge
                 step by step, and keep moving towards your goals.
               </p>
 
               <div className="mt-7 flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.07] px-4 py-3">
-                  <Layers3 size={17} className="text-indigo-300" />
+
+                <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3">
+                  <Layers3 size={19} className="text-white" />
+
                   <div>
                     <p className="text-lg font-semibold">
                       {loading ? "—" : totalModules}
                     </p>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-neutral-500">
                       Total modules
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.07] px-4 py-3">
-                  <BookOpen size={17} className="text-violet-300" />
+                <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3">
+                  <BookOpen size={19} className="text-neutral-300" />
+
                   <div>
                     <p className="text-sm font-semibold">
                       Self-paced
                     </p>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-neutral-500">
                       Learn your way
                     </p>
                   </div>
                 </div>
+
               </div>
             </div>
 
-            {/* Live classes card */}
-            <div className="w-full rounded-2xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur-sm sm:p-6 lg:w-72">
-              <div className="flex items-center justify-between">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-300">
+            {/* LIVE CLASSES CARD */}
+            <div className="group relative isolate w-full overflow-hidden rounded-[24px] border border-white/15 bg-[#080808] p-5 shadow-[0_0_30px_rgba(255,255,255,0.025)] transition duration-500 hover:border-white/30 hover:shadow-[0_0_40px_rgba(255,255,255,0.09)] sm:p-6 lg:w-72">
+
+              <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-white/[0.07] blur-[65px] transition group-hover:bg-white/[0.12]" />
+
+              <div className="relative z-10 flex items-center justify-between">
+
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-black">
                   <Video size={22} />
                 </div>
 
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/10 px-2.5 py-1 text-[11px] font-medium text-emerald-300">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-[10px] font-medium text-neutral-300">
+                  <span className="h-1.5 w-1.5 rounded-full bg-white" />
                   Live learning
                 </span>
+
               </div>
 
-              <h2 className="mt-5 text-lg font-semibold">
+              <h2 className="relative z-10 mt-5 text-lg font-semibold">
                 Live Classes
               </h2>
 
-              <p className="mt-2 text-sm leading-6 text-slate-400">
+              <p className="relative z-10 mt-2 text-sm leading-6 text-neutral-400">
                 Join interactive sessions and learn with your
                 instructors.
               </p>
@@ -188,178 +245,245 @@ const handleExploreModule = (moduleId) => {
               <button
                 type="button"
                 onClick={handleLiveClasses}
-                className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-indigo-50 active:scale-[0.98]"
+                className="relative z-10 mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-black transition hover:bg-neutral-200 active:scale-[0.98]"
               >
                 Explore Live Classes
                 <ArrowRight size={16} />
               </button>
-
-              <p className="mt-3 text-center text-[11px] text-slate-500">
-                Live class navigation coming soon
-              </p>
             </div>
           </div>
         </section>
 
-        {/* Modules heading */}
-        <section className="mt-10">
+        {/* MODULES SECTION */}
+        <section className="mt-12 sm:mt-16">
+
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+
             <div>
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-indigo-600">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-neutral-400">
                 <BookOpen size={15} />
                 Course curriculum
               </div>
 
-              <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
                 Your learning modules
+                <span className="text-neutral-600">.</span>
               </h2>
 
-              <p className="mt-2 text-sm leading-6 text-slate-500">
+              <p className="mt-2 text-sm leading-6 text-neutral-500">
                 Choose a module to continue your learning journey.
               </p>
             </div>
 
             {!loading && !error && (
-              <div className="inline-flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-600">
-                <Layers3 size={16} className="text-indigo-500" />
+              <div className="inline-flex w-fit items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-neutral-300">
+                <Layers3 size={16} />
                 {totalModules} {totalModules === 1 ? "module" : "modules"}
               </div>
             )}
           </div>
 
-          {/* Loading state */}
+          {/* LOADING STATE */}
           {loading && (
-            <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
               {[1, 2, 3].map((item) => (
                 <div
                   key={item}
-                  className="animate-pulse rounded-2xl border border-slate-200 bg-white p-6"
+                  className="rounded-[24px] border border-white/10 bg-[#080808] p-6"
                 >
-                  <div className="h-11 w-11 rounded-xl bg-slate-100" />
-                  <div className="mt-5 h-4 w-2/3 rounded bg-slate-100" />
-                  <div className="mt-3 h-3 w-full rounded bg-slate-100" />
-                  <div className="mt-2 h-3 w-4/5 rounded bg-slate-100" />
-                  <div className="mt-6 h-9 rounded-lg bg-slate-100" />
+                  <div className="h-12 w-12 animate-pulse rounded-xl bg-neutral-800" />
+
+                  <div className="mt-6 h-4 w-2/3 animate-pulse rounded bg-neutral-800" />
+
+                  <div className="mt-3 h-3 w-full animate-pulse rounded bg-neutral-900" />
+
+                  <div className="mt-2 h-3 w-4/5 animate-pulse rounded bg-neutral-900" />
+
+                  <div className="mt-7 h-11 animate-pulse rounded-full bg-neutral-900" />
                 </div>
               ))}
             </div>
           )}
 
-          {/* Error state */}
+          {/* ERROR STATE */}
           {!loading && error && (
-            <div className="mt-6 rounded-2xl border border-red-200 bg-white p-6">
-              <h3 className="font-semibold text-red-700">
+            <div className="mt-8 rounded-[24px] border border-white/10 bg-[#080808] p-8 text-center">
+
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white/[0.06] text-neutral-300">
+                <Radio size={25} />
+              </div>
+
+              <h3 className="mt-5 text-lg font-semibold">
                 Could not load modules
               </h3>
-              <p className="mt-2 text-sm text-slate-500">
+
+              <p className="mt-2 text-sm text-neutral-500">
                 {error}
               </p>
+
               <button
                 type="button"
-                onClick={() => window.location.reload()}
-                className="mt-4 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-700"
+                onClick={() => setRetryKey((previous) => previous + 1)}
+                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-neutral-200"
               >
+                <RefreshCw size={15} />
                 Try again
               </button>
             </div>
           )}
 
-          {/* Empty state */}
+          {/* EMPTY STATE */}
           {!loading && !error && totalModules === 0 && (
-            <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-500">
-                <BookOpen size={26} />
+            <div className="mt-8 rounded-[24px] border border-dashed border-white/15 bg-[#080808] px-6 py-16 text-center">
+
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white/[0.06] text-neutral-300">
+                <BookOpen size={27} />
               </div>
-              <h3 className="mt-4 text-lg font-semibold">
+
+              <h3 className="mt-5 text-lg font-semibold">
                 Your curriculum is on its way
               </h3>
-              <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
+
+              <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-neutral-500">
                 No modules have been added to this course yet.
                 Check back when your instructor publishes them.
               </p>
             </div>
           )}
 
-          {/* Module cards */}
+          {/* MODULE CARDS */}
           {!loading && !error && totalModules > 0 && (
-            <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="mt-8 grid gap-7 sm:grid-cols-2 xl:grid-cols-3">
+
               {modules.map((module, index) => (
                 <article
                   key={module._id}
-                  className="group flex flex-col rounded-2xl border border-slate-200/80 bg-white p-5 transition duration-200 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-950/[0.05] sm:p-6"
+                  className="group relative isolate flex flex-col overflow-hidden rounded-[26px] border border-white/[0.14] bg-[#080808] p-6 shadow-[0_0_25px_rgba(255,255,255,0.025),0_20px_50px_rgba(0,0,0,0.45)] transition-all duration-500 hover:-translate-y-1 hover:border-white/30 hover:shadow-[0_0_40px_rgba(255,255,255,0.08),0_25px_60px_rgba(0,0,0,0.65)] sm:p-7"
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 transition group-hover:bg-indigo-600 group-hover:text-white">
+
+                  {/* FOUR CORNER LIGHTING */}
+                  <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-[26px]">
+
+                    {/* Top left */}
+                    <div className="absolute -left-12 -top-12 h-40 w-40 rounded-full bg-white/[0.09] opacity-30 blur-[65px] transition duration-700 group-hover:opacity-100" />
+
+                    {/* Top right */}
+                    <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-neutral-300/[0.09] opacity-30 blur-[65px] transition duration-700 group-hover:opacity-100" />
+
+                    {/* Bottom left */}
+                    <div className="absolute -bottom-12 -left-12 h-40 w-40 rounded-full bg-neutral-400/[0.08] opacity-20 blur-[65px] transition duration-700 group-hover:opacity-90" />
+
+                    {/* Bottom right */}
+                    <div className="absolute -bottom-12 -right-12 h-40 w-40 rounded-full bg-white/[0.08] opacity-20 blur-[65px] transition duration-700 group-hover:opacity-90" />
+
+                  </div>
+
+                  {/* TOP CARD CONTENT */}
+                  <div className="relative z-10 flex items-start justify-between gap-3">
+
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-white transition duration-300 group-hover:border-white group-hover:bg-white group-hover:text-black">
                       <BookOpen size={22} />
                     </div>
 
-                    <span className="rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs font-semibold text-slate-500">
+                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[10px] font-semibold tracking-wider text-neutral-400">
                       MODULE {String(module.order ?? index + 1).padStart(2, "0")}
                     </span>
                   </div>
 
-                  <h3 className="mt-5 text-lg font-semibold tracking-tight text-slate-900">
-                    {module.title || "Untitled module"}
-                  </h3>
+                  {/* MODULE DETAILS */}
+                  <div className="relative z-10 mt-6 flex-1">
 
-                  <p className="mt-2 min-h-[48px] text-sm leading-6 text-slate-500">
-                    {module.description ||
-                      "Explore this module and strengthen your understanding of the subject."}
-                  </p>
+                    <h3 className="text-xl font-semibold tracking-tight text-white">
+                      {module.title || "Untitled module"}
+                    </h3>
 
-                  <div className="mt-5 flex items-center gap-4 border-t border-slate-100 pt-4 text-xs text-slate-500">
-                    <span className="inline-flex items-center gap-1.5">
+                    <p className="mt-3 min-h-[48px] text-sm leading-6 text-neutral-400">
+                      {module.description ||
+                        "Explore this module and strengthen your understanding of the subject."}
+                    </p>
+
+                  </div>
+
+                  {/* META INFORMATION */}
+                  <div className="relative z-10 mt-6 flex flex-wrap items-center gap-4 border-t border-white/10 pt-5 text-xs text-neutral-500">
+
+                    <span className="inline-flex items-center gap-2">
                       <Layers3 size={14} />
                       Learning module
                     </span>
-                    <span className="inline-flex items-center gap-1.5">
+
+                    <span className="inline-flex items-center gap-2">
                       <Clock3 size={14} />
                       Self-paced
                     </span>
+
                   </div>
 
-                  
-<button
-  type="button"
-  onClick={() => {
-    navigate(`/courses/${courseId}/modules/${module._id}/lectures`);
-  }}
-  className="mt-5 flex w-full items-center justify-between rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-indigo-600 hover:bg-indigo-600 hover:text-white"
->
-  Explore module
-  <ArrowRight
-    size={16}
-    className="transition group-hover:translate-x-1"
-  />
-</button>
+                  {/* EXPLORE BUTTON */}
+                  <button
+                    type="button"
+                    onClick={() => handleExploreModule(module._id)}
+                    className="relative z-10 mt-6 flex w-full items-center justify-between rounded-full border border-white/20 bg-white/[0.03] px-5 py-3.5 text-sm font-semibold text-white transition duration-300 hover:border-white hover:bg-white hover:text-black"
+                  >
+                    Explore module
+
+                    <ArrowRight
+                      size={17}
+                      className="transition-transform duration-300 group-hover:translate-x-1"
+                    />
+                  </button>
 
                 </article>
               ))}
+
             </div>
           )}
         </section>
 
-        {/* Bottom learning banner */}
-        <section className="mt-10 flex flex-col gap-4 rounded-2xl border border-indigo-100 bg-indigo-50/70 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-indigo-600 shadow-sm">
-              <CalendarDays size={20} />
-            </div>
-            <div>
-              <h3 className="font-semibold text-slate-900">
-                Consistency is your superpower
-              </h3>
-              <p className="mt-1 text-sm leading-6 text-slate-600">
-                Keep learning a little every day to make steady progress.
-              </p>
-            </div>
-          </div>
+        {/* BOTTOM LEARNING BANNER */}
+        <section className="group relative isolate mt-12 overflow-hidden rounded-[24px] border border-white/10 bg-[#080808] p-5 transition duration-500 hover:border-white/20 sm:p-7">
 
-          <div className="flex items-center gap-2 text-sm font-medium text-indigo-700">
-            <Sparkles size={16} />
-            Keep growing
+          <div className="pointer-events-none absolute -right-20 -top-24 -z-10 h-64 w-64 rounded-full bg-white/[0.06] blur-[90px] transition group-hover:bg-white/[0.10]" />
+
+          <div className="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+
+            <div className="flex items-start gap-4">
+
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-white">
+                <CalendarDays size={20} />
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-white">
+                  Consistency is your superpower
+                </h3>
+
+                <p className="mt-1 text-sm leading-6 text-neutral-500">
+                  Keep learning a little every day to make steady progress.
+                </p>
+              </div>
+
+            </div>
+
+            <div className="inline-flex items-center gap-2 text-sm font-medium text-neutral-300">
+              <Sparkles size={16} />
+              Keep growing
+            </div>
+
           </div>
         </section>
+
+        {/* FOOTER */}
+        <footer className="mt-14 flex flex-col items-center justify-between gap-3 border-t border-white/10 py-7 text-xs text-neutral-600 sm:flex-row">
+          <p>
+            © {new Date().getFullYear()} LearnHub. All rights reserved.
+          </p>
+
+          <p className="tracking-[0.18em]">
+            LEARN. CONNECT. GROW.
+          </p>
+        </footer>
+
       </div>
     </main>
   );

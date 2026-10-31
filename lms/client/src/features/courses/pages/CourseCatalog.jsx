@@ -8,6 +8,7 @@ import {
   ArrowUpRight,
   Loader2,
   RefreshCw,
+  ArrowLeft,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -77,7 +78,7 @@ function CourseCatalog() {
     fetchEnrollments();
   }, []);
 
-  // Optimized search
+  // Search courses
   const filteredCourses = useMemo(() => {
     const query = search.trim().toLowerCase();
 
@@ -169,7 +170,8 @@ function CourseCatalog() {
         console.error("Payment failed:", response.error);
 
         setPurchaseError(
-          response.error?.description || "Payment failed. Please try again."
+          response.error?.description ||
+            "Payment failed. Please try again."
         );
 
         setBuyingCourseId(null);
@@ -192,10 +194,11 @@ function CourseCatalog() {
   return (
     <div className="min-h-screen bg-[#f7f7f5] text-[#171717] antialiased">
 
-      {/* Header */}
+      {/* HEADER */}
       <header className="sticky top-0 z-30 border-b border-black/[0.07] bg-white/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
 
+          {/* LOGO */}
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#171717] text-white">
               <GraduationCap size={23} />
@@ -212,16 +215,35 @@ function CourseCatalog() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 rounded-full border border-black/[0.07] bg-neutral-50 px-4 py-2 text-xs font-medium text-neutral-600">
-            <ShoppingBag size={15} />
-            Course Store
+          {/* HEADER ACTIONS */}
+          <div className="flex items-center gap-2">
+
+            {/* COURSE STORE */}
+            <div className="hidden items-center gap-2 rounded-full border border-black/[0.07] bg-neutral-50 px-4 py-2 text-xs font-medium text-neutral-600 sm:flex">
+              <ShoppingBag size={15} />
+              Course Store
+            </div>
+
+            {/* DASHBOARD BUTTON */}
+            <button
+              type="button"
+              onClick={() => navigate("/dashboard")}
+              className="group inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-medium text-white transition duration-300 hover:bg-neutral-800"
+            >
+              <ArrowLeft
+                size={16}
+                className="transition-transform group-hover:-translate-x-1"
+              />
+              Dashboard
+            </button>
+
           </div>
         </div>
       </header>
 
       <main className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8 sm:py-12">
 
-        {/* Hero Section */}
+        {/* HERO SECTION */}
         <section className="relative isolate overflow-hidden rounded-[28px] bg-[#101010] px-6 py-12 text-white sm:px-10 sm:py-16 lg:px-14">
 
           <div className="pointer-events-none absolute -right-20 -top-28 h-80 w-80 rounded-full border border-white/[0.08]" />
@@ -264,7 +286,7 @@ function CourseCatalog() {
           </div>
         </section>
 
-        {/* Course Library */}
+        {/* COURSE LIBRARY */}
         <section
           id="course-library"
           className="scroll-mt-24 mt-12 sm:mt-16"
@@ -285,7 +307,7 @@ function CourseCatalog() {
               </p>
             </div>
 
-            {/* Search */}
+            {/* SEARCH */}
             <label className="flex w-full items-center gap-3 rounded-xl border border-black/[0.08] bg-white px-4 py-3 transition focus-within:border-black sm:max-w-sm">
               <Search size={18} className="shrink-0 text-neutral-400" />
 
@@ -309,7 +331,7 @@ function CourseCatalog() {
             </label>
           </div>
 
-          {/* Purchase Error */}
+          {/* PURCHASE ERROR */}
           {purchaseError && (
             <div className="mt-6 flex items-start justify-between gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
               <p>{purchaseError}</p>
@@ -324,7 +346,7 @@ function CourseCatalog() {
             </div>
           )}
 
-          {/* Results count */}
+          {/* RESULTS COUNT */}
           {!loading && !error && (
             <div className="mt-8 flex items-center justify-between">
               <p className="text-xs text-neutral-500">
@@ -334,7 +356,7 @@ function CourseCatalog() {
             </div>
           )}
 
-          {/* Loading */}
+          {/* LOADING */}
           {loading ? (
             <div className="flex min-h-64 flex-col items-center justify-center gap-3 text-neutral-500">
               <Loader2 size={25} className="animate-spin" />
@@ -394,10 +416,11 @@ function CourseCatalog() {
           )}
         </section>
 
-        {/* Footer */}
+        {/* FOOTER */}
         <footer className="mt-16 border-t border-black/[0.07] py-7 text-center text-xs text-neutral-400">
           © {new Date().getFullYear()} LearnHub · Your learning journey.
         </footer>
+
       </main>
     </div>
   );
