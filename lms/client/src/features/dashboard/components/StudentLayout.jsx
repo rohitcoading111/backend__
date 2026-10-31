@@ -52,11 +52,12 @@ function StudentLayout() {
       />
 
       <div className="min-h-screen lg:pl-[260px]">
-        <DashboardHeader
-          user={user}
-          initials={initials}
-          onMenuClick={() => setSidebarOpen(true)}
-        />
+       <DashboardHeader
+  user={user}
+  initials={initials}
+  onMenuClick={() => setSidebarOpen(true)}
+  activeSection={activeSection}
+/>
 
         <main className="mx-auto max-w-[1600px] px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
           <Outlet context={{ activeSection }} />
