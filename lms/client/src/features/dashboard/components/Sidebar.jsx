@@ -12,6 +12,8 @@ import {
   ChevronRight,
 } from "lucide-react";
 
+import { useNavigate } from "react-router-dom";
+
 const navigationItems = [
   {
     id: "overview",
@@ -50,6 +52,13 @@ function Sidebar({
   activeSection = "overview",
   onNavigate,
 }) {
+  const navigate = useNavigate();
+
+  const handleInstructorDashboard = () => {
+    navigate("/instructor-dashboard");
+    onClose?.();
+  };
+
   return (
     <>
       {/* Mobile overlay */}
@@ -153,6 +162,38 @@ function Sidebar({
                 </button>
               );
             })}
+
+            {/* Instructor Dashboard - Only for instructors */}
+            {user?.role === "INSTRUCTOR" && (
+              <div className="pt-5">
+                <div className="mb-3 border-t border-neutral-100 pt-4">
+                  <p className="px-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
+                    Instructor Workspace
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleInstructorDashboard}
+                  className="group flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-left text-[13px] font-medium text-neutral-500 transition-all duration-200 hover:bg-neutral-100 hover:text-neutral-900"
+                >
+                  <LayoutDashboard
+                    size={18}
+                    strokeWidth={1.7}
+                    className="shrink-0 text-neutral-400 transition-transform duration-200 group-hover:scale-110 group-hover:text-neutral-800"
+                  />
+
+                  <span className="flex-1">
+                    Instructor Dashboard
+                  </span>
+
+                  <ChevronRight
+                    size={15}
+                    className="text-neutral-300 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100"
+                  />
+                </button>
+              </div>
+            )}
           </nav>
         </div>
 
