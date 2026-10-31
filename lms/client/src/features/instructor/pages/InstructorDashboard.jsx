@@ -461,7 +461,7 @@ export default function InstructorDashboard() {
           )}
 
           {activeSection === "lectures" && (
-            <section className={LIGHT_PANEL}>
+            <section>
               <LectureWorkspace courses={courses} />
             </section>
           )}
