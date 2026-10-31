@@ -1,14 +1,33 @@
 
-import { ArrowUpRight, BookOpen, Clock3 } from "lucide-react";
+import {
+  ArrowUpRight,
+  BookOpen,
+  Clock3,
+  Loader2,
+} from "lucide-react";
 
-function CourseCard({ course, onBuy,isPurchased }) {
+function CourseCard({
+  course,
+  onBuy,
+  isPurchased = false,
+  buying = false,
+  disabled = false,
+}) {
+  const thumbnailUrl =
+    typeof course.thumbnail === "string"
+      ? course.thumbnail
+      : course.thumbnail?.url;
+
   return (
-    <article className="group overflow-hidden rounded-2xl border border-black/[0.08] bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl">
+    <article className="group overflow-hidden rounded-2xl border border-black/[0.08] bg-white transition duration-300 hover:-translate-y-1 hover:border-black/15 hover:shadow-xl">
+
+      {/* Thumbnail */}
       <div className="relative h-48 overflow-hidden bg-neutral-900">
-        {course.thumbnail?.url ? (
+        {thumbnailUrl ? (
           <img
-            src={course.thumbnail.url}
-            alt={course.title}
+            src={thumbnailUrl}
+            alt={course.title || "Course thumbnail"}
+            loading="lazy"
             className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
           />
         ) : (
@@ -22,11 +41,13 @@ function CourseCard({ course, onBuy,isPurchased }) {
         </span>
       </div>
 
+      {/* Content */}
       <div className="p-5">
         <div className="flex items-center justify-between gap-3">
           <span className="text-xs font-medium uppercase tracking-wider text-neutral-400">
             {course.level || "BEGINNER"}
           </span>
+
           <span className="flex items-center gap-1 text-xs text-neutral-500">
             <BookOpen size={14} />
             Online course
@@ -46,11 +67,13 @@ function CourseCard({ course, onBuy,isPurchased }) {
           Self-paced learning
         </div>
 
-        <div className="mt-5 flex items-center justify-between border-t border-black/[0.07] pt-4">
-          <div>
+        {/* Price and Action */}
+        <div className="mt-5 flex items-center justify-between gap-3 border-t border-black/[0.07] pt-4">
+          <div className="min-w-0">
             <p className="text-[10px] uppercase tracking-wider text-neutral-400">
               Course price
             </p>
+
             <p className="mt-1 text-xl font-semibold">
               {typeof course.price === "number"
                 ? `₹${course.price.toLocaleString("en-IN")}`
@@ -59,13 +82,27 @@ function CourseCard({ course, onBuy,isPurchased }) {
           </div>
 
           <button
-  type="button"
-  onClick={() => onBuy(course, isPurchased)}
-  className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-3 text-sm font-medium text-white transition hover:bg-neutral-800"
->
-  {isPurchased ? "Already Enrolled" : "Buy Now"}
-  <ArrowUpRight size={16} />
-</button>
+            type="button"
+            onClick={() => onBuy(course, isPurchased)}
+            disabled={disabled || buying}
+            className={`inline-flex shrink-0 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${
+              isPurchased
+                ? "border border-black/10 bg-white text-black hover:bg-neutral-100"
+                : "bg-black text-white hover:bg-neutral-800"
+            }`}
+          >
+            {buying ? (
+              <>
+                <Loader2 size={15} className="animate-spin" />
+                Processing
+              </>
+            ) : (
+              <>
+                {isPurchased ? "Already Enrolled" : "Buy Now"}
+                <ArrowUpRight size={16} />
+              </>
+            )}
+          </button>
         </div>
       </div>
     </article>
