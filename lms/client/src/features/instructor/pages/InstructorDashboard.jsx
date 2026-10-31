@@ -53,13 +53,6 @@ const NAV_ITEMS = [
 const focusRing =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black";
 
-/*
-  Modules, Lectures and Live Classes components are still styled for a white
-  background. Until they are restyled, they sit inside this light panel so
-  nothing becomes unreadable on the black page.
-*/
-const LIGHT_PANEL = "rounded-3xl bg-white p-6 text-black sm:p-8";
-
 function CourseSkeleton() {
   return (
     <div className="overflow-hidden rounded-3xl border border-white/10">
@@ -467,7 +460,7 @@ export default function InstructorDashboard() {
           )}
 
           {activeSection === "live-classes" && (
-            <section className={LIGHT_PANEL}>
+            <section>
               <LiveSessionWorkspace />
             </section>
           )}

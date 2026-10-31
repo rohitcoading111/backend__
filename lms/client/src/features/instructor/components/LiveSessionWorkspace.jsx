@@ -1,11 +1,15 @@
-
+import { useId } from "react";
 import { useSelector } from "react-redux";
+import { Radio } from "lucide-react";
 import useLiveSession from "../hooks/useLiveSession";
+import PremiumSelect from "./PremiumSelect";
+
+const focusRing =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black";
 
 function LiveSessionWorkspace() {
-  const { courses } = useSelector(
-    (state) => state.instructor
-  );
+  const uid = useId();
+  const { courses = [] } = useSelector((state) => state.instructor);
 
   const {
     selectedCourseId,
@@ -15,49 +19,114 @@ function LiveSessionWorkspace() {
     error,
   } = useLiveSession();
 
+  const selectedCourse = courses.find((course) => course._id === selectedCourseId);
+
+  const courseOptions = courses.map((course) => ({
+    value: course._id,
+    label: course.title,
+    badge: course.status === "DRAFT" ? "Draft" : undefined,
+  }));
+
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-2">
-        Live Classes
-      </h1>
+    <div className="text-white">
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/15 text-white/80">
+          <Radio size={21} />
+        </span>
+        <div>
+          <h3 className="text-xl font-semibold tracking-tight">Live classes</h3>
+          <p className="mt-1 text-sm text-white/40">
+            Select a course and start your live session.
+          </p>
+        </div>
+      </div>
 
-      <p className="text-gray-500 mb-6">
-        Select a course and start your live session.
-      </p>
-
-      <div className="bg-white border rounded-xl p-6">
-
-        <label className="block font-medium mb-2">
-          Select Course
+      {/* Start card */}
+      <div className="mt-8 max-w-2xl rounded-3xl border border-white/10 bg-black p-6 sm:p-8">
+        <label
+          htmlFor={`${uid}-course`}
+          className="mb-2 block text-sm font-medium text-white/80"
+        >
+          Select course
         </label>
 
-        <select
+        <PremiumSelect
+          id={`${uid}-course`}
+          options={courseOptions}
           value={selectedCourseId}
-          onChange={(e) => setSelectedCourseId(e.target.value)}
-          className="w-full border rounded-lg p-3"
+          onChange={setSelectedCourseId}
           disabled={loading}
-        >
-          <option value="">Choose a course</option>
+          placeholder="Choose a course"
+          emptyText="No courses yet"
+        />
 
-          {courses.map((course) => (
-            <option key={course._id} value={course._id}>
-              {course.title}
-            </option>
-          ))}
-        </select>
+        {/* Selected course summary */}
+        {selectedCourse && (
+          <div className="mt-5 flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            {selectedCourse.thumbnail?.url ? (
+              <img
+                src={selectedCourse.thumbnail.url}
+                alt=""
+                className="h-14 w-14 shrink-0 rounded-xl object-cover"
+              />
+            ) : (
+              <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-white/10 text-white/30">
+                <Radio size={20} />
+              </span>
+            )}
+
+            <div className="min-w-0">
+              <p className="text-xs text-white/40">You will go live in</p>
+              <p className="mt-0.5 truncate font-medium">
+                {selectedCourse.title}
+              </p>
+            </div>
+          </div>
+        )}
 
         {error && (
-          <p className="text-red-500 mt-3">{error}</p>
+          <p
+            role="alert"
+            className="mt-5 rounded-xl border border-white/20 bg-white/[0.04] px-4 py-3 text-sm text-white/80"
+          >
+            {error}
+          </p>
         )}
 
         <button
+          type="button"
           onClick={handleStartLive}
           disabled={!selectedCourseId || loading}
-          className="w-full mt-6 bg-blue-600 text-white py-3 rounded-lg disabled:opacity-50"
+          className={`mt-8 inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-semibold text-black transition-all hover:bg-white/85 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:active:scale-100 ${focusRing}`}
         >
-          {loading ? "Starting..." : "Start Live Session"}
+          {loading ? (
+            <svg
+              className="h-4 w-4 animate-spin motion-reduce:animate-none"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="9"
+                stroke="currentColor"
+                strokeOpacity="0.25"
+                strokeWidth="3"
+              />
+              <path
+                d="M21 12a9 9 0 0 0-9-9"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+              />
+            </svg>
+          ) : (
+            <Radio size={17} />
+          )}
+          {loading ? "Starting" : "Start live session"}
         </button>
-
       </div>
     </div>
   );
