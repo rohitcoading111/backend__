@@ -98,6 +98,7 @@ export const startMobileRegistration = async ({
   mobile,
   password,
   file,
+  role,
   accountType,
   businessName,
   businessType,
@@ -106,6 +107,13 @@ export const startMobileRegistration = async ({
   const normalizedName = name?.trim();
   const normalizedEmail = normalizeEmail(email);
   const normalizedMobile = mobile?.trim();
+  const normalizedRole = String(role || "STUDENT")
+  .trim()
+  .toUpperCase();
+
+if (!["STUDENT", "INSTRUCTOR"].includes(normalizedRole)) {
+  throw new Error("INVALID_ROLE");
+}
 
   if (!normalizedName || !normalizedMobile || !password) {
     throw new Error("Name, mobile and password are required");
@@ -186,6 +194,7 @@ export const startMobileRegistration = async ({
         mobile: normalizedMobile,
         password: hashedPassword,
         avatar: avatarData,
+        role: normalizedRole,
         ...registrationData,
         expiresAt: new Date(
           now.getTime() + PENDING_REGISTRATION_TTL_MS
@@ -270,6 +279,7 @@ export const startMobileRegistration = async ({
     pendingRegistration.email = normalizedEmail;
     pendingRegistration.password = hashedPassword;
     pendingRegistration.avatar = avatarData;
+    pendingRegistration.role = normalizedRole;
 
     // Save Student/Business registration details.
     pendingRegistration.accountType = registrationData.accountType;
@@ -292,8 +302,10 @@ export const startMobileRegistration = async ({
   return {
     message: "OTP sent successfully",
     mobile: normalizedMobile,
+    role: normalizedRole,
   };
 };
+
 
 export const completeMobileRegistration = async ({
   mobile,
@@ -322,6 +334,7 @@ export const completeMobileRegistration = async ({
     throw new Error("Registration expired. Please register again");
   }
 
+  // Verify mobile OTP
   const isVerified = await verifyMobileOTP(
     normalizedMobile,
     normalizedCode
@@ -331,6 +344,7 @@ export const completeMobileRegistration = async ({
     throw new Error("Invalid or expired OTP");
   }
 
+  // Check existing account
   const identifiers = [
     { mobile: normalizedMobile },
     ...(pendingUser.email ? [{ email: pendingUser.email }] : []),
@@ -348,7 +362,17 @@ export const completeMobileRegistration = async ({
     throw new Error("Email or mobile number already exists");
   }
 
-  // Decide final role on the backend, never from client input.
+  // Get previously selected role
+  // Old pending registrations without role default to STUDENT.
+  const selectedRole = String(pendingUser.role || "STUDENT")
+    .trim()
+    .toUpperCase();
+
+  if (!["STUDENT", "INSTRUCTOR"].includes(selectedRole)) {
+    throw new Error("INVALID_ROLE");
+  }
+
+  // Preserve existing account type
   const accountType = pendingUser.accountType || "STUDENT";
 
   let userData = {
@@ -357,12 +381,15 @@ export const completeMobileRegistration = async ({
     mobile: pendingUser.mobile,
     password: pendingUser.password,
     avatar: pendingUser.avatar,
+
     mobileVerified: true,
-    accountType: "STUDENT",
-    role: "STUDENT",
+
+    role: selectedRole,
+    accountType,
     sellerStatus: "NOT_APPLIED",
   };
 
+  // Business profile validation and preservation
   if (accountType === "BUSINESS") {
     const businessName =
       pendingUser.businessProfile?.businessName;
@@ -390,11 +417,21 @@ export const completeMobileRegistration = async ({
     userData = {
       ...userData,
       accountType: "BUSINESS",
-      role: "INSTRUCTOR",
       sellerStatus: "PENDING",
+
       businessProfile: pendingUser.businessProfile,
       sellerAgreement: pendingUser.sellerAgreement,
     };
+  }
+
+  // Generate permanent Instructor ID only for instructors
+  if (selectedRole === "INSTRUCTOR") {
+    userData.instructorCode =
+      `INS-${crypto.randomBytes(10).toString("hex").toUpperCase()}`;
+
+    userData.employmentStatus = "INDEPENDENT";
+    userData.organizationId = null;
+    userData.hiredBy = null;
   }
 
   let newUser;
@@ -405,35 +442,47 @@ export const completeMobileRegistration = async ({
     throwDuplicateRegistrationError(error);
   }
 
+  // Generate authentication tokens
   const accessToken = generateAccessToken(newUser);
   const refreshToken = generateRefreshToken(newUser);
 
   newUser.refreshToken = refreshToken;
   await newUser.save();
 
+  // Registration notification
   await sendMobileRegistrationNotification({
     mobile: newUser.mobile,
     name: newUser.name,
   });
 
+  // Remove pending registration
   await PendingRegistration.deleteOne({
     _id: pendingUser._id,
   });
 
   return {
     message: "Mobile verified and account created successfully",
+
     accessToken,
     refreshToken,
+
     user: {
       id: newUser._id,
       name: newUser.name,
       email: newUser.email,
       mobile: newUser.mobile,
       mobileVerified: newUser.mobileVerified,
+
       role: newUser.role,
+      instructorCode: newUser.instructorCode || null,
+
       accountType: newUser.accountType,
       sellerStatus: newUser.sellerStatus,
       businessProfile: newUser.businessProfile,
+
+      employmentStatus: newUser.employmentStatus,
+      organizationId: newUser.organizationId,
     },
   };
 };
+

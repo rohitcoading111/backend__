@@ -8,10 +8,23 @@ import { startMobileRegistration } from "../services/mobileRegistration.services
 
 
 
+
 export const registerUser = async (req, res) => {
   try {
     const email = req.body.email?.trim().toLowerCase();
     const mobile = req.body.mobile?.trim();
+
+    // Accept only public registration roles
+    const role = String(req.body.role ?? "STUDENT")
+      .trim()
+      .toUpperCase();
+
+    if (!["STUDENT", "INSTRUCTOR"].includes(role)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid role. Only STUDENT and INSTRUCTOR registration is allowed.",
+      });
+    }
 
     // At least one identifier is required
     if (!email && !mobile) {
@@ -25,6 +38,7 @@ export const registerUser = async (req, res) => {
     if (mobile) {
       const result = await startMobileRegistration({
         ...req.body,
+        role,
         email,
         mobile,
         file: req.file,
@@ -35,6 +49,7 @@ export const registerUser = async (req, res) => {
         message: result.message,
         data: {
           mobile: result.mobile,
+          role,
           otpRequired: true,
         },
       });
@@ -43,6 +58,7 @@ export const registerUser = async (req, res) => {
     // EMAIL REGISTRATION
     const result = await registerUserService({
       ...req.body,
+      role,
       email,
       file: req.file,
     });
@@ -52,20 +68,19 @@ export const registerUser = async (req, res) => {
       message: result.message,
       data: {
         email: result.email,
+        role,
         otpRequired: result.otpRequired,
       },
     });
+
   } catch (error) {
-    // Log the real error for debugging
     console.error("Register Controller Error:", {
       name: error.name,
       message: error.message,
       code: error.code,
-      keyValue: error.keyValue,
       stack: error.stack,
     });
 
-    // Duplicate registration / MongoDB unique-index conflict
     if (
       error.message === "User already exists" ||
       error.message === "Email or mobile number already exists" ||
@@ -79,10 +94,8 @@ export const registerUser = async (req, res) => {
       });
     }
 
-    // OTP rate limits
     if (
-      error.message ===
-        "OTP send limit reached. Please try again later" ||
+      error.message === "OTP send limit reached. Please try again later" ||
       error.message === "Please wait before requesting another OTP"
     ) {
       return res.status(429).json({
@@ -91,7 +104,6 @@ export const registerUser = async (req, res) => {
       });
     }
 
-    // Validation errors
     if (
       error.message?.startsWith("Name, mobile") ||
       error.message?.startsWith("Enter mobile number") ||
@@ -104,7 +116,6 @@ export const registerUser = async (req, res) => {
       });
     }
 
-    // Email delivery failure
     if (error.message === "EMAIL_OTP_SEND_FAILED") {
       return res.status(502).json({
         success: false,
@@ -118,6 +129,7 @@ export const registerUser = async (req, res) => {
     });
   }
 };
+
 
 
 export const Login = async (req, res) => {

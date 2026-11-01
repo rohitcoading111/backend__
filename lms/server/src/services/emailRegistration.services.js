@@ -9,6 +9,8 @@ import {
 
 import { sendRegistrationNotification } from "./registrationNotification.services.js";
 
+
+
 export const verifyEmailRegistration = async ({ email, code }) => {
   const normalizedEmail = email?.trim().toLowerCase();
 
@@ -29,6 +31,7 @@ export const verifyEmailRegistration = async ({ email, code }) => {
     throw new Error("OTP expired. Please register again");
   }
 
+  // Verify email OTP
   const submittedHash = crypto
     .createHash("sha256")
     .update(String(code))
@@ -41,6 +44,7 @@ export const verifyEmailRegistration = async ({ email, code }) => {
     throw new Error("Invalid OTP");
   }
 
+  // Check existing account
   const existingUser = await User.findOne({
     email: normalizedEmail,
   });
@@ -50,7 +54,16 @@ export const verifyEmailRegistration = async ({ email, code }) => {
     throw new Error("Email already registered");
   }
 
-  // Determine account type from trusted pending registration data.
+  // Get selected role from pending registration
+  const selectedRole = String(pending.role || "STUDENT")
+    .trim()
+    .toUpperCase();
+
+  if (!["STUDENT", "INSTRUCTOR"].includes(selectedRole)) {
+    throw new Error("INVALID_ROLE");
+  }
+
+  // Preserve existing account type
   const accountType = pending.accountType || "STUDENT";
 
   let userData = {
@@ -60,10 +73,12 @@ export const verifyEmailRegistration = async ({ email, code }) => {
     avatar: pending.avatar,
     isVerified: true,
 
+    role: selectedRole,
     accountType,
+    sellerStatus: "NOT_APPLIED",
   };
 
-  // BUSINESS account creation.
+  // Preserve existing Business profile and agreement
   if (accountType === "BUSINESS") {
     if (
       !pending.businessProfile?.businessName ||
@@ -76,8 +91,7 @@ export const verifyEmailRegistration = async ({ email, code }) => {
 
     userData = {
       ...userData,
-
-      role: "INSTRUCTOR",
+      accountType: "BUSINESS",
       sellerStatus: "PENDING",
 
       businessProfile: {
@@ -90,34 +104,42 @@ export const verifyEmailRegistration = async ({ email, code }) => {
         acceptedAt: pending.sellerAgreement.acceptedAt,
       },
     };
-  } else {
-    // Normal student account.
-    userData = {
-      ...userData,
-      role: "STUDENT",
-      sellerStatus: "NOT_APPLIED",
-    };
   }
 
+  // Generate permanent Instructor ID
+  if (selectedRole === "INSTRUCTOR") {
+    userData.instructorCode =
+      `INS-${crypto.randomBytes(10).toString("hex").toUpperCase()}`;
+
+    userData.employmentStatus = "INDEPENDENT";
+    userData.organizationId = null;
+    userData.hiredBy = null;
+  }
+
+  // Create actual User
   const newUser = await User.create(userData);
 
+  // Generate authentication tokens
   const accessToken = generateAccessToken(newUser);
   const refreshToken = generateRefreshToken(newUser);
 
   newUser.refreshToken = refreshToken;
   await newUser.save();
 
+  // Registration notification
   await sendRegistrationNotification({
     email: newUser.email,
     name: newUser.name,
   });
 
+  // Delete completed pending registration
   await PendingRegistration.deleteOne({
     _id: pending._id,
   });
 
   return {
     message: "Email verified and registration successful",
+
     accessToken,
     refreshToken,
 
@@ -125,10 +147,17 @@ export const verifyEmailRegistration = async ({ email, code }) => {
       id: newUser._id,
       name: newUser.name,
       email: newUser.email,
+
       role: newUser.role,
+      instructorCode: newUser.instructorCode || null,
+
       accountType: newUser.accountType,
       sellerStatus: newUser.sellerStatus,
       businessProfile: newUser.businessProfile,
+
+      employmentStatus: newUser.employmentStatus,
+      organizationId: newUser.organizationId,
     },
   };
 };
+

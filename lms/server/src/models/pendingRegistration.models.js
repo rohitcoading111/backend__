@@ -35,6 +35,12 @@ const pendingRegistrationSchema = new mongoose.Schema(
       enum: ["STUDENT", "BUSINESS"],
       default: "STUDENT",
     },
+    // Selected role during registration
+role: {
+  type: String,
+  enum: ["STUDENT", "INSTRUCTOR"],
+  default: "STUDENT",
+},
 
     // Temporary business details
     businessProfile: {

@@ -1,6 +1,5 @@
-
 import mongoose from "mongoose";
-
+import crypto from "crypto";
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -17,6 +16,14 @@ const userSchema = new mongoose.Schema(
       trim: true,
       match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
     },
+    userCode: {
+    type: String,
+    unique: true,
+     sparse: true,
+     immutable: true,
+      default: () =>
+    `USR-${crypto.randomBytes(8).toString("hex").toUpperCase()}`,
+},
 
     googleId: {
       type: String,
@@ -35,6 +42,13 @@ const userSchema = new mongoose.Schema(
       minlength: 8,
       select: false,
     },
+    instructorCode: {
+    type: String,
+    unique: true,
+    sparse: true,
+    immutable: true,
+    default: undefined,
+},
 
    role: {
   type: String,
@@ -155,17 +169,6 @@ userSchema.pre("validate", function () {
     this.invalidate(
       "email",
       "Email, mobile number, or Google account is required"
-    );
-  }
-
-  if (
-    this.accountType === "BUSINESS" &&
-    this.role !== "INSTRUCTOR" &&
-    this.role !== "ADMIN"
-  ) {
-    this.invalidate(
-      "role",
-      "Business accounts must have instructor access"
     );
   }
 

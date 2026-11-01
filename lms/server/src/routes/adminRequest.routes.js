@@ -5,6 +5,9 @@ import {
   getPendingAdminRequestsController,
   approveAdminRequestController,
   rejectAdminRequestController,
+  verifyAdminRequestController,
+  verifyAdminRequestEmailController,
+  approveAdminRequestByEmailController, // ADD THIS
 } from "../controllers/adminRequest.controllers.js";
 
 import {
@@ -51,6 +54,33 @@ router.patch(
   superAdminMiddleware,
   rejectAdminRequestValidator,
   rejectAdminRequestController
+);
+
+// Public: verification through email button
+router.get(
+  "/verify-email/:token",
+  verifyAdminRequestEmailController
+);
+
+// Super Admin: verification through dashboard
+router.patch(
+  "/:requestId/verify",
+  authMiddleware,
+  superAdminMiddleware,
+  adminRequestIdValidator,
+  verifyAdminRequestController
+);
+
+// Email button: open confirmation page
+router.get(
+  "/verify-email/:token",
+  verifyAdminRequestEmailController
+);
+
+// Confirmation button: actually approve
+router.post(
+  "/approve-email/:token",
+  approveAdminRequestByEmailController
 );
 
 export default router;

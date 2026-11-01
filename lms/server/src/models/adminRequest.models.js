@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 
 const adminRequestSchema = new mongoose.Schema(
@@ -19,6 +18,24 @@ const adminRequestSchema = new mongoose.Schema(
       trim: true,
       match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
     },
+
+
+    emailVerifiedAt: {
+    type: Date,
+    default: null,
+    },
+
+    verificationTokenHash: {
+      type: String,
+      default: null,
+      select: false,
+    },
+
+      verificationTokenExpiresAt: {
+       type: Date,
+        default: null,
+        select: false,
+      },
 
     mobile: {
       type: String,
@@ -68,10 +85,10 @@ const adminRequestSchema = new mongoose.Schema(
 
     // Request status
     status: {
-      type: String,
-      enum: ["PENDING", "APPROVED", "REJECTED"],
-      default: "PENDING",
-    },
+  type: String,
+  enum: ["PENDING", "VERIFIED", "APPROVED", "REJECTED"],
+  default: "PENDING",
+},
 
     // Existing Super Admin who reviewed the request
     reviewedBy: {

@@ -111,7 +111,6 @@ export const uploadAvatar = async (file) => {
 };
 
 
-
 export const registerUser = async (user) => {
   const {
     email,
@@ -119,10 +118,20 @@ export const registerUser = async (user) => {
     password,
     name,
     file,
+    role,
   } = user;
 
   const normalizedEmail = email?.trim().toLowerCase();
   const normalizedMobile = mobile?.trim() || undefined;
+
+  // Validate selected role
+  const normalizedRole = String(role || "STUDENT")
+    .trim()
+    .toUpperCase();
+
+  if (!["STUDENT", "INSTRUCTOR"].includes(normalizedRole)) {
+    throw new Error("INVALID_ROLE");
+  }
 
   if (!normalizedEmail) {
     throw new Error("Email is required for email registration");
@@ -132,10 +141,10 @@ export const registerUser = async (user) => {
     throw new Error("Password must be at least 8 characters");
   }
 
-  // Prepare STUDENT or BUSINESS registration data.
+  // Existing account type and business validation
   const registrationData = prepareRegistrationData(user);
 
-  // Check existing registered user.
+  // Check existing registered user
   const existingUser = await userModel.findOne({
     $or: [
       { email: normalizedEmail },
@@ -147,7 +156,7 @@ export const registerUser = async (user) => {
     throw new Error("Email or mobile number already exists");
   }
 
-  // Check existing pending registration.
+  // Check existing pending registration
   const existingPending = await PendingRegistration.findOne({
     email: normalizedEmail,
   });
@@ -158,13 +167,13 @@ export const registerUser = async (user) => {
     );
   }
 
-  // Hash password before storing temporarily.
+  // Hash password
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // Upload avatar if supplied.
+  // Upload avatar
   const avatarData = await uploadAvatar(file);
 
-  // Generate email OTP.
+  // Generate email OTP
   const otp = generateEmailOTP();
 
   const emailOtpHash = crypto
@@ -172,13 +181,16 @@ export const registerUser = async (user) => {
     .update(otp)
     .digest("hex");
 
-  // Store registration details temporarily.
+  // Save temporary registration
   const pending = await PendingRegistration.create({
     name,
     email: normalizedEmail,
     mobile: normalizedMobile,
     password: hashedPassword,
     avatar: avatarData,
+
+    // Selected role preserved until OTP verification
+    role: normalizedRole,
 
     ...registrationData,
 
@@ -202,11 +214,10 @@ export const registerUser = async (user) => {
   return {
     message: "Verification OTP sent to your email",
     email: normalizedEmail,
+    role: normalizedRole,
     otpRequired: true,
   };
 };
-
-
 
 export const LoginUser = async (user) => {
   const { email, mobile, password } = user;
