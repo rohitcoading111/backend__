@@ -344,6 +344,11 @@ export const approveAdminRequest = async ({
       logo: adminRequest.logo || {},
     });
 
+    // Link Organization Admin with their organization
+createdUser.organizationId = organization._id;
+
+await createdUser.save();
+
     adminRequest.status = "APPROVED";
     adminRequest.reviewedBy = superAdminId;
     adminRequest.reviewedAt = new Date();

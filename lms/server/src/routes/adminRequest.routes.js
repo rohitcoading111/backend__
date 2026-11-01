@@ -23,7 +23,7 @@ import { superAdminMiddleware } from "../middleware/superAdmin.middleware.js";
 
 const router = express.Router();
 
-// Public: Submit an organization Admin request
+// Public: Submit an organizatiQQon Admin request
 router.post(
   "/",
   createAdminRequestValidator,
