@@ -1,3 +1,4 @@
+
 import mongoose from "mongoose";
 
 const pendingRegistrationSchema = new mongoose.Schema(
@@ -26,6 +27,43 @@ const pendingRegistrationSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
+      select: false,
+    },
+
+    // Selected registration account type
+    accountType: {
+      type: String,
+      enum: ["STUDENT", "BUSINESS"],
+      default: "STUDENT",
+    },
+
+    // Temporary business details
+    businessProfile: {
+      businessName: {
+        type: String,
+        trim: true,
+        maxlength: 100,
+        default: null,
+      },
+
+      businessType: {
+        type: String,
+        enum: ["INDIVIDUAL", "COMPANY", "INSTITUTE"],
+        default: null,
+      },
+    },
+
+    // Agreement accepted during onboarding
+    sellerAgreement: {
+      version: {
+        type: String,
+        default: null,
+      },
+
+      acceptedAt: {
+        type: Date,
+        default: null,
+      },
     },
 
     emailOtpHash: {
@@ -68,11 +106,13 @@ const pendingRegistrationSchema = new mongoose.Schema(
   }
 );
 
+// Automatic pending registration cleanup
 pendingRegistrationSchema.index(
   { expiresAt: 1 },
   { expireAfterSeconds: 0 }
 );
 
+// Mobile unique only when present
 pendingRegistrationSchema.index(
   { mobile: 1 },
   {
@@ -83,6 +123,7 @@ pendingRegistrationSchema.index(
   }
 );
 
+// Email unique only when present
 pendingRegistrationSchema.index(
   { email: 1 },
   {
