@@ -10,7 +10,6 @@ export const verifyEmailRegistrationController = async (req, res) => {
       code,
     });
 
-    // Refresh token ko secure HTTP-only cookie mein set karo
     res.cookie("refreshToken", result.refreshToken, {
       httpOnly: true,
       sameSite: "lax",
@@ -18,11 +17,12 @@ export const verifyEmailRegistrationController = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    // User ko bhejne se pehle sensitive fields hatao
-    const safeUser = result.user.toObject();
-
-    delete safeUser.password;
-    delete safeUser.refreshToken;
+    // Service already returns a plain JavaScript object
+    const {
+      password,
+      refreshToken,
+      ...safeUser
+    } = result.user;
 
     return res.status(200).json({
       success: true,
@@ -32,6 +32,7 @@ export const verifyEmailRegistrationController = async (req, res) => {
         user: safeUser,
       },
     });
+
   } catch (error) {
     const knownErrors = {
       "Email and OTP are required": 400,
@@ -39,6 +40,8 @@ export const verifyEmailRegistrationController = async (req, res) => {
       "OTP expired. Please register again": 400,
       "Invalid OTP": 400,
       "Email already registered": 409,
+      "INVALID_ROLE": 400,
+      "BUSINESS_REGISTRATION_DATA_INCOMPLETE": 400,
     };
 
     const statusCode = knownErrors[error.message] || 500;

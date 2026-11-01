@@ -1,3 +1,4 @@
+
 import { completeMobileRegistration } from "../services/mobileRegistration.services.js";
 
 export const verifyMobileRegistrationController = async (req, res) => {
@@ -22,6 +23,7 @@ export const verifyMobileRegistrationController = async (req, res) => {
         user: result.user,
       },
     });
+
   } catch (error) {
     if (error.code === 11000) {
       return res.status(409).json({
@@ -30,30 +32,28 @@ export const verifyMobileRegistrationController = async (req, res) => {
       });
     }
 
-    if (
-      error.message === "Invalid or expired OTP" ||
-      error.message === "Mobile number and OTP are required" ||
-      error.message === "No pending registration found" ||
-      error.message === "Registration expired. Please register again" ||
-      error.message === "Email or mobile number already exists"
-    ) {
-      const status =
-        error.message === "Email or mobile number already exists"
-          ? 409
-          : 400;
+    const clientErrors = {
+      "Invalid or expired OTP": 400,
+      "Mobile number and OTP are required": 400,
+      "No pending registration found": 404,
+      "Registration expired. Please register again": 400,
+      "Email or mobile number already exists": 409,
+      "INVALID_ROLE": 400,
+      "BUSINESS_REGISTRATION_DATA_INVALID": 400,
+    };
 
-      return res.status(status).json({
+    const statusCode = clientErrors[error.message];
+
+    if (statusCode) {
+      return res.status(statusCode).json({
         success: false,
         message: error.message,
       });
     }
 
-    console.error(
-      "OTP verification error:",
-      error.code || error.name
-    );
+    console.error("Mobile OTP Verification Error:", error);
 
-    return res.status(502).json({
+    return res.status(500).json({
       success: false,
       message: "Unable to verify OTP. Please try again.",
     });

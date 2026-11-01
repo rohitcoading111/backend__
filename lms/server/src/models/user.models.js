@@ -16,14 +16,6 @@ const userSchema = new mongoose.Schema(
       trim: true,
       match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
     },
-    userCode: {
-    type: String,
-    unique: true,
-     sparse: true,
-     immutable: true,
-      default: () =>
-    `USR-${crypto.randomBytes(8).toString("hex").toUpperCase()}`,
-},
 
     googleId: {
       type: String,
@@ -165,6 +157,7 @@ adminType: {
 
 // At least one identifier is required
 userSchema.pre("validate", function () {
+  // At least one identifier is required
   if (!this.email && !this.mobile && !this.googleId) {
     this.invalidate(
       "email",
@@ -172,6 +165,7 @@ userSchema.pre("validate", function () {
     );
   }
 
+  // Business account validation
   if (
     this.accountType === "BUSINESS" &&
     this.sellerStatus === "NOT_APPLIED"
@@ -182,24 +176,45 @@ userSchema.pre("validate", function () {
     );
   }
 
+  const isInstructor = this.role === "INSTRUCTOR";
+
+  const isOrganizationAdmin =
+    this.role === "ADMIN" &&
+    this.adminType === "ORGANIZATION_ADMIN";
+
+  // Only instructors can have hiredBy
+  if (this.hiredBy && !isInstructor) {
+    this.invalidate(
+      "hiredBy",
+      "Only instructors can have a hiring admin"
+    );
+  }
+
+  // Organization Admins and Instructors can have organizationId
   if (
-    this.role === "INSTRUCTOR" &&
     this.organizationId &&
-    !this.hiredBy
+    !isInstructor &&
+    !isOrganizationAdmin
   ) {
+    this.invalidate(
+      "organizationId",
+      "Only Organization Admins and Instructors can belong to an organization"
+    );
+  }
+
+  // Organization instructor must have a hiring Admin
+  if (isInstructor && this.organizationId && !this.hiredBy) {
     this.invalidate(
       "hiredBy",
       "An organization instructor must have a hiring admin"
     );
   }
 
-  if (
-    this.role !== "INSTRUCTOR" &&
-    (this.organizationId || this.hiredBy)
-  ) {
+  // Independent instructors have no organization
+  if (isInstructor && !this.organizationId && this.hiredBy) {
     this.invalidate(
       "organizationId",
-      "Only instructors can be assigned to an organization"
+      "An independent instructor cannot have a hiring admin"
     );
   }
 });
