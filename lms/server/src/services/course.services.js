@@ -1,9 +1,27 @@
+
 import courseModel from "../models/course.models.js";
 import imagekit from "../config/imagekit.js";
 import Module from "../models/module.models.js";
 import Lecture from "../models/lecture.models.js";
 
-export const createCourse = async ({ courseData, instructorId, file }) => {
+// Common ownership filter
+const getCourseOwnershipFilter = (
+  courseId,
+  instructorId,
+  organizationId
+) => ({
+  _id: courseId,
+  instructor: instructorId,
+  organizationId: organizationId ?? null,
+});
+
+// Create Course
+export const createCourse = async ({
+  courseData,
+  instructorId,
+  organizationId,
+  file,
+}) => {
   const {
     title,
     description,
@@ -12,29 +30,36 @@ export const createCourse = async ({ courseData, instructorId, file }) => {
     level,
   } = courseData;
 
+  if (!instructorId) {
+    throw new Error("Invalid instructor ID");
+  }
+
+  if (!file) {
+    throw new Error("Course thumbnail is required");
+  }
+
   let thumbnailData = {
     url: null,
     fileId: null,
   };
 
-  if (file) {
-    const uploadResponse = await imagekit.files.upload({
-      file: file.buffer.toString("base64"),
-      fileName: `${Date.now()}-${file.originalname}`,
-      folder: "/lms/course-thumbnails",
-    });
+  const uploadResponse = await imagekit.files.upload({
+    file: file.buffer.toString("base64"),
+    fileName: `${Date.now()}-${file.originalname}`,
+    folder: "/lms/course-thumbnails",
+  });
 
-    thumbnailData = {
-      url: uploadResponse.url,
-      fileId: uploadResponse.fileId,
-    };
-  }
+  thumbnailData = {
+    url: uploadResponse.url,
+    fileId: uploadResponse.fileId,
+  };
 
   const course = await courseModel.create({
     title,
     description,
     thumbnail: thumbnailData,
     instructor: instructorId,
+    organizationId: organizationId ?? null,
     price,
     category,
     level,
@@ -44,27 +69,42 @@ export const createCourse = async ({ courseData, instructorId, file }) => {
   return course;
 };
 
-export const getCourse = async (instructorId) => {
+
+// Get My Courses
+export const getCourse = async (
+  instructorId,
+  organizationId
+) => {
   if (!instructorId) {
     throw new Error("Invalid instructor ID");
   }
 
-  const matchingData = await courseModel.find({
+  const courses = await courseModel.find({
     instructor: instructorId,
-  });
+    organizationId: organizationId ?? null,
+  }).sort({ createdAt: -1 });
 
-  return matchingData;
+  return courses;
 };
 
-export const getSingleCourse = async (courseId, instructorId) => {
+
+// Get Single Course
+export const getSingleCourse = async (
+  courseId,
+  instructorId,
+  organizationId
+) => {
   if (!courseId || !instructorId) {
     throw new Error("Invalid course or instructor ID");
   }
 
-  const course = await courseModel.findOne({
-    _id: courseId,
-    instructor: instructorId,
-  });
+  const course = await courseModel.findOne(
+    getCourseOwnershipFilter(
+      courseId,
+      instructorId,
+      organizationId
+    )
+  );
 
   if (!course) {
     throw new Error("Course not found or access denied");
@@ -74,9 +114,12 @@ export const getSingleCourse = async (courseId, instructorId) => {
 };
 
 
+// Get All Published Courses (Public)
 export const getAllPublishedCourses = async () => {
   const courses = await courseModel
-    .find({ status: "PUBLISHED" })
+    .find({
+      status: "PUBLISHED",
+    })
     .select("-__v")
     .sort({ createdAt: -1 });
 
@@ -84,10 +127,11 @@ export const getAllPublishedCourses = async () => {
 };
 
 
-
+// Update Course
 export const updateCourse = async ({
   courseId,
   instructorId,
+  organizationId,
   updateData,
   file,
 }) => {
@@ -95,10 +139,13 @@ export const updateCourse = async ({
     throw new Error("Invalid course or instructor ID");
   }
 
-  const course = await courseModel.findOne({
-    _id: courseId,
-    instructor: instructorId,
-  });
+  const course = await courseModel.findOne(
+    getCourseOwnershipFilter(
+      courseId,
+      instructorId,
+      organizationId
+    )
+  );
 
   if (!course) {
     throw new Error("Course not found or access denied");
@@ -112,12 +159,14 @@ export const updateCourse = async ({
     "level",
   ];
 
+  // Update only allowed fields
   allowedFields.forEach((field) => {
     if (updateData[field] !== undefined) {
       course[field] = updateData[field];
     }
   });
 
+  // Update thumbnail
   if (file) {
     const uploadResponse = await imagekit.files.upload({
       file: file.buffer.toString("base64"),
@@ -136,52 +185,62 @@ export const updateCourse = async ({
   return course;
 };
 
-export const deleteCourse = async (courseId, instructorId) => {
+
+// Delete Course
+export const deleteCourse = async (
+  courseId,
+  instructorId,
+  organizationId
+) => {
   if (!courseId || !instructorId) {
     throw new Error("Invalid course or instructor ID");
   }
 
-  // 1. Check course ownership
-  const course = await courseModel.findOne({
-    _id: courseId,
-    instructor: instructorId,
-  });
+  const ownershipFilter = getCourseOwnershipFilter(
+    courseId,
+    instructorId,
+    organizationId
+  );
+
+  // Verify course ownership first
+  const course = await courseModel.findOne(ownershipFilter);
 
   if (!course) {
     throw new Error("Course not found or access denied");
   }
 
-  // 2. Find all modules of this course
-  const modules = await Module.find({ course: courseId });
+  // Get all modules belonging to this course
+  const modules = await Module.find({
+    course: courseId,
+  });
 
   const moduleIds = modules.map((module) => module._id);
 
-  // 3. Find all lectures inside these modules
+  // Get all lectures belonging to these modules
   const lectures = await Lecture.find({
     module: { $in: moduleIds },
   });
 
-  // 4. Delete lectures from database
+  // Delete lectures
   await Lecture.deleteMany({
     module: { $in: moduleIds },
   });
 
-  // 5. Delete modules from database
+  // Delete modules
   await Module.deleteMany({
     course: courseId,
   });
 
-  // 6. Delete the course itself
-  const deletedCourse = await courseModel.findOneAndDelete({
-    _id: courseId,
-    instructor: instructorId,
-  });
+  // Delete course using same ownership filter
+  const deletedCourse = await courseModel.findOneAndDelete(
+    ownershipFilter
+  );
 
   if (!deletedCourse) {
     throw new Error("Course not found or access denied");
   }
 
-  // 7. Collect ImageKit file IDs
+  // Collect ImageKit file IDs
   const fileIds = [];
 
   if (deletedCourse.thumbnail?.fileId) {
@@ -194,7 +253,7 @@ export const deleteCourse = async (courseId, instructorId) => {
     }
   }
 
-  // 8. Clean up uploaded files from ImageKit
+  // Delete uploaded media
   const cleanupResults = await Promise.allSettled(
     fileIds.map((fileId) => imagekit.files.delete(fileId))
   );
@@ -203,7 +262,6 @@ export const deleteCourse = async (courseId, instructorId) => {
     (result) => result.status === "rejected"
   );
 
-  // 9. Return deletion summary
   return {
     course: deletedCourse,
     deletedModules: modules.length,
@@ -212,15 +270,24 @@ export const deleteCourse = async (courseId, instructorId) => {
   };
 };
 
-export const publishCourse = async (courseId, instructorId) => {
+
+// Publish Course
+export const publishCourse = async (
+  courseId,
+  instructorId,
+  organizationId
+) => {
   if (!courseId || !instructorId) {
     throw new Error("Invalid course or instructor ID");
   }
 
-  const course = await courseModel.findOne({
-    _id: courseId,
-    instructor: instructorId,
-  });
+  const course = await courseModel.findOne(
+    getCourseOwnershipFilter(
+      courseId,
+      instructorId,
+      organizationId
+    )
+  );
 
   if (!course) {
     throw new Error("Course not found or access denied");
@@ -237,15 +304,24 @@ export const publishCourse = async (courseId, instructorId) => {
   return course;
 };
 
-export const unpublishCourse = async (courseId, instructorId) => {
+
+// Unpublish Course
+export const unpublishCourse = async (
+  courseId,
+  instructorId,
+  organizationId
+) => {
   if (!courseId || !instructorId) {
     throw new Error("Invalid course or instructor ID");
   }
 
-  const course = await courseModel.findOne({
-    _id: courseId,
-    instructor: instructorId,
-  });
+  const course = await courseModel.findOne(
+    getCourseOwnershipFilter(
+      courseId,
+      instructorId,
+      organizationId
+    )
+  );
 
   if (!course) {
     throw new Error("Course not found or access denied");
