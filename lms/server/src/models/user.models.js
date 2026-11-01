@@ -36,17 +36,23 @@ const userSchema = new mongoose.Schema(
       select: false,
     },
 
-    role: {
-      type: String,
-      enum: ["STUDENT", "INSTRUCTOR", "ADMIN"],
-      default: "STUDENT",
-    },
+   role: {
+  type: String,
+  enum: ["STUDENT", "INSTRUCTOR", "ADMIN"],
+  default: "STUDENT",
+},
 
-    accountType: {
-      type: String,
-      enum: ["STUDENT", "BUSINESS"],
-      default: "STUDENT",
-    },
+accountType: {
+  type: String,
+  enum: ["STUDENT", "BUSINESS"],
+  default: "STUDENT",
+},
+
+adminType: {
+  type: String,
+  enum: ["SUPER_ADMIN", "ORGANIZATION_ADMIN"],
+  default: null,
+},
 
     sellerStatus: {
       type: String,

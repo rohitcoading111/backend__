@@ -1,16 +1,20 @@
 import express from "express";
-import { updateUserRole,getAllUsers } from "../controllers/admin.controllers.js";
-import { authMiddleware } from "../middleware/auth.middleware.js";
-import { roleMiddleware } from "../middleware/role.middleware.js";
-import { roleValidation } from "../validators/admin.validator.js";
 
+import {
+  updateUserRole,
+  getAllUsers,
+} from "../controllers/admin.controllers.js";
+
+import { authMiddleware } from "../middleware/auth.middleware.js";
+import { superAdminMiddleware } from "../middleware/superAdmin.middleware.js";
+import { roleValidation } from "../validators/admin.validator.js";
 
 const router = express.Router();
 
 router.patch(
   "/users/:userId/role",
   authMiddleware,
-  roleMiddleware("ADMIN"),
+  superAdminMiddleware,
   roleValidation,
   updateUserRole
 );
@@ -18,7 +22,7 @@ router.patch(
 router.get(
   "/users",
   authMiddleware,
-  roleMiddleware("ADMIN"),
+  superAdminMiddleware,
   getAllUsers
 );
 

@@ -13,22 +13,28 @@ const createAdmin = async () => {
       email: config.ADMIN_EMAIL,
     });
 
-    if (existingAdmin) {
-      console.log("Admin user already exists");
-      return;
-    }
+  if (existingAdmin) {
+  existingAdmin.role = "ADMIN";
+  existingAdmin.accountType = "BUSINESS";
+  existingAdmin.adminType = "SUPER_ADMIN";
 
+  await existingAdmin.save();
+
+  console.log("Existing Admin updated as Super Admin");
+  return;
+}
     const hashedPassword = await bcrypt.hash(
       config.ADMIN_PASSWORD,
       12
     );
-
-    const admin = await User.create({
-      name: config.ADMIN_NAME,
-      email: config.ADMIN_EMAIL,
-      password: hashedPassword,
-      role: "ADMIN",
-    });
+  const admin = await User.create({
+  name: config.ADMIN_NAME,
+  email: config.ADMIN_EMAIL,
+  password: hashedPassword,
+  role: "ADMIN",
+  accountType: "BUSINESS",
+  adminType: "SUPER_ADMIN",
+});
 
     console.log("Admin created successfully:", admin.email);
 
