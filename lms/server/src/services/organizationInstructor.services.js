@@ -1,4 +1,3 @@
-
 import User from "../models/user.models.js";
 
 // Search only independent instructors by exact email or instructorCode
@@ -60,4 +59,175 @@ export const searchIndependentInstructor = async (identifier) => {
     role: instructor.role,
     employmentStatus: instructor.employmentStatus,
   };
+};
+
+
+
+const createError = (message, statusCode) => {
+  const error = new Error(message);
+  error.statusCode = statusCode;
+  return error;
+};
+
+// Hire an independent instructor into Admin's organization
+export const hireInstructor = async ({
+  userId,
+  organizationId,
+  adminId,
+}) => {
+  // Find the instructor
+  const instructor = await User.findById(userId).select(
+    "_id name email role instructorCode organizationId hiredBy employmentStatus"
+  );
+
+  if (!instructor) {
+    throw createError("Instructor not found", 404);
+  }
+
+  // Only Instructor accounts can be hired
+  if (instructor.role !== "INSTRUCTOR") {
+    throw createError(
+      "Only registered instructors can be hired",
+      400
+    );
+  }
+
+  // Instructor must have a permanent Instructor ID
+  if (!instructor.instructorCode) {
+    throw createError(
+      "Instructor ID is missing. This account needs an Instructor ID before hiring",
+      409
+    );
+  }
+
+  // Only independent instructors can be hired
+  if (
+    instructor.organizationId ||
+    instructor.hiredBy ||
+    instructor.employmentStatus !== "INDEPENDENT"
+  ) {
+    throw createError(
+      "This instructor is already associated with an organization",
+      409
+    );
+  }
+
+  // Atomically assign the instructor to this Admin's organization.
+  // This also prevents two organizations from hiring the same
+  // instructor simultaneously.
+  const hiredInstructor = await User.findOneAndUpdate(
+    {
+      _id: instructor._id,
+      role: "INSTRUCTOR",
+      instructorCode: instructor.instructorCode,
+      organizationId: null,
+      hiredBy: null,
+      employmentStatus: "INDEPENDENT",
+    },
+    {
+      $set: {
+        organizationId,
+        hiredBy: adminId,
+        employmentStatus: "ACTIVE",
+      },
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  ).select(
+    "_id name email role instructorCode organizationId hiredBy employmentStatus"
+  );
+
+  if (!hiredInstructor) {
+    throw createError(
+      "Instructor could not be hired. They may have already been hired",
+      409
+    );
+  }
+
+  return {
+    id: hiredInstructor._id,
+    name: hiredInstructor.name,
+    email: hiredInstructor.email,
+    role: hiredInstructor.role,
+    instructorCode: hiredInstructor.instructorCode,
+    organizationId: hiredInstructor.organizationId,
+    hiredBy: hiredInstructor.hiredBy,
+    employmentStatus: hiredInstructor.employmentStatus,
+  };
+};
+
+
+export const removeInstructor = async ({
+  instructorId,
+  organizationId,
+  adminId,
+}) => {
+  const instructor = await User.findOneAndUpdate(
+    {
+      _id: instructorId,
+      role: "INSTRUCTOR",
+
+      // Only this Admin's organization's employee
+      organizationId,
+      hiredBy: adminId,
+      employmentStatus: "ACTIVE",
+    },
+    {
+      $set: {
+        organizationId: null,
+        hiredBy: null,
+        employmentStatus: "INDEPENDENT",
+      },
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  ).select(
+    "_id name email role instructorCode organizationId hiredBy employmentStatus"
+  );
+
+  if (!instructor) {
+    const error = new Error(
+      "Instructor not found in your organization or already removed"
+    );
+    error.statusCode = 404;
+    throw error;
+  }
+
+  return {
+    id: instructor._id,
+    name: instructor.name,
+    email: instructor.email,
+    role: instructor.role,
+    instructorCode: instructor.instructorCode,
+    organizationId: instructor.organizationId,
+    hiredBy: instructor.hiredBy,
+    employmentStatus: instructor.employmentStatus,
+  };
+};
+
+
+// Get all active instructors belonging to Admin's organization
+export const getOrganizationInstructors = async (organizationId) => {
+  if (!organizationId) {
+    const error = new Error("Organization ID is required");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const instructors = await User.find({
+    organizationId,
+    role: "INSTRUCTOR",
+    employmentStatus: "ACTIVE",
+  })
+    .select(
+      "_id name email instructorCode role employmentStatus createdAt"
+    )
+    .sort({ createdAt: -1 })
+    .lean();
+
+  return instructors;
 };
