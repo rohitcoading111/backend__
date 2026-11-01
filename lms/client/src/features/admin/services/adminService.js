@@ -1,23 +1,16 @@
-
 import api from "../../../services/api.js";
 
-// Fetch all registered users from the backend.
+// Fetch Organization Admins for Super Admin
 export const getAllUsers = async () => {
   const response = await api.get("/admin/users");
-
-  // Return the backend response body to the caller.
   return response.data;
 };
 
-// Update a specific user's role.
-export const updateUserRole = async (userId, newRole) => {
+// Suspend Organization Admin and its Organization
+export const suspendOrganizationAdmin = async (userId) => {
   const response = await api.patch(
-    `/admin/users/${userId}/role`,
-    {
-      role: newRole,
-    }
+    `/admin/users/${userId}/suspend`
   );
 
-  // Return the updated user response from the backend.
   return response.data;
 };
