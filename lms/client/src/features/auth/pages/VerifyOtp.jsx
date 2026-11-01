@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Mail, ArrowRight, Smartphone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -116,6 +115,7 @@ function VerifyOtp() {
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 font-semibold hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isSubmitting ? "Verifying..." : "Verify OTP"}
+
             {!isSubmitting && <ArrowRight size={17} />}
           </button>
         </form>

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -7,8 +6,10 @@ import {
   verifyEmailLoginOtp,
   verifyMobileLoginOtp,
   verifyEmailRegistrationOtp,
-  verifyMobileRegistrationOtp
+  verifyMobileRegistrationOtp,
 } from "../authThunk/authThunks.js";
+
+import { getDashboardPath } from "../utils/getDashboardPath.js";
 
 function useVerifyOtp() {
   const dispatch = useDispatch();
@@ -24,87 +25,76 @@ function useVerifyOtp() {
     (state) => state.auth
   );
 
+  const onSubmit = async (event) => {
+    event.preventDefault();
+    setLocalError("");
 
-const onSubmit = async (event) => {
-  event.preventDefault();
-  setLocalError("");
-
-  if (!/^\d{6}$/.test(otp)) {
-    setLocalError("Please enter a valid 6-digit OTP.");
-    return;
-  }
-
-  if (!flow || !method || !identifier) {
-    setLocalError("Verification session not found. Please try again.");
-    return;
-  }
-
-  try {
-    let result;
-
-    if (flow === "register" && method === "email") {
-      result = await dispatch(
-        verifyEmailRegistrationOtp({
-          email: identifier,
-          code: otp,
-        })
-      ).unwrap();
-    } else if (flow === "register" && method === "mobile") {
-      result = await dispatch(
-        verifyMobileRegistrationOtp({
-          mobile: identifier,
-          code: otp,
-        })
-      ).unwrap();
-    } else if (flow === "login" && method === "email") {
-      result = await dispatch(
-        verifyEmailLoginOtp({
-          email: identifier,
-          code: otp,
-        })
-      ).unwrap();
-    } else if (flow === "login" && method === "mobile") {
-      result = await dispatch(
-        verifyMobileLoginOtp({
-          mobile: identifier,
-          code: otp,
-        })
-      ).unwrap();
-    } else {
-      setLocalError("Unsupported verification method.");
+    if (!/^\d{6}$/.test(otp)) {
+      setLocalError("Please enter a valid 6-digit OTP.");
       return;
     }
 
-    const response = result?.data ?? result;
+    if (!flow || !method || !identifier) {
+      setLocalError("Verification session not found. Please try again.");
+      return;
+    }
 
-    if (response?.user) {
-      const role = response.user.role;
+    try {
+      let result;
 
-      if (role === "STUDENT") {
-        navigate("/courses", { replace: true });
-      } else if (role === "INSTRUCTOR") {
-        navigate("/instructor-dashboard", { replace: true });
+      if (flow === "register" && method === "email") {
+        result = await dispatch(
+          verifyEmailRegistrationOtp({
+            email: identifier,
+            code: otp,
+          })
+        ).unwrap();
+      } else if (flow === "register" && method === "mobile") {
+        result = await dispatch(
+          verifyMobileRegistrationOtp({
+            mobile: identifier,
+            code: otp,
+          })
+        ).unwrap();
+      } else if (flow === "login" && method === "email") {
+        result = await dispatch(
+          verifyEmailLoginOtp({
+            email: identifier,
+            code: otp,
+          })
+        ).unwrap();
+      } else if (flow === "login" && method === "mobile") {
+        result = await dispatch(
+          verifyMobileLoginOtp({
+            mobile: identifier,
+            code: otp,
+          })
+        ).unwrap();
       } else {
-        setLocalError("Unsupported user role.");
+        setLocalError("Unsupported verification method.");
+        return;
       }
-    } else if (flow === "register") {
+
+      const response = result?.data ?? result;
+
+      if (!response?.user) {
+        setLocalError(
+          "Verification succeeded, but user details were not returned."
+        );
+        return;
+      }
+
+      const dashboardPath = getDashboardPath(response.user);
+
+      navigate(dashboardPath, { replace: true });
+    } catch (error) {
       setLocalError(
-        "Registration verified, but user details were not returned."
-      );
-    } else {
-      setLocalError(
-        "Verification succeeded, but user details were not returned."
+        typeof error === "string"
+          ? error
+          : error?.message || "OTP verification failed. Please try again."
       );
     }
-  } catch (error) {
-    setLocalError(
-      typeof error === "string"
-        ? error
-        : "OTP verification failed. Please try again."
-    );
-  }
-};
-
+  };
 
   return {
     flow,

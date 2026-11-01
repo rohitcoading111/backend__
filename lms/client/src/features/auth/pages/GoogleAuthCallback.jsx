@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
+
 import authService from "../services/authService";
 import { setGoogleAuth } from "../authSlices/authSlice.js";
+import { getDashboardPath } from "../utils/getDashboardPath.js";
 
 function GoogleAuthCallback() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const started = useRef(false);
   const [error, setError] = useState("");
 
@@ -16,9 +19,7 @@ function GoogleAuthCallback() {
 
     const finishGoogleLogin = async () => {
       try {
-        const params = new URLSearchParams(
-          window.location.search
-        );
+        const params = new URLSearchParams(window.location.search);
         const code = params.get("code");
 
         window.history.replaceState(
@@ -37,25 +38,21 @@ function GoogleAuthCallback() {
         const response = result?.data ?? result;
 
         if (!response?.user || !response?.accessToken) {
-          throw new Error("Google authentication response is incomplete.");
+          throw new Error(
+            "Google authentication response is incomplete."
+          );
         }
 
-      dispatch(
-  setGoogleAuth({
-    user: response.user,
-    accessToken: response.accessToken,
-  })
-);
+        dispatch(
+          setGoogleAuth({
+            user: response.user,
+            accessToken: response.accessToken,
+          })
+        );
 
-const role = response.user.role;
-
-if (role === "INSTRUCTOR") {
-  navigate("/instructor-dashboard", { replace: true });
-} else if (role === "STUDENT") {
-  navigate("/courses", { replace: true });
-} else {
-  throw new Error(`Unsupported user role: ${role}`);
-}
+        navigate(getDashboardPath(response.user), {
+          replace: true,
+        });
       } catch (err) {
         setError(
           err.response?.data?.message ||
@@ -73,6 +70,7 @@ if (role === "INSTRUCTOR") {
       {error ? (
         <div className="text-center">
           <p className="text-red-400">{error}</p>
+
           <button
             onClick={() => navigate("/login")}
             className="mt-4 rounded-lg bg-indigo-600 px-4 py-2"

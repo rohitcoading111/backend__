@@ -1,9 +1,10 @@
-
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { loginUser } from "../authThunk/authThunks.js";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+
+import { loginUser } from "../authThunk/authThunks.js";
+import { getDashboardPath } from "../utils/getDashboardPath.js";
 
 function useLoginForm() {
   const dispatch = useDispatch();
@@ -34,15 +35,16 @@ function useLoginForm() {
       const isEmail =
         /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
 
-      // Added: normalize Indian mobile number
       const digits = identifier.replace(/\D/g, "");
 
-      const normalizedMobile = digits.startsWith("91")
-        ? `+${digits}`
-        : `+91${digits}`;
+      const normalizedMobile =
+        digits.startsWith("91") && digits.length === 12
+          ? `+${digits}`
+          : `+91${digits}`;
 
       const credentials = {
         password: data.password,
+
         ...(isEmail
           ? { email: identifier.toLowerCase() }
           : { mobile: normalizedMobile }),
@@ -54,16 +56,25 @@ function useLoginForm() {
 
       const response = result?.data ?? result;
 
+      // Existing OTP flow preserved.
       if (response?.otpRequired || response?.mobile) {
         navigate("/verify-otp", {
           state: {
             flow: "login",
             method: isEmail ? "email" : "mobile",
-            // Added: pass normalized number to OTP page too
             identifier: isEmail
               ? identifier.toLowerCase()
               : normalizedMobile,
           },
+        });
+
+        return;
+      }
+
+      // Direct login, when OTP is not required.
+      if (response?.user) {
+        navigate(getDashboardPath(response.user), {
+          replace: true,
         });
       }
     } catch (error) {
