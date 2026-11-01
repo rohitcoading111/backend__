@@ -1,3 +1,4 @@
+
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import config from "../config/config.js";
@@ -9,39 +10,53 @@ const createAdmin = async () => {
 
     console.log("DB has been connected");
 
+    // Check if Super Admin already exists
     const existingAdmin = await User.findOne({
-      email: config.ADMIN_EMAIL,
+      email: config.ADMIN_EMAIL.toLowerCase().trim(),
     });
 
-  if (existingAdmin) {
-  existingAdmin.role = "ADMIN";
-  existingAdmin.accountType = "BUSINESS";
-  existingAdmin.adminType = "SUPER_ADMIN";
+    // Update existing account
+    if (existingAdmin) {
+      existingAdmin.role = "ADMIN";
+      existingAdmin.accountType = "BUSINESS";
+      existingAdmin.adminType = "SUPER_ADMIN";
+      existingAdmin.sellerStatus = "APPROVED";
 
-  await existingAdmin.save();
+      await existingAdmin.save();
 
-  console.log("Existing Admin updated as Super Admin");
-  return;
-}
+      console.log("Existing user updated as Super Admin");
+      console.log("Super Admin Email:", existingAdmin.email);
+
+      return;
+    }
+
+    // Hash password
     const hashedPassword = await bcrypt.hash(
       config.ADMIN_PASSWORD,
       12
     );
-  const admin = await User.create({
-  name: config.ADMIN_NAME,
-  email: config.ADMIN_EMAIL,
-  password: hashedPassword,
-  role: "ADMIN",
-  accountType: "BUSINESS",
-  adminType: "SUPER_ADMIN",
-});
 
-    console.log("Admin created successfully:", admin.email);
+    // Create new Super Admin
+    const admin = await User.create({
+      name: config.ADMIN_NAME,
+      email: config.ADMIN_EMAIL.toLowerCase().trim(),
+      password: hashedPassword,
+
+      role: "ADMIN",
+      accountType: "BUSINESS",
+      adminType: "SUPER_ADMIN",
+      sellerStatus: "APPROVED",
+
+      isVerified: true,
+    });
+
+    console.log("Super Admin created successfully:", admin.email);
 
   } catch (error) {
-    console.error("Error creating admin user:", error);
+    console.error("Error creating Super Admin:", error);
   } finally {
     await mongoose.disconnect();
+    console.log("Database disconnected");
   }
 };
 

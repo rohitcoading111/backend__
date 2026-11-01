@@ -5,10 +5,14 @@ export const generateAccessToken = (user) => {
     const accessToken = jwt.sign({
         id: user._id,
         email: user.email,
-        role: user.role
-    },config.ACCESS_TOKEN_SECRET, { expiresIn: config.ACCESS_TOKEN_EXPIRES_IN });
+        role: user.role,
+        adminType: user.adminType || null
+    }, config.ACCESS_TOKEN_SECRET, {
+        expiresIn: config.ACCESS_TOKEN_EXPIRES_IN
+    });
+
     return accessToken;
-}
+};
 
 export const generateRefreshToken = (user) =>{
     const refreshToken = jwt.sign({

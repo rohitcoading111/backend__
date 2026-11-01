@@ -19,9 +19,9 @@ export const authMiddleware = async (req, res, next) => {
     );
 
     // Fetch the latest user data from MongoDB
-    const user = await User.findById(decoded.id).select(
-      "_id name email mobile role avatar"
-    );
+  const user = await User.findById(decoded.id).select(
+  "_id name email mobile role avatar adminType"
+);
 
     if (!user) {
       return res.status(401).json({
@@ -31,13 +31,14 @@ export const authMiddleware = async (req, res, next) => {
     }
 
     req.user = {
-      id: user._id.toString(),
-      name: user.name,
-      email: user.email,
-      mobile: user.mobile,
-      role: user.role,
-      avatar: user.avatar,
-    };
+  id: user._id.toString(),
+  name: user.name,
+  email: user.email,
+  mobile: user.mobile,
+  role: user.role,
+  adminType: user.adminType,
+  avatar: user.avatar,
+};
 
     next();
   } catch (error) {
