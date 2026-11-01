@@ -1,3 +1,4 @@
+
 import bcrypt from "bcryptjs";
 
 import userModel from "../models/user.models.js";
@@ -21,8 +22,67 @@ const OTP_SEND_WINDOW_MS = 60 * 60 * 1000;
 const MAX_OTP_SENDS_PER_WINDOW = 5;
 const PENDING_REGISTRATION_TTL_MS = 10 * 60 * 1000;
 
+const ACTIVE_SELLER_AGREEMENT_VERSION = "1.0";
+
 const normalizeEmail = (email) =>
   email?.trim().toLowerCase() || undefined;
+
+const prepareRegistrationData = ({
+  accountType,
+  businessName,
+  businessType,
+  agreementAccepted,
+}) => {
+  const normalizedAccountType = (
+    accountType || "STUDENT"
+  ).toUpperCase();
+
+  if (!["STUDENT", "BUSINESS"].includes(normalizedAccountType)) {
+    throw new Error("INVALID_ACCOUNT_TYPE");
+  }
+
+  if (normalizedAccountType === "STUDENT") {
+    return {
+      accountType: "STUDENT",
+      businessProfile: undefined,
+      sellerAgreement: undefined,
+    };
+  }
+
+  const normalizedBusinessName = businessName?.trim();
+  const normalizedBusinessType = businessType?.toUpperCase();
+
+  if (!normalizedBusinessName) {
+    throw new Error("BUSINESS_NAME_REQUIRED");
+  }
+
+  if (
+    !["INDIVIDUAL", "COMPANY", "INSTITUTE"].includes(
+      normalizedBusinessType
+    )
+  ) {
+    throw new Error("INVALID_BUSINESS_TYPE");
+  }
+
+  if (
+    agreementAccepted !== true &&
+    agreementAccepted !== "true"
+  ) {
+    throw new Error("SELLER_AGREEMENT_REQUIRED");
+  }
+
+  return {
+    accountType: "BUSINESS",
+    businessProfile: {
+      businessName: normalizedBusinessName,
+      businessType: normalizedBusinessType,
+    },
+    sellerAgreement: {
+      version: ACTIVE_SELLER_AGREEMENT_VERSION,
+      acceptedAt: new Date(),
+    },
+  };
+};
 
 const throwDuplicateRegistrationError = (error) => {
   if (error?.code === 11000) {
@@ -38,6 +98,10 @@ export const startMobileRegistration = async ({
   mobile,
   password,
   file,
+  accountType,
+  businessName,
+  businessType,
+  agreementAccepted,
 }) => {
   const normalizedName = name?.trim();
   const normalizedEmail = normalizeEmail(email);
@@ -47,11 +111,23 @@ export const startMobileRegistration = async ({
     throw new Error("Name, mobile and password are required");
   }
 
+  if (password.length < 8) {
+    throw new Error("Password must be at least 8 characters");
+  }
+
   if (!/^\+[1-9]\d{7,14}$/.test(normalizedMobile)) {
     throw new Error(
       "Enter mobile number with country code, e.g. +919876543210"
     );
   }
+
+  // Validate Student/Business registration details.
+  const registrationData = prepareRegistrationData({
+    accountType,
+    businessName,
+    businessType,
+    agreementAccepted,
+  });
 
   const identifiers = [
     { mobile: normalizedMobile },
@@ -76,6 +152,7 @@ export const startMobileRegistration = async ({
     await PendingRegistration.deleteOne({
       _id: pendingRegistration._id,
     });
+
     pendingRegistration = null;
   }
 
@@ -109,6 +186,7 @@ export const startMobileRegistration = async ({
         mobile: normalizedMobile,
         password: hashedPassword,
         avatar: avatarData,
+        ...registrationData,
         expiresAt: new Date(
           now.getTime() + PENDING_REGISTRATION_TTL_MS
         ),
@@ -192,6 +270,14 @@ export const startMobileRegistration = async ({
     pendingRegistration.email = normalizedEmail;
     pendingRegistration.password = hashedPassword;
     pendingRegistration.avatar = avatarData;
+
+    // Save Student/Business registration details.
+    pendingRegistration.accountType = registrationData.accountType;
+    pendingRegistration.businessProfile =
+      registrationData.businessProfile;
+    pendingRegistration.sellerAgreement =
+      registrationData.sellerAgreement;
+
     pendingRegistration.expiresAt = new Date(
       now.getTime() + PENDING_REGISTRATION_TTL_MS
     );
@@ -262,17 +348,59 @@ export const completeMobileRegistration = async ({
     throw new Error("Email or mobile number already exists");
   }
 
+  // Decide final role on the backend, never from client input.
+  const accountType = pendingUser.accountType || "STUDENT";
+
+  let userData = {
+    name: pendingUser.name,
+    email: pendingUser.email,
+    mobile: pendingUser.mobile,
+    password: pendingUser.password,
+    avatar: pendingUser.avatar,
+    mobileVerified: true,
+    accountType: "STUDENT",
+    role: "STUDENT",
+    sellerStatus: "NOT_APPLIED",
+  };
+
+  if (accountType === "BUSINESS") {
+    const businessName =
+      pendingUser.businessProfile?.businessName;
+
+    const businessType =
+      pendingUser.businessProfile?.businessType;
+
+    const agreementVersion =
+      pendingUser.sellerAgreement?.version;
+
+    const agreementAcceptedAt =
+      pendingUser.sellerAgreement?.acceptedAt;
+
+    if (
+      !businessName ||
+      !["INDIVIDUAL", "COMPANY", "INSTITUTE"].includes(
+        businessType
+      ) ||
+      !agreementVersion ||
+      !agreementAcceptedAt
+    ) {
+      throw new Error("BUSINESS_REGISTRATION_DATA_INVALID");
+    }
+
+    userData = {
+      ...userData,
+      accountType: "BUSINESS",
+      role: "INSTRUCTOR",
+      sellerStatus: "PENDING",
+      businessProfile: pendingUser.businessProfile,
+      sellerAgreement: pendingUser.sellerAgreement,
+    };
+  }
+
   let newUser;
 
   try {
-    newUser = await userModel.create({
-      name: pendingUser.name,
-      email: pendingUser.email,
-      mobile: pendingUser.mobile,
-      password: pendingUser.password,
-      avatar: pendingUser.avatar,
-      mobileVerified: true,
-    });
+    newUser = await userModel.create(userData);
   } catch (error) {
     throwDuplicateRegistrationError(error);
   }
@@ -284,9 +412,9 @@ export const completeMobileRegistration = async ({
   await newUser.save();
 
   await sendMobileRegistrationNotification({
-  mobile: newUser.mobile,
-  name: newUser.name,
-});
+    mobile: newUser.mobile,
+    name: newUser.name,
+  });
 
   await PendingRegistration.deleteOne({
     _id: pendingUser._id,
@@ -302,6 +430,10 @@ export const completeMobileRegistration = async ({
       email: newUser.email,
       mobile: newUser.mobile,
       mobileVerified: newUser.mobileVerified,
+      role: newUser.role,
+      accountType: newUser.accountType,
+      sellerStatus: newUser.sellerStatus,
+      businessProfile: newUser.businessProfile,
     },
   };
 };
