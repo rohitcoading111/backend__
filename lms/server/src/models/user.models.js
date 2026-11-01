@@ -42,6 +42,12 @@ const userSchema = new mongoose.Schema(
     default: undefined,
 },
 
+adminStatus: {
+  type: String,
+  enum: ["ACTIVE", "SUSPENDED"],
+  default: "ACTIVE",
+},
+
    role: {
   type: String,
   enum: ["STUDENT", "INSTRUCTOR", "ADMIN"],

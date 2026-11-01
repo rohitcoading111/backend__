@@ -1,71 +1,71 @@
 import User from "../models/user.models.js";
 
-export const updateUserRole = async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const { role } = req.body;
 
-    const allowedRoles = ["STUDENT", "INSTRUCTOR", "ADMIN"];
+import {
+  suspendOrganizationAdmin,
+} from "../services/admin.services.js";
 
-    if (!allowedRoles.includes(role)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid role",
-      });
-    }
 
-    const user = await User.findById(userId);
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-
-    user.role = role;
-
-    await user.save();
-
-    return res.status(200).json({
-      success: true,
-      message: "User role updated successfully",
-      data: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
-    });
-  } catch (error) {
-    console.error("Update User Role Error:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
-  }
-};
 
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find()
-      .select("name email mobile role avatar isVerified createdAt")
+    const users = await User.find({
+      role: "ADMIN",
+      adminType: "ORGANIZATION_ADMIN",
+    })
+      .select(
+        "_id name email mobile role adminType organizationId isVerified createdAt"
+      )
+      .populate(
+        "organizationId",
+        "name organizationType status"
+      )
       .sort({ createdAt: -1 })
       .lean();
 
     return res.status(200).json({
       success: true,
       data: {
+        total: users.length,
         users,
       },
     });
   } catch (error) {
-    console.error("Get All Users Error:", error);
+    console.error("Get Organization Admins Error:", error);
 
     return res.status(500).json({
       success: false,
-      message: "Failed to fetch users",
+      message: "Failed to fetch Organization Admins",
+    });
+  }
+};
+
+
+export const suspendOrganizationAdminController = async (
+  req,
+  res
+) => {
+  try {
+    const { userId } = req.params;
+
+    const result = await suspendOrganizationAdmin(userId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Organization Admin suspended successfully",
+      data: {
+        admin: result.admin,
+        organization: result.organization,
+      },
+    });
+
+  } catch (error) {
+    console.error("Suspend Organization Admin Error:", error);
+
+    return res.status(error.statusCode || 500).json({
+      success: false,
+      message:
+        error.message || "Failed to suspend Organization Admin",
     });
   }
 };
