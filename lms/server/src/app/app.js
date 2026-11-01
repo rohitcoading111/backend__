@@ -12,7 +12,7 @@ import liveSessionRoutes from "../routes/liveSession.routes.js";
 import progressRoutes from "../routes/progress.routes.js";
 import organizationRoutes from "../routes/organization.routes.js";
 import adminRequestRoutes from "../routes/adminRequest.routes.js";
-
+import organizationInstructorRoutes from "../routes/organizationInstructor.routes.js";
 
 
 import cors from "cors";
@@ -56,6 +56,8 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/live-sessions", liveSessionRoutes);
 
 app.use("/api/progress", progressRoutes);
+
+app.use("/api/organization", organizationInstructorRoutes);
 
 
 app.use("/api/admin-requests", adminRequestRoutes);
