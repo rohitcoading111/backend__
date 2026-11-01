@@ -33,6 +33,12 @@ const moduleSchema = new mongoose.Schema(
   }
 );
 
+// Efficient course-wise module retrieval
+moduleSchema.index({
+  course: 1,
+  order: 1,
+});
+
 const Module = mongoose.model("Module", moduleSchema);
 
 export default Module;

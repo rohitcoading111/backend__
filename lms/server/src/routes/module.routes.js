@@ -1,3 +1,4 @@
+
 import express from "express";
 
 import {
@@ -9,6 +10,9 @@ import {
 
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { roleMiddleware } from "../middleware/role.middleware.js";
+import {
+  instructorAccessMiddleware,
+} from "../middleware/instructorAccess.middleware.js";
 
 const router = express.Router();
 
@@ -17,6 +21,7 @@ router.post(
   "/courses/:courseId/modules",
   authMiddleware,
   roleMiddleware("INSTRUCTOR"),
+  instructorAccessMiddleware,
   createModuleController
 );
 
@@ -25,6 +30,7 @@ router.patch(
   "/:moduleId",
   authMiddleware,
   roleMiddleware("INSTRUCTOR"),
+  instructorAccessMiddleware,
   updateModuleController
 );
 
@@ -33,6 +39,7 @@ router.delete(
   "/:moduleId",
   authMiddleware,
   roleMiddleware("INSTRUCTOR"),
+  instructorAccessMiddleware,
   deleteModuleController
 );
 

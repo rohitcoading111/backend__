@@ -1,5 +1,13 @@
-import { createModule,updateModule,deleteModule,getModules } from "../services/module.services.js";
 
+import {
+  createModule,
+  updateModule,
+  deleteModule,
+  getModules,
+} from "../services/module.services.js";
+
+
+// CREATE MODULE
 export const createModuleController = async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -7,9 +15,9 @@ export const createModuleController = async (req, res) => {
     const module = await createModule({
       courseId,
       instructorId: req.user.id,
+      organizationId: req.organizationId,
       title: req.body.title,
       description: req.body.description,
-      order: req.body.order,
     });
 
     return res.status(201).json({
@@ -22,15 +30,10 @@ export const createModuleController = async (req, res) => {
   } catch (error) {
     console.error("Create Module Error:", error);
 
-    if (error.message === "Course not found or access denied") {
+    if (
+      error.message === "Course not found or access denied"
+    ) {
       return res.status(404).json({
-        success: false,
-        message: error.message,
-      });
-    }
-
-    if (error.message === "Module order already exists") {
-      return res.status(409).json({
         success: false,
         message: error.message,
       });
@@ -43,6 +46,8 @@ export const createModuleController = async (req, res) => {
   }
 };
 
+
+// UPDATE MODULE
 export const updateModuleController = async (req, res) => {
   try {
     const { moduleId } = req.params;
@@ -50,6 +55,7 @@ export const updateModuleController = async (req, res) => {
     const module = await updateModule({
       moduleId,
       instructorId: req.user.id,
+      organizationId: req.organizationId,
       title: req.body.title,
       description: req.body.description,
       order: req.body.order,
@@ -87,13 +93,15 @@ export const updateModuleController = async (req, res) => {
 };
 
 
+// DELETE MODULE
 export const deleteModuleController = async (req, res) => {
   try {
     const { moduleId } = req.params;
 
     const result = await deleteModule(
       moduleId,
-      req.user.id
+      req.user.id,
+      req.organizationId
     );
 
     return res.status(200).json({
@@ -122,13 +130,6 @@ export const deleteModuleController = async (req, res) => {
       });
     }
 
-    if (error.message === "Invalid module or instructor ID") {
-      return res.status(400).json({
-        success: false,
-        message: error.message,
-      });
-    }
-
     return res.status(500).json({
       success: false,
       message: "Failed to delete module",
@@ -136,6 +137,8 @@ export const deleteModuleController = async (req, res) => {
   }
 };
 
+
+// GET MODULES
 export const getModulesController = async (req, res) => {
   try {
     const { courseId } = req.params;

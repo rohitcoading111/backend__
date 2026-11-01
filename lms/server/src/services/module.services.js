@@ -1,34 +1,56 @@
+
 import Module from "../models/module.models.js";
 import courseModel from "../models/course.models.js";
-import Lecture from "../models/lecture.models.js"
+import Lecture from "../models/lecture.models.js";
+import User from "../models/user.models.js";
+import Organization from "../models/organization.models.js";
 import imagekit from "../config/imagekit.js";
 
+// Verify instructor's course ownership
+const findOwnedCourse = async ({
+  courseId,
+  instructorId,
+  organizationId,
+}) => {
+  return courseModel.findOne({
+    _id: courseId,
+    instructor: instructorId,
+    organizationId,
+  });
+};
 
+
+// CREATE MODULE
 export const createModule = async ({
   courseId,
   instructorId,
+  organizationId,
   title,
   description,
 }) => {
-  if (!courseId || !instructorId) {
-    throw new Error("Invalid course or instructor ID");
+  if (!courseId || !instructorId || !organizationId) {
+    throw new Error("Invalid course, instructor or organization ID");
   }
 
-  const course = await courseModel.findOne({
-    _id: courseId,
-    instructor: instructorId,
+  // Verify course belongs to this instructor and organization
+  const course = await findOwnedCourse({
+    courseId,
+    instructorId,
+    organizationId,
   });
 
   if (!course) {
     throw new Error("Course not found or access denied");
   }
 
-  // Find the highest existing order for this course
+  // Find highest existing module order
   const lastModule = await Module.findOne({
     course: courseId,
   }).sort({ order: -1 });
 
-  const nextOrder = lastModule ? lastModule.order + 1 : 1;
+  const nextOrder = lastModule
+    ? lastModule.order + 1
+    : 1;
 
   const module = await Module.create({
     title,
@@ -41,14 +63,16 @@ export const createModule = async ({
 };
 
 
+// UPDATE MODULE
 export const updateModule = async ({
   moduleId,
   instructorId,
+  organizationId,
   title,
   description,
   order,
 }) => {
-  if (!moduleId || !instructorId) {
+  if (!moduleId || !instructorId || !organizationId) {
     throw new Error("Invalid module or instructor ID");
   }
 
@@ -58,9 +82,11 @@ export const updateModule = async ({
     throw new Error("Module not found");
   }
 
-  const course = await courseModel.findOne({
-    _id: module.course,
-    instructor: instructorId,
+  // Verify parent course ownership
+  const course = await findOwnedCourse({
+    courseId: module.course,
+    instructorId,
+    organizationId,
   });
 
   if (!course) {
@@ -84,47 +110,54 @@ export const updateModule = async ({
   return module;
 };
 
-export const deleteModule = async (moduleId, instructorId) => {
-  if (!moduleId || !instructorId) {
+
+// DELETE MODULE
+export const deleteModule = async (
+  moduleId,
+  instructorId,
+  organizationId
+) => {
+  if (!moduleId || !instructorId || !organizationId) {
     throw new Error("Invalid module or instructor ID");
   }
 
-  // 1. Find module
+  // Find module
   const module = await Module.findById(moduleId);
 
   if (!module) {
     throw new Error("Module not found");
   }
 
-  // 2. Check course ownership
-  const course = await courseModel.findOne({
-    _id: module.course,
-    instructor: instructorId,
+  // Verify parent course ownership before deleting anything
+  const course = await findOwnedCourse({
+    courseId: module.course,
+    instructorId,
+    organizationId,
   });
 
   if (!course) {
     throw new Error("Access denied");
   }
 
-  // 3. Find lectures inside this module
+  // Find lectures inside this module
   const lectures = await Lecture.find({
     module: moduleId,
   });
 
-  // 4. Delete lectures from database
+  // Delete lectures
   await Lecture.deleteMany({
     module: moduleId,
   });
 
-  // 5. Delete the module
+  // Delete module
   const deletedModule = await Module.findByIdAndDelete(moduleId);
 
-  // 6. Collect uploaded video IDs
+  // Collect uploaded video IDs
   const fileIds = lectures
     .map((lecture) => lecture.video?.fileId)
     .filter(Boolean);
 
-  // 7. Delete videos from ImageKit
+  // Clean up ImageKit videos
   const cleanupResults = await Promise.allSettled(
     fileIds.map((fileId) => imagekit.files.delete(fileId))
   );
@@ -133,7 +166,6 @@ export const deleteModule = async (moduleId, instructorId) => {
     (result) => result.status === "rejected"
   );
 
-  // 8. Return deletion details
   return {
     module: deletedModule,
     deletedLectures: lectures.length,
@@ -141,6 +173,8 @@ export const deleteModule = async (moduleId, instructorId) => {
   };
 };
 
+
+// GET MODULES
 export const getModules = async ({
   courseId,
   userId,
@@ -156,28 +190,87 @@ export const getModules = async ({
     throw new Error("Course not found");
   }
 
-  if (
-    userRole === "STUDENT" &&
-    course.status !== "PUBLISHED"
-  ) {
-    throw new Error("Course is not available");
+  // STUDENT: Published courses only
+  if (userRole === "STUDENT") {
+    if (course.status !== "PUBLISHED") {
+      throw new Error("Course is not available");
+    }
   }
 
-  if (
-    userRole === "INSTRUCTOR" &&
-    course.instructor.toString() !== userId
-  ) {
+  // INSTRUCTOR: Must be actively hired by the course's organization
+  else if (userRole === "INSTRUCTOR") {
+    const instructor = await User.findOne({
+      _id: userId,
+      role: "INSTRUCTOR",
+      employmentStatus: "ACTIVE",
+      organizationId: { $ne: null },
+      hiredBy: { $ne: null },
+    }).select("_id organizationId hiredBy employmentStatus");
+
+    if (!instructor) {
+      throw new Error("Access denied");
+    }
+
+    const organization = await Organization.findOne({
+      _id: instructor.organizationId,
+      owner: instructor.hiredBy,
+      status: "ACTIVE",
+    }).select("_id");
+
+    if (!organization) {
+      throw new Error("Access denied");
+    }
+
+    // Instructor can access only their own courses
+    if (
+      course.instructor.toString() !== userId.toString() ||
+      !course.organizationId ||
+      course.organizationId.toString() !==
+        organization._id.toString()
+    ) {
+      throw new Error("Access denied");
+    }
+  }
+
+  // ORGANIZATION ADMIN: Only their own organization's courses
+  else if (userRole === "ADMIN") {
+    const admin = await User.findOne({
+      _id: userId,
+      role: "ADMIN",
+      adminType: "ORGANIZATION_ADMIN",
+      adminStatus: { $ne: "SUSPENDED" },
+    }).select("_id organizationId");
+
+    if (!admin || !admin.organizationId) {
+      throw new Error("Access denied");
+    }
+
+    const organization = await Organization.findOne({
+      _id: admin.organizationId,
+      owner: admin._id,
+      status: "ACTIVE",
+    }).select("_id");
+
+    if (
+      !organization ||
+      !course.organizationId ||
+      course.organizationId.toString() !==
+        organization._id.toString()
+    ) {
+      throw new Error("Access denied");
+    }
+  }
+
+  else {
     throw new Error("Access denied");
   }
 
-  if (!["STUDENT", "INSTRUCTOR", "ADMIN"].includes(userRole)) {
-    throw new Error("Access denied");
-  }
-
+  // Fetch modules
   const modules = await Module.find({
     course: courseId,
   }).sort({ order: 1 });
 
+  // Attach lecture count
   const modulesWithLectureCount = await Promise.all(
     modules.map(async (module) => {
       const lectureCount = await Lecture.countDocuments({
