@@ -1,5 +1,15 @@
-import { createLecture,updateLecture,deleteLecture,getLectures,getLectureVideo,markLectureCompleted } from "../services/lecture.services.js";
 
+import {
+  createLecture,
+  updateLecture,
+  deleteLecture,
+  getLectures,
+  getLectureVideo,
+  markLectureCompleted,
+} from "../services/lecture.services.js";
+
+
+// CREATE LECTURE
 export const createLectureController = async (req, res) => {
   try {
     const { moduleId } = req.params;
@@ -7,6 +17,7 @@ export const createLectureController = async (req, res) => {
     const lecture = await createLecture({
       moduleId,
       instructorId: req.user.id,
+      organizationId: req.organizationId,
       title: req.body.title,
       notes: req.body.notes,
       order: Number(req.body.order),
@@ -23,7 +34,8 @@ export const createLectureController = async (req, res) => {
   } catch (error) {
     console.error("Create Lecture Error:", error);
 
-    if (error.message === "Module not found") {
+    if (error.message === "Module not found" ||
+        error.message === "Course not found") {
       return res.status(404).json({
         success: false,
         message: error.message,
@@ -58,6 +70,8 @@ export const createLectureController = async (req, res) => {
   }
 };
 
+
+// UPDATE LECTURE
 export const updateLectureController = async (req, res) => {
   try {
     const { lectureId } = req.params;
@@ -75,14 +89,15 @@ export const updateLectureController = async (req, res) => {
       }
     }
 
-   const lecture = await updateLecture({
-  lectureId,
-  instructorId: req.user.id,
-  title: req.body.title,
-  notes: req.body.notes,
-  order,
-  videoFile: req.file,
-});
+    const lecture = await updateLecture({
+      lectureId,
+      instructorId: req.user.id,
+      organizationId: req.organizationId,
+      title: req.body.title,
+      notes: req.body.notes,
+      order,
+      videoFile: req.file,
+    });
 
     return res.status(200).json({
       success: true,
@@ -103,7 +118,8 @@ export const updateLectureController = async (req, res) => {
 
     if (
       error.message === "Lecture not found" ||
-      error.message === "Module not found"
+      error.message === "Module not found" ||
+      error.message === "Course not found"
     ) {
       return res.status(404).json({
         success: false,
@@ -132,6 +148,8 @@ export const updateLectureController = async (req, res) => {
   }
 };
 
+
+// DELETE LECTURE
 export const deleteLectureController = async (req, res) => {
   try {
     const { lectureId } = req.params;
@@ -139,6 +157,7 @@ export const deleteLectureController = async (req, res) => {
     const result = await deleteLecture({
       lectureId,
       instructorId: req.user.id,
+      organizationId: req.organizationId,
     });
 
     if (result.videoCleanupFailed) {
@@ -171,7 +190,8 @@ export const deleteLectureController = async (req, res) => {
 
     if (
       error.message === "Lecture not found" ||
-      error.message === "Module not found"
+      error.message === "Module not found" ||
+      error.message === "Course not found"
     ) {
       return res.status(404).json({
         success: false,
@@ -193,6 +213,8 @@ export const deleteLectureController = async (req, res) => {
   }
 };
 
+
+// GET LECTURES OF A MODULE
 export const getLecturesController = async (req, res) => {
   try {
     const { moduleId } = req.params;
@@ -203,18 +225,17 @@ export const getLecturesController = async (req, res) => {
       userRole: req.user.role,
     });
 
-    // Do not send raw ImageKit video URLs yet
-   const lectureData = lectures.map((lecture) => ({
-  _id: lecture._id,
-  title: lecture.title,
-  notes: lecture.notes,
-  module: lecture.module,
-  order: lecture.order,
-  videoAvailable: Boolean(lecture.video?.fileId),
-  isCompleted: Boolean(lecture.isCompleted),
-  createdAt: lecture.createdAt,
-  updatedAt: lecture.updatedAt,
-}));
+    const lectureData = lectures.map((lecture) => ({
+      _id: lecture._id,
+      title: lecture.title,
+      notes: lecture.notes,
+      module: lecture.module,
+      order: lecture.order,
+      videoAvailable: Boolean(lecture.video?.fileId),
+      isCompleted: Boolean(lecture.isCompleted),
+      createdAt: lecture.createdAt,
+      updatedAt: lecture.updatedAt,
+    }));
 
     return res.status(200).json({
       success: true,
@@ -261,6 +282,8 @@ export const getLecturesController = async (req, res) => {
   }
 };
 
+
+// GET LECTURE VIDEO
 export const getLectureVideoController = async (req, res) => {
   try {
     const { lectureId } = req.params;
@@ -322,6 +345,8 @@ export const getLectureVideoController = async (req, res) => {
   }
 };
 
+
+// MARK LECTURE COMPLETED
 export const markLectureCompletedController = async (req, res) => {
   try {
     const result = await markLectureCompleted({
@@ -337,9 +362,11 @@ export const markLectureCompletedController = async (req, res) => {
   } catch (error) {
     const statusCode =
       error.message === "Lecture not found" ||
-      error.message === "Module not found"
+      error.message === "Module not found" ||
+      error.message === "Course not found"
         ? 404
         : error.message === "Active enrollment not found"
+          || error.message === "Course is not available"
           ? 403
           : 500;
 

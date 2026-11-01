@@ -1,3 +1,4 @@
+
 import express from "express";
 
 import {
@@ -6,9 +7,8 @@ import {
   updateLectureController,
   deleteLectureController,
   getLectureVideoController,
-  markLectureCompletedController
+  markLectureCompletedController,
 } from "../controllers/lecture.controllers.js";
-
 
 import {
   validateLecture,
@@ -20,15 +20,21 @@ import {
 
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { roleMiddleware } from "../middleware/role.middleware.js";
+
+import {
+  instructorAccessMiddleware,
+} from "../middleware/instructorAccess.middleware.js";
+
 import { uploadVideo } from "../middleware/upload.middleware.js";
 
 const router = express.Router();
 
-// Create lecture
+// Create Lecture
 router.post(
   "/modules/:moduleId/lectures",
   authMiddleware,
   roleMiddleware("INSTRUCTOR"),
+  instructorAccessMiddleware,
   validateModuleId,
   uploadVideo.single("video"),
   validateLecture,
@@ -45,34 +51,38 @@ router.get(
   getLecturesController
 );
 
-// Update lecture
+// Update Lecture
 router.patch(
   "/lectures/:lectureId",
   authMiddleware,
   roleMiddleware("INSTRUCTOR"),
+  instructorAccessMiddleware,
   validateLectureId,
   uploadVideo.single("video"),
   validateUpdateLecture,
   checkValidation,
   updateLectureController
 );
-// Delete lecture
+
+// Delete Lecture
 router.delete(
   "/lectures/:lectureId",
   authMiddleware,
   roleMiddleware("INSTRUCTOR"),
+  instructorAccessMiddleware,
   validateLectureId,
   checkValidation,
   deleteLectureController
 );
 
+// Get Lecture Video
 router.get(
   "/lectures/:lectureId/video",
   authMiddleware,
   getLectureVideoController
 );
 
-
+// Mark Lecture Completed
 router.patch(
   "/lectures/:lectureId/complete",
   authMiddleware,

@@ -1,3 +1,4 @@
+
 import mongoose from "mongoose";
 
 const lectureSchema = new mongoose.Schema(
@@ -43,6 +44,12 @@ const lectureSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+// Efficient module-wise lecture retrieval
+lectureSchema.index({
+  module: 1,
+  order: 1,
+});
 
 const Lecture = mongoose.model("Lecture", lectureSchema);
 
