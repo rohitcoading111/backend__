@@ -18,7 +18,6 @@ const userSchema = new mongoose.Schema(
       match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
     },
 
-    // Google account ki unique identity
     googleId: {
       type: String,
       default: undefined,
@@ -37,21 +36,18 @@ const userSchema = new mongoose.Schema(
       select: false,
     },
 
-    // User authorization role
     role: {
       type: String,
       enum: ["STUDENT", "INSTRUCTOR", "ADMIN"],
       default: "STUDENT",
     },
 
-    // Account kis purpose ke liye create hua hai
     accountType: {
       type: String,
       enum: ["STUDENT", "BUSINESS"],
       default: "STUDENT",
     },
 
-    // Seller approval status
     sellerStatus: {
       type: String,
       enum: [
@@ -63,7 +59,6 @@ const userSchema = new mongoose.Schema(
       default: "NOT_APPLIED",
     },
 
-    // Seller / Business information
     businessProfile: {
       businessName: {
         type: String,
@@ -79,7 +74,6 @@ const userSchema = new mongoose.Schema(
       },
     },
 
-    // Seller agreement acceptance record
     sellerAgreement: {
       version: {
         type: String,
@@ -90,6 +84,31 @@ const userSchema = new mongoose.Schema(
         type: Date,
         default: null,
       },
+    },
+
+    // Organization to which the user belongs
+    organizationId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Organization",
+      default: null,
+    },
+
+    // Admin who hired this instructor
+    hiredBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
+    // Instructor employment status
+    employmentStatus: {
+      type: String,
+      enum: [
+        "INDEPENDENT",
+        "ACTIVE",
+        "SUSPENDED",
+      ],
+      default: null,
     },
 
     avatar: {
@@ -133,7 +152,6 @@ userSchema.pre("validate", function () {
     );
   }
 
-  // Business account must have instructor role
   if (
     this.accountType === "BUSINESS" &&
     this.role !== "INSTRUCTOR" &&
@@ -145,7 +163,6 @@ userSchema.pre("validate", function () {
     );
   }
 
-  // Business account must have an application status
   if (
     this.accountType === "BUSINESS" &&
     this.sellerStatus === "NOT_APPLIED"
@@ -153,6 +170,27 @@ userSchema.pre("validate", function () {
     this.invalidate(
       "sellerStatus",
       "Business account requires a seller application status"
+    );
+  }
+
+  if (
+    this.role === "INSTRUCTOR" &&
+    this.organizationId &&
+    !this.hiredBy
+  ) {
+    this.invalidate(
+      "hiredBy",
+      "An organization instructor must have a hiring admin"
+    );
+  }
+
+  if (
+    this.role !== "INSTRUCTOR" &&
+    (this.organizationId || this.hiredBy)
+  ) {
+    this.invalidate(
+      "organizationId",
+      "Only instructors can be assigned to an organization"
     );
   }
 });
@@ -190,8 +228,17 @@ userSchema.index(
   }
 );
 
-// Useful for admin seller management
+// Seller management
 userSchema.index({ accountType: 1, sellerStatus: 1 });
+
+// Organization instructor management
+userSchema.index({
+  organizationId: 1,
+  role: 1,
+  employmentStatus: 1,
+});
+
+userSchema.index({ hiredBy: 1 });
 
 const User = mongoose.model("User", userSchema);
 

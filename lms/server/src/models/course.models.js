@@ -1,3 +1,4 @@
+
 import mongoose from "mongoose";
 
 const courseSchema = new mongoose.Schema(
@@ -34,6 +35,14 @@ const courseSchema = new mongoose.Schema(
       required: true,
     },
 
+    // Organization that owns/manages this course
+    organizationId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Organization",
+      default: null,
+      index: true,
+    },
+
     price: {
       type: Number,
       required: true,
@@ -62,6 +71,19 @@ const courseSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+// Instructor's courses
+courseSchema.index({
+  instructor: 1,
+  createdAt: -1,
+});
+
+// Organization's courses
+courseSchema.index({
+  organizationId: 1,
+  status: 1,
+  createdAt: -1,
+});
 
 const Course = mongoose.model("Course", courseSchema);
 
