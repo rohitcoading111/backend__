@@ -10,6 +10,7 @@ import paymentRoutes from "../routes/payment.routes.js"
 import passport from '../config/googleStrategy.js';
 import liveSessionRoutes from "../routes/liveSession.routes.js";
 import progressRoutes from "../routes/progress.routes.js";
+import organizationRoutes from "../routes/organization.routes.js";
 
 import cors from "cors";
 
@@ -52,4 +53,7 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/live-sessions", liveSessionRoutes);
 
 app.use("/api/progress", progressRoutes);
+
+
+app.use("/api/organizations", organizationRoutes);
 export default app;
