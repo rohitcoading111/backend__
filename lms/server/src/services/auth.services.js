@@ -25,9 +25,70 @@ const RESET_OTP_TTL_MS = 10 * 60 * 1000;
 import transporter from "../config/mailer.js";
 import config from "../config/config.js";
 
+
+
+const ACTIVE_SELLER_AGREEMENT_VERSION = "1.0";
 // Temporary reset OTP records will be stored separately.
 
 
+const prepareRegistrationData = ({
+  accountType,
+  businessName,
+  businessType,
+  agreementAccepted,
+}) => {
+  const normalizedAccountType = (
+    accountType || "STUDENT"
+  ).toUpperCase();
+
+  if (!["STUDENT", "BUSINESS"].includes(normalizedAccountType)) {
+    throw new Error("INVALID_ACCOUNT_TYPE");
+  }
+
+  // Normal student registration
+  if (normalizedAccountType === "STUDENT") {
+    return {
+      accountType: "STUDENT",
+      businessProfile: undefined,
+      sellerAgreement: undefined,
+    };
+  }
+
+  // Business registration validation
+  const normalizedBusinessName = businessName?.trim();
+
+  const normalizedBusinessType = businessType?.toUpperCase();
+
+  if (!normalizedBusinessName) {
+    throw new Error("BUSINESS_NAME_REQUIRED");
+  }
+
+  if (
+    !["INDIVIDUAL", "COMPANY", "INSTITUTE"].includes(
+      normalizedBusinessType
+    )
+  ) {
+    throw new Error("INVALID_BUSINESS_TYPE");
+  }
+
+  if (agreementAccepted !== true && agreementAccepted !== "true") {
+    throw new Error("SELLER_AGREEMENT_REQUIRED");
+  }
+
+  return {
+    accountType: "BUSINESS",
+
+    businessProfile: {
+      businessName: normalizedBusinessName,
+      businessType: normalizedBusinessType,
+    },
+
+    sellerAgreement: {
+      version: ACTIVE_SELLER_AGREEMENT_VERSION,
+      acceptedAt: new Date(),
+    },
+  };
+};
 
 export const uploadAvatar = async (file) => {
   if (!file) {
@@ -50,27 +111,43 @@ export const uploadAvatar = async (file) => {
 };
 
 
+
 export const registerUser = async (user) => {
-  const { email, mobile, password, name, file } = user;
+  const {
+    email,
+    mobile,
+    password,
+    name,
+    file,
+  } = user;
 
   const normalizedEmail = email?.trim().toLowerCase();
   const normalizedMobile = mobile?.trim() || undefined;
 
-  // This service handles email registration.
   if (!normalizedEmail) {
     throw new Error("Email is required for email registration");
   }
 
-  // Reject an already registered email.
+  if (!password || password.length < 8) {
+    throw new Error("Password must be at least 8 characters");
+  }
+
+  // Prepare STUDENT or BUSINESS registration data.
+  const registrationData = prepareRegistrationData(user);
+
+  // Check existing registered user.
   const existingUser = await userModel.findOne({
-    email: normalizedEmail,
+    $or: [
+      { email: normalizedEmail },
+      ...(normalizedMobile ? [{ mobile: normalizedMobile }] : []),
+    ],
   });
 
   if (existingUser) {
     throw new Error("Email or mobile number already exists");
   }
 
-  // Reject an email that already has a pending registration.
+  // Check existing pending registration.
   const existingPending = await PendingRegistration.findOne({
     email: normalizedEmail,
   });
@@ -81,26 +158,30 @@ export const registerUser = async (user) => {
     );
   }
 
-  // Hash the password before temporarily storing it.
+  // Hash password before storing temporarily.
   const hashedPassword = await bcrypt.hash(password, 10);
 
   // Upload avatar if supplied.
   const avatarData = await uploadAvatar(file);
 
-  // Generate a secure six-digit email OTP.
+  // Generate email OTP.
   const otp = generateEmailOTP();
+
   const emailOtpHash = crypto
     .createHash("sha256")
     .update(otp)
     .digest("hex");
 
-  // Store temporary registration details.
+  // Store registration details temporarily.
   const pending = await PendingRegistration.create({
     name,
     email: normalizedEmail,
     mobile: normalizedMobile,
     password: hashedPassword,
     avatar: avatarData,
+
+    ...registrationData,
+
     emailOtpHash,
     expiresAt: new Date(Date.now() + 10 * 60 * 1000),
     otpWindowStartedAt: new Date(),
@@ -111,8 +192,10 @@ export const registerUser = async (user) => {
   try {
     await sendEmailOTP(normalizedEmail, otp);
   } catch (error) {
-    // Clean up if the email could not be sent.
-    await PendingRegistration.deleteOne({ _id: pending._id });
+    await PendingRegistration.deleteOne({
+      _id: pending._id,
+    });
+
     throw new Error("EMAIL_OTP_SEND_FAILED");
   }
 
@@ -122,6 +205,7 @@ export const registerUser = async (user) => {
     otpRequired: true,
   };
 };
+
 
 
 export const LoginUser = async (user) => {
