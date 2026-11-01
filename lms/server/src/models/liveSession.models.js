@@ -42,6 +42,18 @@ const liveSessionSchema = new mongoose.Schema(
   }
 );
 
+// Course-wise live session lookup
+liveSessionSchema.index({
+  course: 1,
+  status: 1,
+});
+
+// Instructor's live sessions
+liveSessionSchema.index({
+  instructor: 1,
+  status: 1,
+});
+
 const LiveSession = mongoose.model(
   "LiveSession",
   liveSessionSchema
