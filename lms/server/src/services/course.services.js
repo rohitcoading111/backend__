@@ -71,6 +71,7 @@ export const createCourse = async ({
 
 
 // Get My Courses
+// Get Organization Courses / My Individual Courses
 export const getCourse = async (
   instructorId,
   organizationId
@@ -79,15 +80,24 @@ export const getCourse = async (
     throw new Error("Invalid instructor ID");
   }
 
-  const courses = await courseModel.find({
-    instructor: instructorId,
-    organizationId: organizationId ?? null,
-  }).sort({ createdAt: -1 });
+  // Hired instructor: fetch all courses of their organization
+  // Independent instructor: fetch only their own courses
+  const filter = organizationId
+    ? { organizationId }
+    : {
+        instructor: instructorId,
+        organizationId: null,
+      };
+
+  const courses = await courseModel
+    .find(filter)
+    .sort({ createdAt: -1 });
 
   return courses;
 };
 
 
+// Get Single Course
 // Get Single Course
 export const getSingleCourse = async (
   courseId,
@@ -98,13 +108,18 @@ export const getSingleCourse = async (
     throw new Error("Invalid course or instructor ID");
   }
 
-  const course = await courseModel.findOne(
-    getCourseOwnershipFilter(
-      courseId,
-      instructorId,
-      organizationId
-    )
-  );
+  const filter = organizationId
+    ? {
+        _id: courseId,
+        organizationId,
+      }
+    : {
+        _id: courseId,
+        instructor: instructorId,
+        organizationId: null,
+      };
+
+  const course = await courseModel.findOne(filter);
 
   if (!course) {
     throw new Error("Course not found or access denied");
