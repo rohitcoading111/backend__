@@ -6,8 +6,12 @@ import {
   logout,
 } from "../features/auth/authSlices/authSlice";
 
+// Local and production API configuration
 const baseURL =
-  import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV
+    ? "http://localhost:3000/api"
+    : "https://learnhub-com.onrender.com/api");
 
 // Main Axios instance
 const api = axios.create({
@@ -15,7 +19,7 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// Separate instance for refresh token
+// Separate instance for refreshing access token
 const refreshApi = axios.create({
   baseURL,
   withCredentials: true,
@@ -24,15 +28,19 @@ const refreshApi = axios.create({
 let refreshPromise = null;
 
 // REQUEST INTERCEPTOR
-api.interceptors.request.use((config) => {
-  const token = store.getState().auth.accessToken;
+api.interceptors.request.use(
+  (config) => {
+    const token = store.getState().auth.accessToken;
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+    if (token) {
+      config.headers = config.headers || {};
+      config.headers.Authorization = `Bearer ${token}`;
+    }
 
-  return config;
-});
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 // RESPONSE INTERCEPTOR
 api.interceptors.response.use(
@@ -41,6 +49,7 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // Only handle unauthorized requests
     if (
       error.response?.status !== 401 ||
       !originalRequest ||
@@ -53,15 +62,21 @@ api.interceptors.response.use(
     originalRequest._retry = true;
 
     try {
+      // Share one refresh request between concurrent API failures
       if (!refreshPromise) {
         refreshPromise = refreshApi
           .post("/auth/refresh")
-          .then((res) => {
-            const token = res.data.data.accessToken;
+          .then((response) => {
+            const newAccessToken =
+              response.data?.data?.accessToken;
 
-            store.dispatch(setAccessToken(token));
+            if (!newAccessToken) {
+              throw new Error("Access token missing from refresh response.");
+            }
 
-            return token;
+            store.dispatch(setAccessToken(newAccessToken));
+
+            return newAccessToken;
           })
           .finally(() => {
             refreshPromise = null;
@@ -70,12 +85,15 @@ api.interceptors.response.use(
 
       const newToken = await refreshPromise;
 
+      originalRequest.headers = originalRequest.headers || {};
       originalRequest.headers.Authorization = `Bearer ${newToken}`;
 
+      // Retry original request with new access token
       return api(originalRequest);
-    } catch (error) {
+
+    } catch (refreshError) {
       store.dispatch(logout());
-      return Promise.reject(error);
+      return Promise.reject(refreshError);
     }
   }
 );
