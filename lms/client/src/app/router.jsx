@@ -21,6 +21,9 @@ import LiveRoom from "../features/instructor/components/LiveRoom.jsx";
 import ProtectedRoute from "../routes/ProtectedRoute.jsx";
 import PublicOnlyRoute from "../routes/PublicOnlyRoute.jsx";
 
+import OrganizationRequest from
+  "../features/adminRequests/pages/OrganizationRequest.jsx";
+
 import { useSelector } from "react-redux";
 
 
@@ -115,19 +118,18 @@ export const router = createBrowserRouter([
 
 
   // Public Authentication Routes
-  {
-    element: <PublicOnlyRoute />,
-    children: [
-      {
-        path: "/login",
-        element: <Login />,
-      },
-      {
-        path: "/register",
-        element: <Register />,
-      },
-    ],
-  },
+{
+  element: <PublicOnlyRoute />,
+  children: [
+    { path: "/login", element: <Login /> },
+    { path: "/register", element: <Register /> },
+
+    {
+      path: "/register-organization",
+      element: <OrganizationRequest />,
+    },
+  ],
+},
 
 
   // OTP Verification

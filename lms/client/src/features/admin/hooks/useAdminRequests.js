@@ -9,7 +9,6 @@ import {
 
 function useAdminRequests() {
   const [requests, setRequests] = useState([]);
-
   const [isLoading, setIsLoading] = useState(true);
 
   const [activeRequestId, setActiveRequestId] = useState(null);
@@ -18,24 +17,25 @@ function useAdminRequests() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // Fetch requests
-  const fetchRequests = useCallback(async () => {
+  // Initial fetch and background refresh
+  const fetchRequests = useCallback(async ({ silent = false } = {}) => {
     try {
-      setIsLoading(true);
+      if (!silent) setIsLoading(true);
+
       setError("");
 
       const response = await getPendingAdminRequests();
 
       if (!response?.success) {
         throw new Error(
-          response?.message || "Failed to fetch requests"
+          response?.message || "Failed to fetch organization requests"
         );
       }
 
       const fetchedRequests = response?.data?.requests;
 
       if (!Array.isArray(fetchedRequests)) {
-        throw new Error("Invalid admin requests response");
+        throw new Error("Invalid organization requests response");
       }
 
       setRequests(fetchedRequests);
@@ -46,27 +46,25 @@ function useAdminRequests() {
           "Unable to load organization requests"
       );
     } finally {
-      setIsLoading(false);
+      if (!silent) setIsLoading(false);
     }
   }, []);
 
   // Common action handler
-  const executeAction = async (
-    requestId,
-    actionName,
-    actionFunction
-  ) => {
+  const executeAction = async (requestId, action, apiFunction) => {
+    if (activeRequestId) return false;
+
     try {
       setActiveRequestId(requestId);
-      setActiveAction(actionName);
+      setActiveAction(action);
       setError("");
       setSuccess("");
 
-      const response = await actionFunction();
+      const response = await apiFunction();
 
       if (response?.success === false) {
         throw new Error(
-          response.message || "Request action failed"
+          response?.message || "Unable to process request"
         );
       }
 
@@ -74,14 +72,14 @@ function useAdminRequests() {
         response?.message || "Request updated successfully"
       );
 
-      await fetchRequests();
+      await fetchRequests({ silent: true });
 
       return true;
     } catch (err) {
       setError(
         err?.response?.data?.message ||
           err?.message ||
-          "Unable to process request"
+          "Unable to process organization request"
       );
 
       return false;
@@ -91,26 +89,41 @@ function useAdminRequests() {
     }
   };
 
-  // Verify
   const handleVerify = (requestId) =>
     executeAction(requestId, "VERIFY", () =>
       verifyAdminRequest(requestId)
     );
 
-  // Approve
   const handleApprove = (requestId) =>
     executeAction(requestId, "APPROVE", () =>
       approveAdminRequest(requestId)
     );
 
-  // Reject
   const handleReject = (requestId, rejectionReason) =>
     executeAction(requestId, "REJECT", () =>
       rejectAdminRequest(requestId, rejectionReason)
     );
 
+  // Fetch when dashboard opens.
+  // Poll every 30 seconds while dashboard remains open.
+  // Refresh immediately when user returns to the tab.
   useEffect(() => {
     fetchRequests();
+
+    const intervalId = window.setInterval(() => {
+      fetchRequests({ silent: true });
+    }, 30000);
+
+    const handleWindowFocus = () => {
+      fetchRequests({ silent: true });
+    };
+
+    window.addEventListener("focus", handleWindowFocus);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", handleWindowFocus);
+    };
   }, [fetchRequests]);
 
   return {

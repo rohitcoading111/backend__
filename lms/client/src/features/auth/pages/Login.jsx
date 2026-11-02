@@ -158,6 +158,15 @@ function Login() {
                 Create account
               </Link>
             </p>
+            <p className="mt-4 text-center text-xs text-slate-400">
+  Managing an organization?{" "}
+  <Link
+    to="/register-organization"
+    className="font-semibold text-indigo-400 transition hover:text-indigo-300"
+  >
+    Register your organization
+  </Link>
+</p>
 
             {/* Footer */}
             <p className="mt-4 text-center text-[11px] text-slate-500">
