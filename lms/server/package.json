@@ -8,7 +8,8 @@
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "create-admin": "node src/scripts/create-admin.js",
-    "create-instructors": "node src/scripts/create-instructor.js"
+    "create-instructors": "node src/scripts/create-instructor.js",
+    "generate:gmail-token": "node src/scripts/generateGmailRefreshToken.js"
   },
   "keywords": [],
   "author": "",
@@ -27,10 +28,10 @@
     "livekit-server-sdk": "^2.19.1",
     "mongoose": "^9.10.3",
     "multer": "^2.4.0",
-    "nodemailer": "^10.1.1",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "razorpay": "^2.9.8",
+    "googleapis": "^150.0.1",
     "socket.io": "^4.8.4",
     "socket.io-client": "^4.8.4",
     "twilio": "^6.2.0"

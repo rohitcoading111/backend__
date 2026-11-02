@@ -1,126 +1,141 @@
 import assert from "node:assert/strict";
 import { after, test } from "node:test";
-import nodemailer from "nodemailer";
 
-process.env.MAIL_PROVIDER = "mailjet";
-process.env.MAILJET_API_KEY = "test-api-key";
-process.env.MAILJET_SECRET_KEY = "test-secret-key";
-process.env.MAILJET_SENDER_EMAIL = "verified@example.com";
-process.env.MAILJET_SENDER_NAME = "LearnHub";
-process.env.EMAIL_USER = "local@example.com";
-process.env.EMAIL_APP_PASSWORD = "test-app-password";
-
-const originalFetch = globalThis.fetch;
-const { default: config } = await import("../src/config/config.js");
-const { default: mailer } = await import("../src/config/mailer.js");
+const originalEnv = { ...process.env };
+process.env.EMAIL_PROVIDER = "gmail-api";
+process.env.GMAIL_API_CLIENT_ID = "sender-client-id";
+process.env.GMAIL_API_CLIENT_SECRET = "sender-client-secret";
+process.env.GMAIL_API_REFRESH_TOKEN = "private-refresh-token";
+process.env.GMAIL_SENDER_EMAIL = "rp538220@gmail.com";
+process.env.GMAIL_SENDER_NAME = "LearnHub";
+const { default: gmailConfig } = await import("../src/config/gmail.config.js");
+const { createGmailApiProvider } = await import(
+  "../src/services/email/gmailApi.provider.js"
+);
+const { createRawMessage } = await import(
+  "../src/services/email/email.helpers.js"
+);
 const { sendEmailOTP } = await import("../src/services/emailOTP.services.js");
-assert.equal(config.MAIL_PROVIDER, "mailjet");
+const { default: emailService } = await import(
+  "../src/services/email/email.service.js"
+);
 
 after(() => {
-  globalThis.fetch = originalFetch;
-});
-
-test("keeps local Gmail SMTP behind the gmail provider setting", async () => {
-  const originalCreateTransport = nodemailer.createTransport;
-  let transportOptions;
-  let sentMessage;
-
-  config.MAIL_PROVIDER = "gmail";
-  nodemailer.createTransport = (options) => {
-    transportOptions = options;
-    return {
-      sendMail: async (message) => {
-        sentMessage = message;
-        return { messageId: "gmail-message-id" };
-      },
-    };
-  };
-
-  try {
-    const info = await mailer.sendMail({
-      to: "recipient@example.com",
-      subject: "Local Gmail test",
-      text: "Test",
-    });
-
-    assert.equal(transportOptions.service, "gmail");
-    assert.deepEqual(transportOptions.auth, {
-      user: "local@example.com",
-      pass: "test-app-password",
-    });
-    assert.equal(sentMessage.from, "local@example.com");
-    assert.equal(info.messageId, "gmail-message-id");
-  } finally {
-    nodemailer.createTransport = originalCreateTransport;
-    config.MAIL_PROVIDER = "mailjet";
+  for (const key of [
+    "EMAIL_PROVIDER",
+    "GMAIL_API_CLIENT_ID",
+    "GMAIL_API_CLIENT_SECRET",
+    "GMAIL_API_REFRESH_TOKEN",
+    "GMAIL_SENDER_EMAIL",
+    "GMAIL_SENDER_NAME",
+  ]) {
+    if (originalEnv[key] === undefined) delete process.env[key];
+    else process.env[key] = originalEnv[key];
   }
 });
 
-test("never allows Gmail SMTP in production, even if misconfigured", async () => {
-  const originalCreateTransport = nodemailer.createTransport;
-  const originalEnvironment = config.NODE_ENV;
-  const originalRenderFlag = config.IS_RENDER;
-  config.NODE_ENV = "production";
-  config.IS_RENDER = false;
-  config.MAIL_PROVIDER = "gmail";
-  nodemailer.createTransport = () => {
-    throw new Error("Gmail transport must not be initialized");
-  };
-
-  try {
-    assert.throws(
-      () =>
-        mailer.sendMail({
-          to: "recipient@example.com",
-          subject: "Production test",
-          text: "Test",
-        }),
-      (error) => error.code === "MAIL_PROVIDER_INVALID"
-    );
-  } finally {
-    nodemailer.createTransport = originalCreateTransport;
-    config.NODE_ENV = originalEnvironment;
-    config.IS_RENDER = originalRenderFlag;
-    config.MAIL_PROVIDER = "mailjet";
-  }
+const getConfig = (overrides = {}) => ({
+  EMAIL_PROVIDER: "gmail-api",
+  GMAIL_API_CLIENT_ID: "sender-client-id",
+  GMAIL_API_CLIENT_SECRET: "sender-client-secret",
+  GMAIL_API_REFRESH_TOKEN: "private-refresh-token",
+  GMAIL_SENDER_EMAIL: "rp538220@gmail.com",
+  GMAIL_SENDER_NAME: "LearnHub",
+  NODE_ENV: "test",
+  IS_RENDER: false,
+  ...overrides,
 });
 
-test("sends a mapped message and returns the Mailjet acceptance ID", async () => {
-  let request;
-  globalThis.fetch = async (url, options) => {
-    request = { url, options, payload: JSON.parse(options.body) };
-    return new Response(
-      JSON.stringify({
-        Messages: [
-          {
-            Status: "success",
-            To: [
-              {
-                Email: "recipient@example.com",
-                MessageID: 456,
-                MessageUUID: "mailjet-uuid",
-              },
-            ],
+const createMockGoogle = ({ response, error } = {}) => {
+  const calls = { auth: null, request: null, options: null };
+  class OAuth2 {
+    constructor(clientId, clientSecret) {
+      calls.auth = { clientId, clientSecret };
+    }
+
+    setCredentials(credentials) {
+      calls.credentials = credentials;
+    }
+  }
+
+  const googleApi = {
+    auth: { OAuth2 },
+    gmail(options) {
+      calls.options = options;
+      return {
+        users: {
+          messages: {
+            send: async (request) => {
+              calls.request = request;
+              if (error) throw error;
+              return response || { data: { id: "gmail-message-id" } };
+            },
           },
-        ],
-      }),
-      { status: 200 }
-    );
+        },
+      };
+    },
   };
+  return { googleApi, calls };
+};
 
-  const info = await mailer.sendMail({
+test("selects Gmail API in local and production configurations", async () => {
+  assert.equal(gmailConfig.EMAIL_PROVIDER, "gmail-api");
+  assert.equal(gmailConfig.GMAIL_API_CLIENT_ID, "sender-client-id");
+
+  const { googleApi, calls } = createMockGoogle();
+  const productionProvider = createGmailApiProvider({
+    googleApi,
+    gmailConfig: getConfig({ NODE_ENV: "production" }),
+  });
+  const info = await productionProvider.sendMail({
+    to: "recipient@example.com",
+    subject: "Production config",
+    text: "Mocked send",
+  });
+
+  assert.equal(info.messageId, "gmail-message-id");
+  assert.equal(calls.options.auth.constructor.name, "OAuth2");
+});
+
+test("sets the refresh token on the dedicated Gmail OAuth client", async () => {
+  const { googleApi, calls } = createMockGoogle();
+  const provider = createGmailApiProvider({
+    googleApi,
+    gmailConfig: getConfig(),
+  });
+
+  await provider.sendMail({
+    to: "recipient@example.com",
+    subject: "Refresh token",
+    text: "Mocked send",
+  });
+
+  assert.deepEqual(calls.auth, {
+    clientId: "sender-client-id",
+    clientSecret: "sender-client-secret",
+  });
+  assert.deepEqual(calls.credentials, {
+    refresh_token: "private-refresh-token",
+  });
+  assert.equal(calls.options.version, "v1");
+});
+
+test("sends a base64url RFC 2822 message with supported recipient and body options", async () => {
+  const { googleApi, calls } = createMockGoogle();
+  const provider = createGmailApiProvider({
+    googleApi,
+    gmailConfig: getConfig(),
+  });
+  const info = await provider.sendMail({
     to: { name: "Recipient", address: "recipient@example.com" },
     cc: "copy@example.com",
     bcc: [{ email: "hidden@example.com" }],
     replyTo: "reply@example.com",
-    subject: "Test email",
+    subject: "Hello",
     text: "Plain text",
     html: "<p>HTML</p>",
     attachments: [
-      {
-        filename: "note.txt",
-        content: Buffer.from("file content"),
-      },
+      { filename: "note.txt", content: Buffer.from("file content") },
       {
         filename: "inline.png",
         cid: "inline-image",
@@ -129,195 +144,162 @@ test("sends a mapped message and returns the Mailjet acceptance ID", async () =>
     ],
   });
 
-  assert.equal(request.url, "https://api.mailjet.com/v3.1/send");
-  assert.equal(
-    request.options.headers.Authorization,
-    `Basic ${Buffer.from("test-api-key:test-secret-key").toString("base64")}`
+  assert.equal(calls.request.userId, "me");
+  assert.equal(info.messageId, "gmail-message-id");
+  assert.deepEqual(info.rejected, []);
+  const mime = Buffer.from(calls.request.requestBody.raw, "base64url").toString(
+    "utf8"
   );
-  assert.deepEqual(request.payload.Messages[0].From, {
-    Email: "verified@example.com",
-    Name: "LearnHub",
-  });
-  assert.deepEqual(request.payload.Messages[0].To, [
-    { Email: "recipient@example.com", Name: "Recipient" },
-  ]);
-  assert.deepEqual(request.payload.Messages[0].Cc, [
-    { Email: "copy@example.com" },
-  ]);
-  assert.deepEqual(request.payload.Messages[0].Bcc, [
-    { Email: "hidden@example.com" },
-  ]);
-  assert.deepEqual(request.payload.Messages[0].ReplyTo, {
-    Email: "reply@example.com",
-  });
-  assert.equal(
-    request.payload.Messages[0].Attachments[0].Base64Content,
-    Buffer.from("file content").toString("base64")
-  );
-  assert.equal(
-    request.payload.Messages[0].InlinedAttachments[0].ContentID,
-    "inline-image"
-  );
-  assert.equal(info.messageId, "mailjet-uuid");
-  assert.deepEqual(info.accepted, ["recipient@example.com"]);
+  assert.match(mime, /From: LearnHub <rp538220@gmail\.com>/);
+  assert.match(mime, /To: Recipient <recipient@example\.com>/);
+  assert.match(mime, /Cc: copy@example\.com/);
+  assert.match(mime, /Bcc: hidden@example\.com/);
+  assert.match(mime, /Reply-To: reply@example\.com/);
+  assert.match(mime, /multipart\/mixed/);
+  assert.match(mime, /multipart\/related/);
+  assert.match(mime, /multipart\/alternative/);
+  assert.match(mime, /Content-ID: <inline-image>/);
+  assert.ok(mime.includes(Buffer.from("Plain text").toString("base64")));
 });
 
-test("trims surrounding whitespace from Mailjet credentials before Basic Auth", async () => {
-  const originalApiKey = config.MAILJET_API_KEY;
-  const originalSecretKey = config.MAILJET_SECRET_KEY;
-  let authorization;
+test("rejects a From address that is not the configured Gmail sender", async () => {
+  await assert.rejects(
+    createRawMessage(
+      {
+        from: "spoof@example.com",
+        to: "recipient@example.com",
+        subject: "Sender check",
+        text: "Body",
+      },
+      getConfig()
+    ),
+    (error) => error.code === "GMAIL_SENDER_NOT_ALLOWED"
+  );
+});
 
-  config.MAILJET_API_KEY = " test-api-key \n";
-  config.MAILJET_SECRET_KEY = "\ttest-secret-key ";
-  globalThis.fetch = async (_url, options) => {
-    authorization = options.headers.Authorization;
-    return new Response(
-      JSON.stringify({
-        Messages: [
-          {
-            Status: "success",
-            To: [{ Email: "recipient@example.com", MessageUUID: "test-id" }],
-          },
-        ],
-      }),
-      { status: 200 }
-    );
-  };
+test("rejects malformed recipient addresses before making an API request", async () => {
+  const { googleApi, calls } = createMockGoogle();
+  const provider = createGmailApiProvider({
+    googleApi,
+    gmailConfig: getConfig(),
+  });
 
-  try {
-    await mailer.sendMail({
-      to: "recipient@example.com",
-      subject: "Test",
-      text: "Test",
+  await assert.rejects(
+    provider.sendMail({
+      to: "not-an-address",
+      subject: "Recipient check",
+      text: "Body",
+    }),
+    (error) => error.code === "GMAIL_INVALID_RECIPIENT"
+  );
+  assert.equal(calls.request, null);
+});
+
+test("maps authentication, revoked token, permission, invalid message, quota, and network failures", async (t) => {
+  const cases = [
+    [
+      "authentication failure",
+      { response: { status: 401, data: { error: "unauthorized" } } },
+      "GMAIL_AUTH_FAILED",
+    ],
+    [
+      "revoked refresh token",
+      { response: { status: 400, data: { error: "invalid_grant" } } },
+      "GMAIL_REFRESH_TOKEN_INVALID",
+    ],
+    [
+      "permission failure",
+      {
+        response: {
+          status: 403,
+          data: { error: { status: "PERMISSION_DENIED", message: "insufficient scope" } },
+        },
+      },
+      "GMAIL_PERMISSION_DENIED",
+    ],
+    [
+      "invalid MIME message",
+      { response: { status: 400, data: { error: { message: "Invalid message" } } } },
+      "GMAIL_INVALID_MESSAGE",
+    ],
+    [
+      "invalid recipient rejected by Gmail",
+      { response: { status: 400, data: { error: { message: "Invalid To header" } } } },
+      "GMAIL_INVALID_RECIPIENT",
+    ],
+    [
+      "quota failure",
+      {
+        response: {
+          status: 403,
+          data: { error: { message: "userRateLimitExceeded" } },
+        },
+      },
+      "GMAIL_QUOTA_OR_RATE_LIMIT",
+    ],
+    [
+      "network failure",
+      Object.assign(new Error("request failed"), { code: "ETIMEDOUT" }),
+      "GMAIL_NETWORK_ERROR",
+    ],
+  ];
+
+  for (const [name, error, expectedCode] of cases) {
+    await t.test(name, async () => {
+      const { googleApi } = createMockGoogle({ error });
+      const provider = createGmailApiProvider({
+        googleApi,
+        gmailConfig: getConfig(),
+        logger: { info() {}, error() {} },
+      });
+
+      await assert.rejects(
+        provider.sendMail({
+          to: "recipient@example.com",
+          subject: "Error mapping",
+          text: "Body",
+        }),
+        (mappedError) => mappedError.code === expectedCode
+      );
     });
-
-    assert.equal(
-      authorization,
-      `Basic ${Buffer.from("test-api-key:test-secret-key").toString("base64")}`
-    );
-  } finally {
-    config.MAILJET_API_KEY = originalApiKey;
-    config.MAILJET_SECRET_KEY = originalSecretKey;
   }
 });
 
-test("reports invalid Mailjet credentials without exposing secrets", async () => {
-  globalThis.fetch = async () =>
-    new Response(
-      JSON.stringify({ ErrorMessage: "Invalid API key" }),
-      { status: 401 }
-    );
+test("returns a failure if Gmail API does not provide an accepted message ID", async () => {
+  const { googleApi } = createMockGoogle({ response: { data: {} } });
+  const provider = createGmailApiProvider({
+    googleApi,
+    gmailConfig: getConfig(),
+    logger: { info() {}, error() {} },
+  });
 
   await assert.rejects(
-    mailer.sendMail({
+    provider.sendMail({
       to: "recipient@example.com",
-      subject: "Test",
-      text: "Test",
+      subject: "Invalid response",
+      text: "Body",
     }),
-    (error) => {
-      assert.equal(error.code, "MAILJET_AUTH_FAILED");
-      assert.equal(error.statusCode, 401);
-      assert.doesNotMatch(error.message, /test-api-key|test-secret-key/);
-      return true;
-    }
+    (error) => error.code === "GMAIL_INVALID_RESPONSE"
   );
 });
 
-test("email OTP reports an API rejection instead of false success", async () => {
-  globalThis.fetch = async () =>
-    new Response(
-      JSON.stringify({
-        Messages: [
-          {
-            Status: "error",
-            Errors: [{ ErrorMessage: "Sender address is not validated" }],
-          },
-        ],
-      }),
-      { status: 200 }
-    );
-
-  await assert.rejects(
-    sendEmailOTP("recipient@example.com", "123456"),
-    (error) => error.code === "MAILJET_SENDER_REJECTED"
-  );
-});
-
-test("reports a rejected sender or recipient even with HTTP 200", async () => {
-  globalThis.fetch = async () =>
-    new Response(
-      JSON.stringify({
-        Messages: [
-          {
-            Status: "error",
-            Errors: [{ ErrorMessage: "Sender address is not validated" }],
-          },
-        ],
-      }),
-      { status: 200 }
-    );
-
-  await assert.rejects(
-    mailer.sendMail({
-      to: "recipient@example.com",
-      subject: "Test",
-      text: "Test",
-    }),
-    (error) => error.code === "MAILJET_SENDER_REJECTED"
-  );
-
-  globalThis.fetch = async () =>
-    new Response(
-      JSON.stringify({
-        Messages: [
-          {
-            Status: "error",
-            Errors: [{ ErrorMessage: "Invalid recipient address" }],
-          },
-        ],
-      }),
-      { status: 200 }
-    );
-
-  await assert.rejects(
-    mailer.sendMail({
-      to: "recipient@example.com",
-      subject: "Test",
-      text: "Test",
-    }),
-    (error) => error.code === "MAILJET_RECIPIENT_REJECTED"
-  );
-});
-
-test("reports rate limits and provider network failures", async () => {
-  globalThis.fetch = async () =>
-    new Response(JSON.stringify({ ErrorMessage: "Rate limit exceeded" }), {
-      status: 429,
-    });
-
-  await assert.rejects(
-    mailer.sendMail({
-      to: "recipient@example.com",
-      subject: "Test",
-      text: "Test",
-    }),
-    (error) => error.code === "MAILJET_RATE_LIMIT"
-  );
-
-  globalThis.fetch = async () => {
-    throw new Error("network unavailable");
+test("email OTP service continues using the same centralized sendMail interface", async () => {
+  const originalSendMail = emailService.sendMail;
+  let captured;
+  emailService.sendMail = async (options) => {
+    captured = options;
+    return { messageId: "mock-accepted" };
   };
 
-  await assert.rejects(
-    mailer.sendMail({
-      to: "recipient@example.com",
-      subject: "Test",
-      text: "Test",
-    }),
-    (error) => {
-      assert.equal(error.code, "MAILJET_NETWORK_ERROR");
-      assert.doesNotMatch(error.message, /test-api-key|test-secret-key/);
-      return true;
-    }
-  );
+  try {
+    assert.equal(
+      await sendEmailOTP("recipient@example.com", "123456"),
+      "mock-accepted"
+    );
+    assert.equal(captured.to, "recipient@example.com");
+    assert.equal(captured.subject, "Verify your email address");
+    assert.match(captured.text, /123456/);
+  } finally {
+    emailService.sendMail = originalSendMail;
+  }
 });

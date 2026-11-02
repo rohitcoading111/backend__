@@ -29,22 +29,8 @@ const config = {
     TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN,
     TWILIO_VERIFY_SERVICE_SID: process.env.TWILIO_VERIFY_SERVICE_SID,
 
-    EMAIL_USER:process.env.EMAIL_USER,
-    EMAIL_APP_PASSWORD:process.env.EMAIL_APP_PASSWORD,
-
     NODE_ENV: process.env.NODE_ENV || "development",
     IS_RENDER: process.env.RENDER === "true",
-    MAIL_PROVIDER: (
-        process.env.MAIL_PROVIDER ||
-        (process.env.NODE_ENV === "production" ||
-        process.env.RENDER === "true"
-            ? "mailjet"
-            : "gmail")
-    ).trim().toLowerCase(),
-    MAILJET_API_KEY: process.env.MAILJET_API_KEY?.trim(),
-    MAILJET_SECRET_KEY: process.env.MAILJET_SECRET_KEY?.trim(),
-    MAILJET_SENDER_EMAIL: process.env.MAILJET_SENDER_EMAIL?.trim(),
-    MAILJET_SENDER_NAME: process.env.MAILJET_SENDER_NAME?.trim() || "LearnHub",
 
    WHATSAPP_FROM: process.env.WHATSAPP_FROM || "whatsapp:+17372508034",  
    APPOINTMENT_TEMPLATE_SID: process.env.APPOINTMENT_TEMPLATE_SID || "HXfe5ab5f00277942d4d4200328b4d403c",
