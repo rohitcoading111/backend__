@@ -6,6 +6,9 @@ export const getDashboardPath = (user) => {
   }
 
   const role = String(user.role).toUpperCase();
+  const handlePersonalDashboard = useCallback(() => {
+  navigate("/instructor-dashboard");
+}, [navigate]);
 
   switch (role) {
     case "STUDENT":

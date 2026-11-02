@@ -114,16 +114,10 @@ export const router = createBrowserRouter([
   },
 
 
-  // Independent Instructor Routes
-// Independent Instructor Routes
 {
   element: (
-    <ProtectedRoute
-      allowedRoles={["INSTRUCTOR"]}
-      instructorType="INDEPENDENT"
-    />
+    <ProtectedRoute allowedRoles={["INSTRUCTOR"]} />
   ),
-
   children: [
     {
       path: "/instructor-dashboard",
