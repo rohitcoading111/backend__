@@ -1,5 +1,6 @@
 
 import { verifyEmailRegistration } from "../services/emailRegistration.services.js";
+import { setRefreshCookie } from "../utils/refreshCookie.js";
 
 export const verifyEmailRegistrationController = async (req, res) => {
   try {
@@ -10,12 +11,7 @@ export const verifyEmailRegistrationController = async (req, res) => {
       code,
     });
 
-    res.cookie("refreshToken", result.refreshToken, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    setRefreshCookie(res, result.refreshToken);
 
     // Service already returns a plain JavaScript object
     const {

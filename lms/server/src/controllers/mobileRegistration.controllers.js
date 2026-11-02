@@ -1,5 +1,6 @@
 
 import { completeMobileRegistration } from "../services/mobileRegistration.services.js";
+import { setRefreshCookie } from "../utils/refreshCookie.js";
 
 export const verifyMobileRegistrationController = async (req, res) => {
   try {
@@ -8,12 +9,7 @@ export const verifyMobileRegistrationController = async (req, res) => {
       code: req.body.code,
     });
 
-    res.cookie("refreshToken", result.refreshToken, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    setRefreshCookie(res, result.refreshToken);
 
     return res.status(201).json({
       success: true,

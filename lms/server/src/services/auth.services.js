@@ -483,15 +483,20 @@ export const refreshTokenService = async (decoded, refreshToken) => {
   return accessToken;
 };
 
-export const LogoutUser = async (refreshToken) => {
+export const LogoutUser = async ({ refreshToken, userId } = {}) => {
+  const filter = refreshToken
+    ? { refreshToken, ...(userId ? { _id: userId } : {}) }
+    : userId
+      ? { _id: userId }
+      : null;
 
-  const loggedOutUser = await userModel.findOneAndUpdate(
-    { refreshToken: refreshToken },
+  if (!filter) return null;
+
+  return userModel.findOneAndUpdate(
+    filter,
     { $set: { refreshToken: null } },
     { new: true }
   );
-
-  return loggedOutUser;
 };
 
 

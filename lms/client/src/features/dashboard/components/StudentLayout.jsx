@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 import { logoutUser } from "../../auth/authThunk/authThunks.js";
+import { logout } from "../../auth/authSlices/authSlice.js";
 
 import Sidebar from "./Sidebar.jsx";
 import DashboardHeader from "./DashboardHeader.jsx";
@@ -51,6 +52,8 @@ function StudentLayout() {
       navigate("/login", { replace: true });
     } catch (error) {
       console.error("Logout failed:", error);
+      dispatch(logout());
+      navigate("/login", { replace: true });
     } finally {
       setLoggingOut(false);
     }

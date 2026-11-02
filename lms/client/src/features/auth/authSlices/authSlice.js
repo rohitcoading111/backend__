@@ -104,6 +104,7 @@ const authSlice = createSlice({
 
   if (response?.user) {
     state.user = response.user;
+    state.accessToken = response.accessToken;
     state.isAuthenticated = true;
   }
 })
@@ -125,6 +126,7 @@ const authSlice = createSlice({
 
   if (response?.user) {
     state.user = response.user;
+    state.accessToken = response.accessToken;
     state.isAuthenticated = true;
   }
 })
@@ -140,6 +142,7 @@ const authSlice = createSlice({
 
   if (response?.user) {
     state.user = response.user;
+    state.accessToken = response.accessToken;
     state.isAuthenticated = true;
   }
 })
@@ -163,6 +166,7 @@ const authSlice = createSlice({
 
   if (response?.user) {
     state.user = response.user;
+    state.accessToken = response.accessToken;
     state.isAuthenticated = true;
   }
 })
@@ -201,6 +205,9 @@ const authSlice = createSlice({
 })
 
 .addCase(logoutUser.rejected, (state, action) => {
+  state.user = null;
+  state.accessToken = null;
+  state.isAuthenticated = false;
   state.status = "failed";
   state.error = action.payload || "Logout failed";
 })

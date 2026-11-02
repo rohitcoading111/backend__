@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import { LogoutUser } from "../services/auth.services.js";
 import { refreshTokenService } from "../services/auth.services.js";
 import { startMobileRegistration } from "../services/mobileRegistration.services.js";
+import { clearRefreshCookie } from "../utils/refreshCookie.js";
 
 
 
@@ -246,18 +247,25 @@ export const RefreshToken = async (req, res) => {
 };
 
 export const Logout = async (req, res) => {
-  const { refreshToken } = req.cookies;
+  const refreshToken = req.cookies?.refreshToken;
+  const accessToken = req.headers.authorization?.match(/^Bearer\s+(.+)$/i)?.[1];
+  let userId;
 
-  if (!refreshToken) {
-    return res.status(400).json({
-      success: false,
-      message: "Refresh token not found",
-    });
+  if (accessToken) {
+    try {
+      userId = jwt.verify(accessToken, config.ACCESS_TOKEN_SECRET).id;
+    } catch (error) {
+      if (
+        error.name !== "TokenExpiredError" &&
+        error.name !== "JsonWebTokenError"
+      ) {
+        throw error;
+      }
+    }
   }
 
-  const logoutuser = await LogoutUser(refreshToken);
-
-  res.clearCookie("refreshToken");
+  await LogoutUser({ refreshToken, userId });
+  clearRefreshCookie(res);
 
   return res.status(200).json({
     success: true,

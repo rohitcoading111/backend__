@@ -8,6 +8,7 @@ import User from "../models/user.models.js";
 import { findOrCreateGoogleUser } from "../services/googleAuth.services.js";
 import { sendLoginNotification } from "../services/loginNotification.services.js";
 import { sendRegistrationNotification } from "../services/registrationNotification.services.js";
+import { setRefreshCookie } from "../utils/refreshCookie.js";
 
 export const googleAuthCallback = async (req, res) => {
   try {
@@ -29,13 +30,7 @@ export const googleAuthCallback = async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save();
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    setRefreshCookie(res, refreshToken);
 
     try {
       if (isNewUser) {
