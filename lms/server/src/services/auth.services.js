@@ -23,7 +23,6 @@ const OTP_SEND_WINDOW_MS = 60 * 60 * 1000;
 const MAX_OTP_SENDS_PER_WINDOW = 5;
 const RESET_OTP_TTL_MS = 10 * 60 * 1000;
 import transporter from "../config/mailer.js";
-import config from "../config/config.js";
 
 
 
@@ -267,8 +266,7 @@ const isPasswordValid = await bcrypt.compare(
     };
   }
 
-  // EMAIL LOGIN: Nodemailer flow will be implemented next
- // EMAIL LOGIN
+  // EMAIL LOGIN
 if (normalizedEmail) {
   if (!existingUser.email) {
     throw new Error("LOGIN_EMAIL_REQUIRED");
@@ -763,7 +761,6 @@ export const resetPassword = async ({
   if (user.email) {
     try {
       await transporter.sendMail({
-        from: config.EMAIL_USER,
         to: user.email,
         subject: "Your password has been reset",
         text: "Your password was reset successfully. If you did not make this change, contact support immediately.",

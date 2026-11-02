@@ -14,7 +14,6 @@ export const sendRegistrationNotification = async ({
     }
 
     await transporter.sendMail({
-      from: config.EMAIL_USER,
       to: email,
       subject: "Registration Successful",
       text: `Hi ${name || "User"},

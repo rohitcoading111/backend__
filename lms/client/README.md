@@ -22,6 +22,30 @@ Register the Google callback URL in the Google OAuth client configuration.
 Google sign-in redirects to the frontend URL configured in the backend's
 `FRONTEND_URL` setting.
 
+## Backend email provider
+
+Email provider settings belong only in the **backend** environment; never put
+Mailjet credentials in frontend or `VITE_` variables.
+
+For local backend development, set `NODE_ENV=development` and
+`MAIL_PROVIDER=gmail`, and keep `EMAIL_USER` and `EMAIL_APP_PASSWORD` in the
+backend's ignored `.env` file.
+
+For the Render backend, set `NODE_ENV=production` and these backend environment
+variables:
+
+```env
+MAIL_PROVIDER=mailjet
+MAILJET_API_KEY=<Mailjet API key>
+MAILJET_SECRET_KEY=<Mailjet secret key>
+MAILJET_SENDER_EMAIL=<verified Mailjet sender address>
+MAILJET_SENDER_NAME=LearnHub
+```
+
+Mailjet acceptance means the Send API accepted the request; it does not prove
+delivery to the recipient. Check Mailjet's message activity/status for delivery
+or bounce confirmation.
+
 For local frontend development against the live backend, set
 `VITE_API_URL=https://learnhub-com.onrender.com/api` and
 `VITE_SOCKET_URL=https://learnhub-com.onrender.com` in the development

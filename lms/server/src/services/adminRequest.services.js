@@ -109,7 +109,6 @@ export const createAdminRequest = async (data) => {
 
   try {
     await transporter.sendMail({
-      from: config.EMAIL_USER,
       to: config.ADMIN_EMAIL,
       subject: "New Organization Admin Request - Verification Required",
       html: `

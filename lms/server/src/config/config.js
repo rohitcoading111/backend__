@@ -32,6 +32,14 @@ const config = {
     EMAIL_USER:process.env.EMAIL_USER,
     EMAIL_APP_PASSWORD:process.env.EMAIL_APP_PASSWORD,
 
+    MAIL_PROVIDER:
+        process.env.MAIL_PROVIDER ||
+        (process.env.NODE_ENV === "production" ? "mailjet" : "gmail"),
+    MAILJET_API_KEY: process.env.MAILJET_API_KEY,
+    MAILJET_SECRET_KEY: process.env.MAILJET_SECRET_KEY,
+    MAILJET_SENDER_EMAIL: process.env.MAILJET_SENDER_EMAIL,
+    MAILJET_SENDER_NAME: process.env.MAILJET_SENDER_NAME || "LearnHub",
+
    WHATSAPP_FROM: process.env.WHATSAPP_FROM || "whatsapp:+17372508034",  
    APPOINTMENT_TEMPLATE_SID: process.env.APPOINTMENT_TEMPLATE_SID || "HXfe5ab5f00277942d4d4200328b4d403c",
 

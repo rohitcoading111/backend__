@@ -12,7 +12,6 @@ export const sendLoginNotification = async ({
 
   try {
     await transporter.sendMail({
-      from: config.EMAIL_USER,
       to: email,
       subject: "New Login Alert",
       text: `

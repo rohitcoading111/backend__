@@ -180,6 +180,15 @@ export const Login = async (req, res) => {
       });
     }
 
+    if (error.code?.startsWith("MAILJET_")) {
+      console.error("Email login OTP delivery failed:", error.code);
+
+      return res.status(error.code === "MAILJET_RATE_LIMIT" ? 429 : 502).json({
+        success: false,
+        message: "Could not send email OTP. Please try again.",
+      });
+    }
+
     console.error("Login Error:", error);
 
     return res.status(500).json({
