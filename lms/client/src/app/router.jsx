@@ -1,30 +1,35 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
+// Authentication
 import Login from "../features/auth/pages/Login.jsx";
 import Register from "../features/auth/pages/Register.jsx";
 import VerifyOtp from "../features/auth/pages/VerifyOtp.jsx";
 import GoogleAuthCallback from "../features/auth/pages/GoogleAuthCallback.jsx";
 
+// Student
 import CourseCatalog from "../features/courses/pages/CourseCatalog.jsx";
 import ModulesPage from "../features/modules/pages/ModulesPage.jsx";
 import ModuleLecturesPage from "../features/lectures/pages/ModuleLecturesPage.jsx";
-
 import StudentLayout from "../features/dashboard/components/StudentLayout.jsx";
 
+// Admin
 import AdminDashboard from "../features/admin/pages/AdminDashboard.jsx";
 
-import LiveClassesPage from "../features/liveClasses/pages/LiveClassesPage.jsx";
-
+// Instructor
 import InstructorDashboard from "../features/instructor/pages/InstructorDashboard.jsx";
 import LiveRoom from "../features/instructor/components/LiveRoom.jsx";
 
+// Live Classes
+import LiveClassesPage from "../features/liveClasses/pages/LiveClassesPage.jsx";
+
+// Organization
+import OrganizationRequest from "../features/adminRequests/pages/OrganizationRequest.jsx";
+import OrganizationAdminDashboard from "../features/organizationAdmin/pages/OrganizationAdminDashboard.jsx";
+
+// Route Guards
 import ProtectedRoute from "../routes/ProtectedRoute.jsx";
 import PublicOnlyRoute from "../routes/PublicOnlyRoute.jsx";
-
-import OrganizationRequest from
-  "../features/adminRequests/pages/OrganizationRequest.jsx";
-
-import { useSelector } from "react-redux";
 
 
 // Temporary Independent Instructor Dashboard
@@ -68,46 +73,6 @@ function IndependentInstructorDashboard() {
 }
 
 
-// Temporary Organization Admin Dashboard
-function OrganizationAdminDashboard() {
-  const user = useSelector((state) => state.auth?.user);
-
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-950 p-6 text-white">
-      <div className="w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-900 p-8 text-center">
-
-        <h1 className="text-2xl font-bold">
-          Organization Admin Dashboard
-        </h1>
-
-        <p className="mt-3 text-sm text-slate-400">
-          Welcome to your organization administration panel.
-        </p>
-
-        <div className="mt-6 rounded-xl border border-slate-700 bg-slate-800 p-4 text-left">
-          <p className="text-xs text-slate-400">
-            Admin Name
-          </p>
-
-          <p className="mt-1 font-semibold">
-            {user?.name || "Organization Admin"}
-          </p>
-
-          <p className="mt-4 text-xs text-slate-400">
-            Organization ID
-          </p>
-
-          <p className="mt-1 break-all font-semibold text-indigo-400">
-            {user?.organizationId || "Not available"}
-          </p>
-        </div>
-
-      </div>
-    </div>
-  );
-}
-
-
 export const router = createBrowserRouter([
 
   // Root
@@ -118,18 +83,23 @@ export const router = createBrowserRouter([
 
 
   // Public Authentication Routes
-{
-  element: <PublicOnlyRoute />,
-  children: [
-    { path: "/login", element: <Login /> },
-    { path: "/register", element: <Register /> },
-
-    {
-      path: "/register-organization",
-      element: <OrganizationRequest />,
-    },
-  ],
-},
+  {
+    element: <PublicOnlyRoute />,
+    children: [
+      {
+        path: "/login",
+        element: <Login />,
+      },
+      {
+        path: "/register",
+        element: <Register />,
+      },
+      {
+        path: "/register-organization",
+        element: <OrganizationRequest />,
+      },
+    ],
+  },
 
 
   // OTP Verification
@@ -149,9 +119,7 @@ export const router = createBrowserRouter([
   // Student Routes
   {
     element: (
-      <ProtectedRoute
-        allowedRoles={["STUDENT"]}
-      />
+      <ProtectedRoute allowedRoles={["STUDENT"]} />
     ),
 
     children: [
@@ -159,22 +127,18 @@ export const router = createBrowserRouter([
         path: "/dashboard",
         element: <StudentLayout />,
       },
-
       {
         path: "/courses",
         element: <CourseCatalog />,
       },
-
       {
         path: "/courses/:courseId/modules",
         element: <ModulesPage />,
       },
-
       {
         path: "/courses/:courseId/modules/:moduleId/lectures",
         element: <ModuleLecturesPage />,
       },
-
       {
         path: "/live-classes",
         element: <LiveClassesPage />,
@@ -215,7 +179,6 @@ export const router = createBrowserRouter([
         path: "/organization-instructor-dashboard",
         element: <InstructorDashboard />,
       },
-
       {
         path: "/instructor/live-room",
         element: <LiveRoom />,
@@ -257,10 +220,15 @@ export const router = createBrowserRouter([
         element: <AdminDashboard />,
       },
 
-      // Backward compatibility with your old URL
+      // Backward compatibility
       {
         path: "/adminDashboard",
-        element: <Navigate to="/super-admin-dashboard" replace />,
+        element: (
+          <Navigate
+            to="/super-admin-dashboard"
+            replace
+          />
+        ),
       },
     ],
   },
