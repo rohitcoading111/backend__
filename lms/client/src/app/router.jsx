@@ -27,50 +27,15 @@ import LiveClassesPage from "../features/liveClasses/pages/LiveClassesPage.jsx";
 import OrganizationRequest from "../features/adminRequests/pages/OrganizationRequest.jsx";
 import OrganizationAdminDashboard from "../features/organizationAdmin/pages/OrganizationAdminDashboard.jsx";
 import OrganizationDetailsPage from "../features/organizationAdmin/pages/OrganizationDetailsPage.jsx";
+
+import IndependentInstructorDashboard from
+  "../features/independentInstructor/pages/IndependentInstructorDashboard.jsx";
 // Route Guards
 import ProtectedRoute from "../routes/ProtectedRoute.jsx";
 import PublicOnlyRoute from "../routes/PublicOnlyRoute.jsx";
 
 
-// Temporary Independent Instructor Dashboard
-function IndependentInstructorDashboard() {
-  const user = useSelector((state) => state.auth?.user);
 
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-950 p-6 text-white">
-      <div className="w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-900 p-8 text-center">
-
-        <h1 className="text-2xl font-bold">
-          Independent Instructor Dashboard
-        </h1>
-
-        <p className="mt-3 text-sm text-slate-400">
-          Your instructor account is active.
-          You can access LMS management after joining an organization.
-        </p>
-
-        <div className="mt-6 rounded-xl border border-slate-700 bg-slate-800 p-4 text-left">
-          <p className="text-xs text-slate-400">
-            Instructor ID
-          </p>
-
-          <p className="mt-1 font-semibold text-indigo-400">
-            {user?.instructorCode || "Not available"}
-          </p>
-
-          <p className="mt-4 text-xs text-slate-400">
-            Employment Status
-          </p>
-
-          <p className="mt-1 font-semibold">
-            {user?.employmentStatus || "INDEPENDENT"}
-          </p>
-        </div>
-
-      </div>
-    </div>
-  );
-}
 
 
 export const router = createBrowserRouter([
@@ -148,21 +113,22 @@ export const router = createBrowserRouter([
 
 
   // Independent Instructor Routes
-  {
-    element: (
-      <ProtectedRoute
-        allowedRoles={["INSTRUCTOR"]}
-        instructorType="INDEPENDENT"
-      />
-    ),
+// Independent Instructor Routes
+{
+  element: (
+    <ProtectedRoute
+      allowedRoles={["INSTRUCTOR"]}
+      instructorType="INDEPENDENT"
+    />
+  ),
 
-    children: [
-      {
-        path: "/instructor-dashboard",
-        element: <IndependentInstructorDashboard />,
-      },
-    ],
-  },
+  children: [
+    {
+      path: "/instructor-dashboard",
+      element: <IndependentInstructorDashboard />,
+    },
+  ],
+},
 
 
   // Organization Instructor Routes

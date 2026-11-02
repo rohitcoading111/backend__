@@ -1,6 +1,6 @@
-
 import Organization from "../models/organization.models.js";
 import User from "../models/user.models.js";
+
 
 export const createOrganization = async ({
   adminId,

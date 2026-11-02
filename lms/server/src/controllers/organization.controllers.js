@@ -4,6 +4,7 @@ import { validationResult } from "express-validator";
 import {
   createOrganization,
   getMyOrganization,
+  getAvailableOrganizations,
 } from "../services/organization.services.js";
 
 export const createOrganizationController = async (req, res) => {
