@@ -5,6 +5,7 @@ import {
   createOrganization,
   getMyOrganization,
   getAvailableOrganizations,
+  getInstructorOrganizationOverview
 } from "../services/organization.services.js";
 
 export const createOrganizationController = async (req, res) => {
@@ -87,6 +88,28 @@ export const getAvailableOrganizationsController = async (
       success: false,
       message:
         error.message || "Failed to fetch available organizations",
+    });
+  }
+};
+
+export const getInstructorOrganizationOverviewController = async (
+  req,
+  res
+) => {
+  try {
+    const result = await getInstructorOrganizationOverview(
+      req.organizationId
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Organization overview fetched successfully",
+      data: result,
+    });
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.message || "Failed to fetch organization overview",
     });
   }
 };

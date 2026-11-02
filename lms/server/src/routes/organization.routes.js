@@ -4,6 +4,7 @@ import {
   createOrganizationController,
   getMyOrganizationController,
   getAvailableOrganizationsController,
+  getInstructorOrganizationOverviewController
 } from "../controllers/organization.controllers.js";
 
 import {
@@ -39,6 +40,15 @@ router.get(
   authMiddleware,
   roleMiddleware("INSTRUCTOR"),
   getAvailableOrganizationsController
+);
+
+
+router.get(
+  "/instructor-overview",
+  authMiddleware,
+  roleMiddleware("INSTRUCTOR"),
+  instructorAccessMiddleware,
+  getInstructorOrganizationOverviewController
 );
 
 export default router;

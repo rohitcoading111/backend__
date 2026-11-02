@@ -1,5 +1,5 @@
 import User from "../models/user.models.js";
-
+import Course from "../models/course.models.js";
 // Search only independent instructors by exact email or instructorCode
 export const searchIndependentInstructor = async (identifier) => {
   const searchValue = String(identifier || "").trim();
@@ -75,7 +75,6 @@ export const hireInstructor = async ({
   organizationId,
   adminId,
 }) => {
-  // Find the instructor
   const instructor = await User.findById(userId).select(
     "_id name email role instructorCode organizationId hiredBy employmentStatus"
   );
@@ -84,7 +83,6 @@ export const hireInstructor = async ({
     throw createError("Instructor not found", 404);
   }
 
-  // Only Instructor accounts can be hired
   if (instructor.role !== "INSTRUCTOR") {
     throw createError(
       "Only registered instructors can be hired",
@@ -92,15 +90,13 @@ export const hireInstructor = async ({
     );
   }
 
-  // Instructor must have a permanent Instructor ID
   if (!instructor.instructorCode) {
     throw createError(
-      "Instructor ID is missing. This account needs an Instructor ID before hiring",
+      "Instructor ID is missing",
       409
     );
   }
 
-  // Only independent instructors can be hired
   if (
     instructor.organizationId ||
     instructor.hiredBy ||
@@ -112,9 +108,7 @@ export const hireInstructor = async ({
     );
   }
 
-  // Atomically assign the instructor to this Admin's organization.
-  // This also prevents two organizations from hiring the same
-  // instructor simultaneously.
+  // Step 1: Hire instructor
   const hiredInstructor = await User.findOneAndUpdate(
     {
       _id: instructor._id,
@@ -146,6 +140,58 @@ export const hireInstructor = async ({
     );
   }
 
+  // Step 2: Link instructor's existing courses to organization
+  let linkedCourses;
+
+  try {
+    linkedCourses = await Course.updateMany(
+      {
+        instructor: hiredInstructor._id,
+        organizationId: null,
+      },
+      {
+        $set: {
+          organizationId: organizationId,
+        },
+      }
+    );
+  } catch (error) {
+    // Roll back hiring if course linking fails
+    await Course.updateMany(
+      {
+        instructor: hiredInstructor._id,
+        organizationId,
+      },
+      {
+        $set: {
+          organizationId: null,
+        },
+      }
+    );
+
+    await User.findOneAndUpdate(
+      {
+        _id: hiredInstructor._id,
+        organizationId,
+        hiredBy: adminId,
+        employmentStatus: "ACTIVE",
+      },
+      {
+        $set: {
+          organizationId: null,
+          hiredBy: null,
+          employmentStatus: "INDEPENDENT",
+        },
+      }
+    );
+
+    throw createError(
+      "Instructor hiring failed because existing courses could not be linked.",
+      500
+    );
+  }
+
+  // Step 3: Return hiring details
   return {
     id: hiredInstructor._id,
     name: hiredInstructor.name,
@@ -155,6 +201,7 @@ export const hireInstructor = async ({
     organizationId: hiredInstructor.organizationId,
     hiredBy: hiredInstructor.hiredBy,
     employmentStatus: hiredInstructor.employmentStatus,
+    linkedCourses: linkedCourses.modifiedCount,
   };
 };
 

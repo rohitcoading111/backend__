@@ -1,6 +1,6 @@
 import Organization from "../models/organization.models.js";
 import User from "../models/user.models.js";
-
+import Course from "../models/course.models.js";
 
 export const createOrganization = async ({
   adminId,
@@ -141,4 +141,36 @@ export const getAvailableOrganizations = async (instructorId) => {
       name: organization.name,
       email: organization.owner.email,
     }));
+};
+
+export const getInstructorOrganizationOverview = async (
+  organizationId
+) => {
+  if (!organizationId) {
+    throw createError("Organization ID is required", 400);
+  }
+
+  const organization = await Organization.findOne({
+    _id: organizationId,
+    status: "ACTIVE",
+  })
+    .select("_id name owner organizationType description logo status")
+    .populate("owner", "_id name email")
+    .lean();
+
+  if (!organization) {
+    throw createError("Organization not found", 404);
+  }
+
+  const courses = await Course.find({
+    organizationId,
+  })
+    .populate("instructor", "_id name email instructorCode")
+    .sort({ createdAt: -1 })
+    .lean();
+
+  return {
+    organization,
+    courses,
+  };
 };
