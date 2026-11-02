@@ -260,8 +260,18 @@ const getMailjetMessage = async (options) => {
 
 const sendWithMailjet = async (options) => {
   const message = await getMailjetMessage(options);
+  const apiKey = config.MAILJET_API_KEY?.trim();
+  const secretKey = config.MAILJET_SECRET_KEY?.trim();
+
+  if (!apiKey || !secretKey) {
+    throw createMailError(
+      "Mailjet API credentials are not configured.",
+      "MAILJET_CONFIG_ERROR"
+    );
+  }
+
   const authorization = Buffer.from(
-    `${config.MAILJET_API_KEY}:${config.MAILJET_SECRET_KEY}`
+    `${apiKey}:${secretKey}`
   ).toString("base64");
 
   let response;

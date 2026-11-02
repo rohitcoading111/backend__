@@ -162,6 +162,45 @@ test("sends a mapped message and returns the Mailjet acceptance ID", async () =>
   assert.deepEqual(info.accepted, ["recipient@example.com"]);
 });
 
+test("trims surrounding whitespace from Mailjet credentials before Basic Auth", async () => {
+  const originalApiKey = config.MAILJET_API_KEY;
+  const originalSecretKey = config.MAILJET_SECRET_KEY;
+  let authorization;
+
+  config.MAILJET_API_KEY = " test-api-key \n";
+  config.MAILJET_SECRET_KEY = "\ttest-secret-key ";
+  globalThis.fetch = async (_url, options) => {
+    authorization = options.headers.Authorization;
+    return new Response(
+      JSON.stringify({
+        Messages: [
+          {
+            Status: "success",
+            To: [{ Email: "recipient@example.com", MessageUUID: "test-id" }],
+          },
+        ],
+      }),
+      { status: 200 }
+    );
+  };
+
+  try {
+    await mailer.sendMail({
+      to: "recipient@example.com",
+      subject: "Test",
+      text: "Test",
+    });
+
+    assert.equal(
+      authorization,
+      `Basic ${Buffer.from("test-api-key:test-secret-key").toString("base64")}`
+    );
+  } finally {
+    config.MAILJET_API_KEY = originalApiKey;
+    config.MAILJET_SECRET_KEY = originalSecretKey;
+  }
+});
+
 test("reports invalid Mailjet credentials without exposing secrets", async () => {
   globalThis.fetch = async () =>
     new Response(
