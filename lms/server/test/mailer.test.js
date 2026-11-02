@@ -13,6 +13,7 @@ process.env.EMAIL_APP_PASSWORD = "test-app-password";
 const originalFetch = globalThis.fetch;
 const { default: config } = await import("../src/config/config.js");
 const { default: mailer } = await import("../src/config/mailer.js");
+assert.equal(config.MAIL_PROVIDER, "mailjet");
 
 after(() => {
   globalThis.fetch = originalFetch;
@@ -50,6 +51,35 @@ test("keeps local Gmail SMTP behind the gmail provider setting", async () => {
     assert.equal(info.messageId, "gmail-message-id");
   } finally {
     nodemailer.createTransport = originalCreateTransport;
+    config.MAIL_PROVIDER = "mailjet";
+  }
+});
+
+test("never allows Gmail SMTP in production, even if misconfigured", async () => {
+  const originalCreateTransport = nodemailer.createTransport;
+  const originalEnvironment = config.NODE_ENV;
+  const originalRenderFlag = config.IS_RENDER;
+  config.NODE_ENV = "production";
+  config.IS_RENDER = false;
+  config.MAIL_PROVIDER = "gmail";
+  nodemailer.createTransport = () => {
+    throw new Error("Gmail transport must not be initialized");
+  };
+
+  try {
+    assert.throws(
+      () =>
+        mailer.sendMail({
+          to: "recipient@example.com",
+          subject: "Production test",
+          text: "Test",
+        }),
+      (error) => error.code === "MAIL_PROVIDER_INVALID"
+    );
+  } finally {
+    nodemailer.createTransport = originalCreateTransport;
+    config.NODE_ENV = originalEnvironment;
+    config.IS_RENDER = originalRenderFlag;
     config.MAIL_PROVIDER = "mailjet";
   }
 });

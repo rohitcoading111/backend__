@@ -32,9 +32,15 @@ const config = {
     EMAIL_USER:process.env.EMAIL_USER,
     EMAIL_APP_PASSWORD:process.env.EMAIL_APP_PASSWORD,
 
-    MAIL_PROVIDER:
+    NODE_ENV: process.env.NODE_ENV || "development",
+    IS_RENDER: process.env.RENDER === "true",
+    MAIL_PROVIDER: (
         process.env.MAIL_PROVIDER ||
-        (process.env.NODE_ENV === "production" ? "mailjet" : "gmail"),
+        (process.env.NODE_ENV === "production" ||
+        process.env.RENDER === "true"
+            ? "mailjet"
+            : "gmail")
+    ).trim().toLowerCase(),
     MAILJET_API_KEY: process.env.MAILJET_API_KEY,
     MAILJET_SECRET_KEY: process.env.MAILJET_SECRET_KEY,
     MAILJET_SENDER_EMAIL: process.env.MAILJET_SENDER_EMAIL,

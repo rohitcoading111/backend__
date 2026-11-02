@@ -5,6 +5,38 @@ import config from "./config.js";
 
 const MAILJET_SEND_API_URL = "https://api.mailjet.com/v3.1/send";
 let gmailTransporter;
+const isProductionRuntime = () =>
+  config.NODE_ENV === "production" || config.IS_RENDER;
+
+console.info("[mailer] provider configuration", {
+  provider: config.MAIL_PROVIDER,
+  environment: config.NODE_ENV,
+  render: config.IS_RENDER,
+  mailjetCredentialsConfigured: Boolean(
+    config.MAILJET_API_KEY && config.MAILJET_SECRET_KEY
+  ),
+  mailjetSenderConfigured: Boolean(config.MAILJET_SENDER_EMAIL),
+  gmailCredentialsConfigured: Boolean(
+    config.EMAIL_USER && config.EMAIL_APP_PASSWORD
+  ),
+});
+
+if (isProductionRuntime() && config.MAIL_PROVIDER !== "mailjet") {
+  console.error(
+    "[mailer] Invalid provider configuration: production and Render require Mailjet."
+  );
+}
+
+if (
+  config.MAIL_PROVIDER === "mailjet" &&
+  (!config.MAILJET_API_KEY ||
+    !config.MAILJET_SECRET_KEY ||
+    !config.MAILJET_SENDER_EMAIL)
+) {
+  console.error(
+    "[mailer] Mailjet is selected but API credentials or sender configuration are missing."
+  );
+}
 
 const createMailError = (message, code, statusCode) => {
   const error = new Error(message);
@@ -234,6 +266,7 @@ const sendWithMailjet = async (options) => {
 
   let response;
   try {
+    console.info("[mailer] Mailjet Send API request started.");
     response = await fetch(MAILJET_SEND_API_URL, {
       method: "POST",
       headers: {
@@ -243,6 +276,7 @@ const sendWithMailjet = async (options) => {
       body: JSON.stringify({ Messages: [message] }),
     });
   } catch {
+    console.error("[mailer] Mailjet Send API network request failed.");
     throw createMailError(
       "Mailjet request failed because the provider could not be reached.",
       "MAILJET_NETWORK_ERROR"
@@ -253,6 +287,9 @@ const sendWithMailjet = async (options) => {
   try {
     payload = await response.json();
   } catch {
+    console.error("[mailer] Mailjet returned a non-JSON response.", {
+      statusCode: response.status,
+    });
     throw createMailError(
       "Mailjet returned an invalid response.",
       "MAILJET_INVALID_RESPONSE",
@@ -266,6 +303,10 @@ const sendWithMailjet = async (options) => {
     const statusCode = response.status;
     const code = getMailjetErrorCode(statusCode, providerDetails);
     const detail = providerDetails ? `: ${providerDetails}` : "";
+    console.error("[mailer] Mailjet rejected the Send API request.", {
+      statusCode,
+      errorCode: code,
+    });
     throw createMailError(
       `Mailjet rejected the email request (HTTP ${statusCode})${detail}`,
       code,
@@ -276,7 +317,23 @@ const sendWithMailjet = async (options) => {
   const recipients = ["To", "Cc", "Bcc"].flatMap((key) =>
     Array.isArray(result[key]) ? result[key] : []
   );
+  if (!recipients.length) {
+    console.error(
+      "[mailer] Mailjet returned success without recipient acceptance details."
+    );
+    throw createMailError(
+      "Mailjet returned success without recipient acceptance details.",
+      "MAILJET_INVALID_RESPONSE",
+      response.status
+    );
+  }
+
   const firstRecipient = recipients[0];
+
+  console.info("[mailer] Mailjet accepted the Send API request.", {
+    statusCode: response.status,
+    recipientCount: recipients.length,
+  });
 
   return {
     messageId:
@@ -291,6 +348,13 @@ const sendWithMailjet = async (options) => {
 };
 
 const sendWithGmail = (options) => {
+  if (isProductionRuntime()) {
+    throw createMailError(
+      "Gmail SMTP is disabled in production and on Render. Set MAIL_PROVIDER=mailjet.",
+      "MAIL_PROVIDER_INVALID"
+    );
+  }
+
   gmailTransporter ||= nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -307,6 +371,13 @@ const sendWithGmail = (options) => {
 
 const mailer = {
   sendMail(options) {
+    if (isProductionRuntime() && config.MAIL_PROVIDER !== "mailjet") {
+      throw createMailError(
+        "Production email delivery requires MAIL_PROVIDER=mailjet.",
+        "MAIL_PROVIDER_INVALID"
+      );
+    }
+
     if (config.MAIL_PROVIDER === "mailjet") {
       return sendWithMailjet(options);
     }
