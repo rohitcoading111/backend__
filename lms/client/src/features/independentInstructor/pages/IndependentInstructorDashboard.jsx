@@ -1,5 +1,11 @@
 import { useSelector } from "react-redux";
 
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
+import { logoutUser } from "../../auth/authThunk/authThunks.js";
+import { logout } from "../../auth/authSlices/authSlice.js";
+
 import {
   GraduationCap,
   ShieldCheck,
@@ -26,6 +32,20 @@ function IndependentInstructorDashboard() {
     error,
     fetchOrganizations,
   } = useAvailableOrganizations();
+
+  const dispatch = useDispatch();
+const navigate = useNavigate();
+
+const handleLogout = async () => {
+  try {
+    await dispatch(logoutUser()).unwrap();
+  } catch (error) {
+    // API logout fail hone par bhi local session clear hoga
+    dispatch(logout());
+  } finally {
+    navigate("/login", { replace: true });
+  }
+};
 
   return (
     <main className="min-h-screen bg-[#f4f6fb] px-4 py-7 text-slate-900 sm:px-6 lg:px-8 lg:py-9">
@@ -78,7 +98,16 @@ function IndependentInstructorDashboard() {
                 <p className="mt-1 text-sm font-bold text-emerald-300">
                   Independent
                 </p>
+
+                
               </div>
+              <button
+  type="button"
+  onClick={handleLogout}
+  className="rounded-xl border border-red-500/30 bg-red-500/10 px-5 py-2.5 font-medium text-red-400 transition hover:bg-red-500/20"
+>
+  Logout
+</button>
             </div>
 
           </div>
