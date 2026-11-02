@@ -41,20 +41,49 @@ export const createOrganization = async ({
 };
 
 export const getMyOrganization = async (adminId) => {
-  const admin = await User.findById(adminId).select("_id role");
+  if (!adminId) {
+    const error = new Error("Admin ID is missing");
+    error.statusCode = 401;
+    throw error;
+  }
 
-  if (!admin || admin.role !== "ADMIN") {
-    const error = new Error("Only admins can access this resource");
+  // Find only Organization Admin
+  const admin = await User.findOne({
+    _id: adminId,
+    role: "ADMIN",
+    adminType: "ORGANIZATION_ADMIN",
+    adminStatus: { $ne: "SUSPENDED" },
+  }).select(
+    "_id name email role adminType organizationId adminStatus"
+  );
+
+  if (!admin) {
+    const error = new Error(
+      "Organization Admin access required"
+    );
     error.statusCode = 403;
     throw error;
   }
 
+  if (!admin.organizationId) {
+    const error = new Error(
+      "Your account is not linked to an organization"
+    );
+    error.statusCode = 403;
+    throw error;
+  }
+
+  // Find only this admin's organization
   const organization = await Organization.findOne({
-    owner: adminId,
+    _id: admin.organizationId,
+    owner: admin._id,
+    status: "ACTIVE",
   }).populate("owner", "name email");
 
   if (!organization) {
-    const error = new Error("Organization not found");
+    const error = new Error(
+      "Active organization not found"
+    );
     error.statusCode = 404;
     throw error;
   }

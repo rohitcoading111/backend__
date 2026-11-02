@@ -26,7 +26,7 @@ import LiveClassesPage from "../features/liveClasses/pages/LiveClassesPage.jsx";
 // Organization
 import OrganizationRequest from "../features/adminRequests/pages/OrganizationRequest.jsx";
 import OrganizationAdminDashboard from "../features/organizationAdmin/pages/OrganizationAdminDashboard.jsx";
-
+import OrganizationDetailsPage from "../features/organizationAdmin/pages/OrganizationDetailsPage.jsx";
 // Route Guards
 import ProtectedRoute from "../routes/ProtectedRoute.jsx";
 import PublicOnlyRoute from "../routes/PublicOnlyRoute.jsx";
@@ -188,21 +188,26 @@ export const router = createBrowserRouter([
 
 
   // Organization Admin Routes
-  {
-    element: (
-      <ProtectedRoute
-        allowedRoles={["ADMIN"]}
-        allowedAdminTypes={["ORGANIZATION_ADMIN"]}
-      />
-    ),
+  // Organization Admin Routes
+{
+  element: (
+    <ProtectedRoute
+      allowedRoles={["ADMIN"]}
+      allowedAdminTypes={["ORGANIZATION_ADMIN"]}
+    />
+  ),
 
-    children: [
-      {
-        path: "/organization-admin-dashboard",
-        element: <OrganizationAdminDashboard />,
-      },
-    ],
-  },
+  children: [
+    {
+      path: "/organization-admin-dashboard",
+      element: <OrganizationAdminDashboard />,
+    },
+    {
+      path: "/organization-details",
+      element: <OrganizationDetailsPage />,
+    },
+  ],
+},
 
 
   // Super Admin Routes

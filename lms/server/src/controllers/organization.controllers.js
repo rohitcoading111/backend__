@@ -43,15 +43,18 @@ export const createOrganizationController = async (req, res) => {
 
 export const getMyOrganizationController = async (req, res) => {
   try {
-    const organization = await getMyOrganization(req.user._id);
+    const organization = await getMyOrganization(
+      req.user.id
+    );
 
     return res.status(200).json({
       success: true,
-      message: "Organization fetched successfully",
-      data: organization,
+      data: {
+        organization,
+      },
     });
   } catch (error) {
-    console.error("Get organization error:", error);
+    console.error("Get My Organization Error:", error);
 
     return res.status(error.statusCode || 500).json({
       success: false,

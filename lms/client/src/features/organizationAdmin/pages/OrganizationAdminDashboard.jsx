@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+
+import useOrganizationDashboard from "../hooks/useOrganizationDashboard.js";
 
 import {
   Building2,
@@ -40,11 +43,15 @@ function OrganizationAdminDashboard() {
     handleRemoveInstructor,
   } = useOrganizationInstructors();
 
-  const organizationName =
-    typeof user?.organizationId === "object"
-      ? user.organizationId?.name
-      : null;
+  const {
+  organization,
+  isLoading: isLoadingOrganization,
+  error: organizationError,
+  fetchOrganization,
+} = useOrganizationDashboard();
 
+
+const organizationName = organization?.name || "Your Organization";
   const handleLogout = async () => {
     if (isLoggingOut) return;
 
@@ -102,6 +109,13 @@ function OrganizationAdminDashboard() {
               <p className="mt-3 text-sm text-slate-300 sm:text-base">
                 {organizationName || "Manage your organization and instructor team."}
               </p>
+              <Link
+                to="/organization-details"
+                className="mt-4 inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-white/15"
+              >
+               <Building2 size={15} />
+                 View Organization Details
+                </Link>
 
               <div className="mt-5 flex flex-wrap items-center gap-3">
 
@@ -149,6 +163,72 @@ function OrganizationAdminDashboard() {
             </div>
           </div>
         </header>
+
+            {/* Organization Summary */}
+  <section className="mt-7 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+
+  <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+
+    <div className="flex items-center gap-3">
+
+      <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-indigo-50">
+        {organization?.logo?.url ? (
+          <img
+            src={organization.logo.url}
+            alt="Organization logo"
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <Building2 size={23} className="text-indigo-600" />
+        )}
+      </div>
+
+      <div>
+        <p className="text-xs font-medium text-slate-400">
+          Your Organization
+        </p>
+
+        <h2 className="mt-1 text-lg font-bold text-slate-900">
+          {isLoadingOrganization
+            ? "Loading organization..."
+            : organization?.name || "Organization unavailable"}
+        </h2>
+
+        <p className="mt-1 text-xs text-slate-500">
+          {organization?.organizationType || "Organization type unavailable"}
+        </p>
+      </div>
+
+    </div>
+
+    <div className="flex flex-wrap items-center gap-3">
+
+      {organizationError ? (
+        <button
+          type="button"
+          onClick={fetchOrganization}
+          className="rounded-xl bg-red-50 px-4 py-2.5 text-xs font-semibold text-red-700 hover:bg-red-100"
+        >
+          Retry Organization Details
+        </button>
+      ) : (
+        <span className="rounded-full bg-emerald-50 px-3.5 py-2 text-xs font-bold text-emerald-700">
+          {organization?.status || "—"}
+        </span>
+      )}
+
+      <Link
+        to="/organization-details"
+        className="rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-indigo-500"
+      >
+        View Details
+      </Link>
+
+    </div>
+
+  </div>
+
+    </section>
 
         {/* Stats */}
         <section className="mt-7 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">

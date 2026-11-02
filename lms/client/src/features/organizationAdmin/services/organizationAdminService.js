@@ -1,18 +1,32 @@
 import api from "../../../services/api.js";
 
-const BASE_URL = "/organization/instructors";
 
-// 1. Get all instructors of logged-in organization
-export const getOrganizationInstructors = async () => {
-  const response = await api.get(BASE_URL);
+const INSTRUCTOR_URL = "/organization/instructors";
 
+// ==========================================
+// ORGANIZATION DETAILS
+// ==========================================
+
+// GET: Logged-in Organization Admin's organization
+export const getOrganizationDetails = async () => {
+  const response = await api.get("/organizations/me");
   return response.data;
 };
 
-// 2. Search independent instructor using email or instructorCode
+// ==========================================
+// INSTRUCTOR MANAGEMENT
+// ==========================================
+
+// GET: Organization instructors
+export const getOrganizationInstructors = async () => {
+  const response = await api.get(INSTRUCTOR_URL);
+  return response.data;
+};
+
+// GET: Search independent instructor by ID or email
 export const searchIndependentInstructor = async (identifier) => {
   const response = await api.get(
-    `${BASE_URL}/search`,
+    `${INSTRUCTOR_URL}/search`,
     {
       params: {
         identifier: identifier.trim(),
@@ -23,19 +37,19 @@ export const searchIndependentInstructor = async (identifier) => {
   return response.data;
 };
 
-// 3. Hire an independent instructor
+// POST: Hire instructor
 export const hireInstructor = async (userId) => {
   const response = await api.post(
-    `${BASE_URL}/${userId}/hire`
+    `${INSTRUCTOR_URL}/${userId}/hire`
   );
 
   return response.data;
 };
 
-// 4. Remove instructor from organization
+// PATCH: Remove instructor
 export const removeInstructor = async (instructorId) => {
   const response = await api.patch(
-    `${BASE_URL}/${instructorId}/remove`
+    `${INSTRUCTOR_URL}/${instructorId}/remove`
   );
 
   return response.data;
