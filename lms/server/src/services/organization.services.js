@@ -90,3 +90,55 @@ export const getMyOrganization = async (adminId) => {
 
   return organization;
 };
+
+
+export const getAvailableOrganizations = async (instructorId) => {
+  const instructor = await User.findOne({
+    _id: instructorId,
+    role: "INSTRUCTOR",
+  }).select(
+    "_id role organizationId hiredBy employmentStatus"
+  );
+
+  if (!instructor) {
+    const error = new Error("Instructor account not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  // Only independent instructors can browse organizations
+  if (
+    instructor.organizationId ||
+    instructor.hiredBy ||
+    instructor.employmentStatus !== "INDEPENDENT"
+  ) {
+    const error = new Error(
+      "Only independent instructors can view available organizations"
+    );
+    error.statusCode = 403;
+    throw error;
+  }
+
+  const organizations = await Organization.find({
+    status: "ACTIVE",
+  })
+    .select("_id name owner")
+    .populate({
+      path: "owner",
+      select: "email",
+      match: {
+        role: "ADMIN",
+        adminType: "ORGANIZATION_ADMIN",
+        adminStatus: { $ne: "SUSPENDED" },
+      },
+    })
+    .lean();
+
+  // Return only organization name and contact email
+  return organizations
+    .filter((organization) => organization.owner?.email)
+    .map((organization) => ({
+      name: organization.name,
+      email: organization.owner.email,
+    }));
+};

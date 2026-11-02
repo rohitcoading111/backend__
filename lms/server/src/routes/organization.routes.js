@@ -3,6 +3,7 @@ import express from "express";
 import {
   createOrganizationController,
   getMyOrganizationController,
+  getAvailableOrganizationsController,
 } from "../controllers/organization.controllers.js";
 
 import {
@@ -30,6 +31,14 @@ router.get(
   authMiddleware,
   organizationAdminMiddleware,
   getMyOrganizationController
+);
+
+// Independent instructors: browse available organizations
+router.get(
+  "/available",
+  authMiddleware,
+  roleMiddleware("INSTRUCTOR"),
+  getAvailableOrganizationsController
 );
 
 export default router;

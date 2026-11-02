@@ -62,3 +62,30 @@ export const getMyOrganizationController = async (req, res) => {
     });
   }
 };
+
+
+export const getAvailableOrganizationsController = async (
+  req,
+  res
+) => {
+  try {
+    const organizations = await getAvailableOrganizations(
+      req.user.id
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        organizations,
+      },
+    });
+  } catch (error) {
+    console.error("Get Available Organizations Error:", error);
+
+    return res.status(error.statusCode || 500).json({
+      success: false,
+      message:
+        error.message || "Failed to fetch available organizations",
+    });
+  }
+};
