@@ -74,6 +74,19 @@ export const registerUser = async (req, res) => {
     });
 
   } catch (error) {
+    if (error.message === "EMAIL_OTP_SEND_FAILED") {
+      console.error("Registration OTP delivery failed:", {
+        providerCode: error.providerCode || "EMAIL_DELIVERY_FAILED",
+        providerStatus: error.providerStatus,
+      });
+
+      return res.status(502).json({
+        success: false,
+        message: "Could not send verification email. Please try again.",
+        code: error.providerCode || "EMAIL_DELIVERY_FAILED",
+      });
+    }
+
     console.error("Register Controller Error:", {
       name: error.name,
       message: error.message,
@@ -113,13 +126,6 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: error.message,
-      });
-    }
-
-    if (error.message === "EMAIL_OTP_SEND_FAILED") {
-      return res.status(502).json({
-        success: false,
-        message: "Could not send verification email. Please try again.",
       });
     }
 

@@ -13,6 +13,7 @@ process.env.EMAIL_APP_PASSWORD = "test-app-password";
 const originalFetch = globalThis.fetch;
 const { default: config } = await import("../src/config/config.js");
 const { default: mailer } = await import("../src/config/mailer.js");
+const { sendEmailOTP } = await import("../src/services/emailOTP.services.js");
 assert.equal(config.MAIL_PROVIDER, "mailjet");
 
 after(() => {
@@ -180,6 +181,26 @@ test("reports invalid Mailjet credentials without exposing secrets", async () =>
       assert.doesNotMatch(error.message, /test-api-key|test-secret-key/);
       return true;
     }
+  );
+});
+
+test("email OTP reports an API rejection instead of false success", async () => {
+  globalThis.fetch = async () =>
+    new Response(
+      JSON.stringify({
+        Messages: [
+          {
+            Status: "error",
+            Errors: [{ ErrorMessage: "Sender address is not validated" }],
+          },
+        ],
+      }),
+      { status: 200 }
+    );
+
+  await assert.rejects(
+    sendEmailOTP("recipient@example.com", "123456"),
+    (error) => error.code === "MAILJET_SENDER_REJECTED"
   );
 });
 

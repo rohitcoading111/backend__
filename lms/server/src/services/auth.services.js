@@ -207,7 +207,12 @@ export const registerUser = async (user) => {
       _id: pending._id,
     });
 
-    throw new Error("EMAIL_OTP_SEND_FAILED");
+    const deliveryError = new Error("EMAIL_OTP_SEND_FAILED", {
+      cause: error,
+    });
+    deliveryError.providerCode = error.code || "EMAIL_DELIVERY_FAILED";
+    deliveryError.providerStatus = error.statusCode;
+    throw deliveryError;
   }
 
   return {
