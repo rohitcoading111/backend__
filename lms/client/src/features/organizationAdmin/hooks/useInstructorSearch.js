@@ -30,7 +30,6 @@ function useInstructorSearch() {
       setInstructor(null);
       setHasSearched(false);
 
-      // Normalize based on identifier type
       const normalizedIdentifier = value.includes("@")
         ? value.toLowerCase()
         : value.toUpperCase();
@@ -41,28 +40,29 @@ function useInstructorSearch() {
 
       if (!response?.success) {
         throw new Error(
-          response?.message || "Instructor search failed"
+          response?.message || "Instructor search failed."
         );
       }
 
-      // Supports common controller response shapes
-      const foundInstructor =
-        response?.data?.instructor ??
-        response?.data?.user ??
-        response?.data;
+      const foundInstructor = response?.data?.instructor;
 
-      if (
-        !foundInstructor ||
-        typeof foundInstructor !== "object" ||
-        Array.isArray(foundInstructor) ||
-        !foundInstructor._id
-      ) {
+      // Backend returns id, while some frontend components use _id.
+      const instructorId =
+        foundInstructor?.id || foundInstructor?._id;
+
+      if (!foundInstructor || !instructorId) {
         setInstructor(null);
+        setError("No independent instructor found.");
         setHasSearched(true);
         return;
       }
 
-      setInstructor(foundInstructor);
+      setInstructor({
+        ...foundInstructor,
+        id: instructorId,
+        _id: instructorId,
+      });
+
       setHasSearched(true);
     } catch (err) {
       setInstructor(null);
@@ -88,12 +88,10 @@ function useInstructorSearch() {
   return {
     identifier,
     setIdentifier,
-
     instructor,
     isSearching,
     error,
     hasSearched,
-
     handleSearch,
     clearSearch,
   };
