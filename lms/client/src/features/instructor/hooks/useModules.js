@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
 
@@ -9,7 +9,7 @@ import {
   removeModule,
 } from "../thunks/moduleThunks";
 
-export default function useModules(courses = []) {
+export default function useModules(courses = [], initialCourseId) {
   const dispatch = useDispatch();
   const location = useLocation();
 
@@ -17,54 +17,123 @@ export default function useModules(courses = []) {
     (state) => state.modules
   );
 
+  const user = useSelector((state) => state.auth.user);
+
+  const currentInstructorId = user?.id || user?._id;
+
+  const routeCourseId =
+    initialCourseId || location.state?.courseId || "";
+
   const [selectedCourseId, setSelectedCourseId] = useState(
-    location.state?.courseId || ""
+    routeCourseId
   );
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [editingModule, setEditingModule] = useState(null);
+  const [actionError, setActionError] = useState("");
 
-  const selectedCourse = courses.find(
-    (course) => course._id === selectedCourseId
+  // Selected course
+  const selectedCourse = useMemo(
+    () =>
+      courses.find(
+        (course) =>
+          String(course._id) === String(selectedCourseId)
+      ) || null,
+    [courses, selectedCourseId]
   );
 
-  useEffect(() => {
-    if (location.state?.courseId) {
-      setSelectedCourseId(location.state.courseId);
-    }
-  }, [location.state?.courseId]);
+  // Identify course owner
+  const courseInstructorId =
+    typeof selectedCourse?.instructor === "object"
+      ? selectedCourse.instructor?._id ||
+        selectedCourse.instructor?.id
+      : selectedCourse?.instructor;
 
+  const isOwner =
+    Boolean(currentInstructorId) &&
+    Boolean(courseInstructorId) &&
+    String(currentInstructorId) === String(courseInstructorId);
+
+  // Sync selected course from navigation
+  useEffect(() => {
+    if (routeCourseId) {
+      setSelectedCourseId(routeCourseId);
+    }
+  }, [routeCourseId]);
+
+  // Fetch modules whenever course changes
   useEffect(() => {
     if (selectedCourseId) {
       dispatch(fetchCourseModules(selectedCourseId));
     }
   }, [dispatch, selectedCourseId]);
 
-  function handleCourseChange(courseId) {
-    setSelectedCourseId(courseId);
-    setIsFormOpen(false);
+  // Reset form
+  function resetForm() {
     setTitle("");
     setDescription("");
+    setEditingModule(null);
+    setIsFormOpen(false);
+    setActionError("");
   }
 
-  function openCreateForm() {
-    if (!selectedCourseId) return;
+  // Select course
+  function handleCourseChange(courseId) {
+    setSelectedCourseId(courseId);
+    resetForm();
+  }
 
+  // Open create form
+  function openCreateForm() {
+    if (!selectedCourseId || !isOwner) return;
+
+    setEditingModule(null);
     setTitle("");
     setDescription("");
+    setActionError("");
     setIsFormOpen(true);
   }
 
+  // Close form
   function closeCreateForm() {
-    setIsFormOpen(false);
+    resetForm();
   }
 
-  async function handleCreateModule(event) {
-    event.preventDefault();
+  // Start editing module
+  function startEditing(module) {
+    if (!isOwner) return;
 
-    if (!selectedCourseId || !title.trim()) return;
+    setEditingModule(module);
+    setTitle(module.title || "");
+    setDescription(module.description || "");
+    setActionError("");
+    setIsFormOpen(true);
+  }
+
+  // Cancel form
+  function handleCancel() {
+    resetForm();
+  }
+
+  // Create module
+  async function handleCreateModule(event) {
+    event?.preventDefault();
+
+    if (!isOwner) {
+      setActionError("You can only manage your own course modules.");
+      return false;
+    }
+
+    if (!selectedCourseId || !title.trim()) {
+      setActionError("Module title is required.");
+      return false;
+    }
 
     try {
+      setActionError("");
+
       await dispatch(
         addModule({
           courseId: selectedCourseId,
@@ -75,53 +144,150 @@ export default function useModules(courses = []) {
         })
       ).unwrap();
 
-      setTitle("");
-      setDescription("");
-      setIsFormOpen(false);
-
-      // Refresh modules from the backend.
-      await dispatch(fetchCourseModules(selectedCourseId)).unwrap();
-    } catch (err) {
-      console.error("Module creation failed:", err);
-    }
-  }
-
-  async function handleUpdateModule(moduleId, moduleData) {
-    try {
       await dispatch(
-        editModule({ moduleId, moduleData })
+        fetchCourseModules(selectedCourseId)
       ).unwrap();
 
-      await dispatch(fetchCourseModules(selectedCourseId)).unwrap();
+      resetForm();
+
+      return true;
     } catch (err) {
-      console.error("Module update failed:", err);
+      setActionError(
+        err?.message || "Module creation failed."
+      );
+
+      return false;
     }
   }
 
-  async function handleDeleteModule(moduleId) {
-    try {
-      await dispatch(removeModule(moduleId)).unwrap();
-    } catch (err) {
-      console.error("Module deletion failed:", err);
+  // Update module
+  async function handleUpdateModule(moduleId, moduleData) {
+    if (!isOwner) {
+      setActionError("You can only update your own course modules.");
+      return false;
     }
+
+    try {
+      setActionError("");
+
+      await dispatch(
+        editModule({
+          moduleId,
+          moduleData,
+        })
+      ).unwrap();
+
+      await dispatch(
+        fetchCourseModules(selectedCourseId)
+      ).unwrap();
+
+      return true;
+    } catch (err) {
+      setActionError(
+        err?.message || "Module update failed."
+      );
+
+      return false;
+    }
+  }
+
+  // Single submit handler for create and update
+  async function handleSubmitModule(event) {
+    event.preventDefault();
+
+    if (!isOwner) return false;
+
+    if (!editingModule) {
+      return handleCreateModule(event);
+    }
+
+    const success = await handleUpdateModule(
+      editingModule._id,
+      {
+        title: title.trim(),
+        description: description.trim(),
+      }
+    );
+
+    if (success) {
+      resetForm();
+    }
+
+    return success;
+  }
+
+  // Delete module
+  async function handleDeleteModule(moduleId) {
+    if (!isOwner) {
+      setActionError("You cannot delete another instructor's module.");
+      return false;
+    }
+
+    try {
+      setActionError("");
+
+      await dispatch(
+        removeModule(moduleId)
+      ).unwrap();
+
+      await dispatch(
+        fetchCourseModules(selectedCourseId)
+      ).unwrap();
+
+      return true;
+    } catch (err) {
+      setActionError(
+        err?.message || "Module deletion failed."
+      );
+
+      return false;
+    }
+  }
+
+  // Open lecture workspace
+  function handleOpenLectures(module, onAddLecture) {
+    if (!onAddLecture) return;
+
+    onAddLecture({
+      courseId: selectedCourseId,
+      courseTitle: selectedCourse?.title,
+      moduleId: module._id,
+      moduleTitle: module.title,
+      readOnly: !isOwner,
+    });
   }
 
   return {
     modules,
     loading,
     error,
+    actionError,
+
     selectedCourseId,
     selectedCourse,
+    isOwner,
+
     isFormOpen,
+    editingModule,
+
     title,
     description,
     setTitle,
     setDescription,
+
     handleCourseChange,
     openCreateForm,
     closeCreateForm,
+
+    startEditing,
+    handleCancel,
+
     handleCreateModule,
     handleUpdateModule,
+    handleSubmitModule,
     handleDeleteModule,
+
+    handleSelectCourse: handleCourseChange,
+    handleOpenLectures,
   };
 }

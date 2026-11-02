@@ -15,6 +15,12 @@ export default function useInstructorCourses() {
     (state) => state.instructor
   );
 
+  const user = useSelector((state) => state.auth.user);
+
+  const currentInstructorId = user?.id || user?._id;
+
+  // Fetch all courses available to this instructor.
+  // Backend decides organization scope.
   const refreshCourses = useCallback(() => {
     return dispatch(fetchInstructorCourses()).unwrap();
   }, [dispatch]);
@@ -23,20 +29,87 @@ export default function useInstructorCourses() {
     refreshCourses().catch(() => {});
   }, [refreshCourses]);
 
-  const handleDelete = (courseId) =>
-    dispatch(removeInstructorCourse(courseId)).unwrap();
+  // Find course by ID
+  const getCourseById = useCallback(
+    (courseId) => {
+      return courses.find(
+        (course) => String(course._id) === String(courseId)
+      );
+    },
+    [courses]
+  );
 
-  const handlePublish = (courseId) =>
-    dispatch(publishInstructorCourse(courseId)).unwrap();
+  // Check course ownership
+  const isCourseOwner = useCallback(
+    (courseOrId) => {
+      const course =
+        typeof courseOrId === "object"
+          ? courseOrId
+          : getCourseById(courseOrId);
 
-  const handleUnpublish = (courseId) =>
-    dispatch(unpublishInstructorCourse(courseId)).unwrap();
+      if (!course || !currentInstructorId) {
+        return false;
+      }
+
+      const ownerId =
+        typeof course.instructor === "object"
+          ? course.instructor?._id || course.instructor?.id
+          : course.instructor;
+
+      return (
+        String(ownerId) === String(currentInstructorId)
+      );
+    },
+    [currentInstructorId, getCourseById]
+  );
+
+  // Common ownership validation
+  const ensureOwnership = (courseId) => {
+    if (!isCourseOwner(courseId)) {
+      throw new Error(
+        "You can only manage courses created by you."
+      );
+    }
+  };
+
+  // Delete own course only
+  const handleDelete = async (courseId) => {
+    ensureOwnership(courseId);
+
+    return dispatch(
+      removeInstructorCourse(courseId)
+    ).unwrap();
+  };
+
+  // Publish own course only
+  const handlePublish = async (courseId) => {
+    ensureOwnership(courseId);
+
+    return dispatch(
+      publishInstructorCourse(courseId)
+    ).unwrap();
+  };
+
+  // Unpublish own course only
+  const handleUnpublish = async (courseId) => {
+    ensureOwnership(courseId);
+
+    return dispatch(
+      unpublishInstructorCourse(courseId)
+    ).unwrap();
+  };
 
   return {
     courses,
     loading,
     error,
+
+    currentInstructorId,
+
     refreshCourses,
+    getCourseById,
+    isCourseOwner,
+
     handleDelete,
     handlePublish,
     handleUnpublish,

@@ -24,6 +24,8 @@ const focusRing =
 
 function CourseCard({
   course,
+  currentInstructorId,
+  isCourseOwner,
   onEdit,
   onDelete,
   onPublish,
@@ -36,15 +38,24 @@ function CourseCard({
   const thumbnail = course.thumbnail?.url;
   const price = Number(course.price) || 0;
 
+  const courseInstructorId =
+    course.instructor?._id ||
+    course.instructor?.id ||
+    course.instructor;
+
+  const isOwner =
+    Boolean(currentInstructorId) &&
+    String(courseInstructorId) === String(currentInstructorId);
+
   return (
     <article
-      className={`group flex h-full flex-col overflow-hidden rounded-3xl bg-black text-white transition-all duration-500 motion-reduce:transition-none ${
+      className={`group flex h-full flex-col overflow-hidden rounded-3xl bg-black text-white transition-all duration-500 ${
         isDraft
           ? "border border-dashed border-white/20"
-          : "border border-white/10 hover:-translate-y-1 hover:border-white/30 hover:shadow-[0_24px_60px_-20px_rgba(255,255,255,0.18)] motion-reduce:hover:translate-y-0"
+          : "border border-white/10 hover:-translate-y-1 hover:border-white/30"
       }`}
     >
-      {/* Thumbnail: grayscale by default, full colour on hover */}
+      {/* Thumbnail */}
       <div className="relative aspect-[16/10] overflow-hidden bg-neutral-900">
         {thumbnail && !imgFailed ? (
           <img
@@ -52,10 +63,10 @@ function CourseCard({
             alt={course.title}
             loading="lazy"
             onError={() => setImgFailed(true)}
-            className={`h-full w-full object-cover transition-all duration-700 ease-out motion-reduce:transition-none ${
+            className={`h-full w-full object-cover transition-all duration-700 ${
               isDraft
                 ? "grayscale opacity-40"
-                : "group-hover:scale-105 motion-reduce:group-hover:scale-100"
+                : "group-hover:scale-105"
             }`}
           />
         ) : (
@@ -70,14 +81,15 @@ function CourseCard({
 
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent" />
 
-        <span className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/60 px-3 py-1 text-xs font-medium text-white backdrop-blur-md">
-          <span
-            className={`h-1.5 w-1.5 rounded-full ${
-              isDraft ? "border border-white" : "bg-white"
-            }`}
-          />
+        <span className="absolute left-4 top-4 rounded-full border border-white/20 bg-black/60 px-3 py-1 text-xs text-white backdrop-blur-md">
           {isDraft ? "Draft" : "Published"}
         </span>
+
+        {!isOwner && (
+          <span className="absolute right-4 top-4 rounded-full border border-white/20 bg-black/70 px-3 py-1 text-xs text-white/70 backdrop-blur-md">
+            View only
+          </span>
+        )}
       </div>
 
       {/* Content */}
@@ -90,44 +102,48 @@ function CourseCard({
           {course.description}
         </p>
 
-        {/* Price + quick actions */}
         <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-5">
-          <p className="text-2xl font-semibold tabular-nums tracking-tight">
-            {price > 0 ? `₹${priceFormatter.format(price)}` : "Free"}
+          <p className="text-2xl font-semibold tabular-nums">
+            {price > 0
+              ? `₹${priceFormatter.format(price)}`
+              : "Free"}
           </p>
 
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() => onEdit(course)}
-              aria-label={`Edit ${course.title}`}
-              title="Edit"
-              className={`rounded-full p-2.5 text-white/50 transition-colors hover:bg-white/10 hover:text-white ${focusRing}`}
-            >
-              <Icon>
-                <path d="M12 20h9" />
-                <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
-              </Icon>
-            </button>
+          {/* Owner actions only */}
+          {isOwner && (
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => onEdit(course)}
+                title="Edit"
+                aria-label={`Edit ${course.title}`}
+                className={`rounded-full p-2.5 text-white/50 transition-colors hover:bg-white/10 hover:text-white ${focusRing}`}
+              >
+                <Icon>
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                </Icon>
+              </button>
 
-            <button
-              type="button"
-              onClick={() => onDelete(course._id)}
-              aria-label={`Delete ${course.title}`}
-              title="Delete"
-              className={`rounded-full p-2.5 text-white/50 transition-colors hover:bg-white hover:text-black ${focusRing}`}
-            >
-              <Icon>
-                <path d="M3 6h18" />
-                <path d="M8 6V4h8v2" />
-                <path d="m19 6-1 14H6L5 6" />
-                <path d="M10 11v5M14 11v5" />
-              </Icon>
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={() => onDelete(course._id)}
+                title="Delete"
+                aria-label={`Delete ${course.title}`}
+                className={`rounded-full p-2.5 text-white/50 transition-colors hover:bg-white hover:text-black ${focusRing}`}
+              >
+                <Icon>
+                  <path d="M3 6h18" />
+                  <path d="M8 6V4h8v2" />
+                  <path d="m19 6-1 14H6L5 6" />
+                  <path d="M10 11v5M14 11v5" />
+                </Icon>
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Primary actions */}
+        {/* Module and course actions */}
         <div className="mt-5 grid grid-cols-2 gap-3">
           <button
             type="button"
@@ -135,27 +151,41 @@ function CourseCard({
             className={`inline-flex items-center justify-center gap-1.5 rounded-full border border-white/20 px-4 py-3 text-sm font-medium text-white transition-colors hover:border-white hover:bg-white/10 ${focusRing}`}
           >
             <Icon className="h-3.5 w-3.5">
-              <path d="M12 5v14M5 12h14" />
+              {isOwner ? (
+                <path d="M12 5v14M5 12h14" />
+              ) : (
+                <>
+                  <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5Z" />
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                </>
+              )}
             </Icon>
-            Add module
+
+            {isOwner ? "Add module" : "View modules"}
           </button>
 
-          {isDraft ? (
-            <button
-              type="button"
-              onClick={() => onPublish(course._id)}
-              className={`rounded-full bg-white px-4 py-3 text-sm font-semibold text-black transition-all hover:bg-white/85 active:scale-[0.97] motion-reduce:active:scale-100 ${focusRing}`}
-            >
-              Publish
-            </button>
+          {isOwner ? (
+            isDraft ? (
+              <button
+                type="button"
+                onClick={() => onPublish(course._id)}
+                className={`rounded-full bg-white px-4 py-3 text-sm font-semibold text-black hover:bg-white/85 ${focusRing}`}
+              >
+                Publish
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onUnpublish(course._id)}
+                className={`rounded-full border border-white px-4 py-3 text-sm font-semibold text-white hover:bg-white hover:text-black ${focusRing}`}
+              >
+                Unpublish
+              </button>
+            )
           ) : (
-            <button
-              type="button"
-              onClick={() => onUnpublish(course._id)}
-              className={`rounded-full border border-white px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-white hover:text-black active:scale-[0.97] motion-reduce:active:scale-100 ${focusRing}`}
-            >
-              Unpublish
-            </button>
+            <div className="flex items-center justify-center rounded-full border border-white/10 px-4 py-3 text-xs text-white/40">
+              {course.level || "Course"}
+            </div>
           )}
         </div>
       </div>

@@ -88,15 +88,16 @@ export default function InstructorDashboard() {
     error: formError,
   } = useCourseForm(selectedCourse);
 
-  const {
-    courses,
-    loading: coursesLoading,
-    error: coursesError,
-    refreshCourses,
-    handleDelete,
-    handlePublish,
-    handleUnpublish,
-  } = useInstructorCourses();
+ const {
+  courses,
+  loading: coursesLoading,
+  error: coursesError,
+  refreshCourses,
+  handleDelete,
+  handlePublish,
+  handleUnpublish,
+  isCourseOwner,
+} = useInstructorCourses();
 
   // Sync activeSection if passed from navigation state
   useEffect(() => {
@@ -429,14 +430,16 @@ export default function InstructorDashboard() {
                     </p>
                   ) : (
                     <CourseList
-                      courses={courses}
-                      onEdit={handleEditCourse}
-                      onDelete={handleDelete}
-                      onPublish={handlePublish}
-                      onUnpublish={handleUnpublish}
-                      onAddModule={handleAddModule}
-                      onCreate={handleCreateCourse}
-                    />
+                    courses={courses}
+                    currentInstructorId={user?.id || user?._id}
+                    onEdit={handleEditCourse}
+                    onDelete={handleDelete}
+                    onPublish={handlePublish}
+                    onUnpublish={handleUnpublish}
+                    onAddModule={handleAddModule}
+                    onCreate={handleCreateCourse}
+                    isCourseOwner={isCourseOwner}
+                  />
                   )}
                 </div>
               )}
