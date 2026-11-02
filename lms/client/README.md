@@ -1,5 +1,18 @@
 # React + Vite
 
+## Local and deployed API
+
+Vite uses `.env.development` for `npm run dev` (the local backend at
+`http://localhost:3000`) and `.env.production` for production builds (the
+deployed backend at `https://learnhub-com.onrender.com`). Set `VITE_API_URL`
+and `VITE_SOCKET_URL` as build environment variables on the frontend host if
+you need to override these defaults.
+
+On the backend host, set `FRONTEND_URL=https://learnhub-in.onrender.com`,
+`API_BASE_URL=https://learnhub-com.onrender.com/api`, and
+`GOOGLE_CALLBACK_URL=https://learnhub-com.onrender.com/api/auth/google/callback`.
+Register the Google callback URL in the Google OAuth client configuration.
+
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
 Currently, two official plugins are available:
