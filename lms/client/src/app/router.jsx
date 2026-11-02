@@ -30,6 +30,8 @@ import OrganizationDetailsPage from "../features/organizationAdmin/pages/Organiz
 
 import IndependentInstructorDashboard from
   "../features/independentInstructor/pages/IndependentInstructorDashboard.jsx";
+
+  import OrganizationOverview from "../features/org-ins/pages/OrganizationOverview.jsx";
 // Route Guards
 import ProtectedRoute from "../routes/ProtectedRoute.jsx";
 import PublicOnlyRoute from "../routes/PublicOnlyRoute.jsx";
@@ -131,29 +133,32 @@ export const router = createBrowserRouter([
 },
 
 
-  // Organization Instructor Routes
-  {
-    element: (
-      <ProtectedRoute
-        allowedRoles={["INSTRUCTOR"]}
-        instructorType="ORGANIZATION"
-      />
-    ),
+// Organization Instructor Routes
+{
+  element: (
+    <ProtectedRoute
+      allowedRoles={["INSTRUCTOR"]}
+      instructorType="ORGANIZATION"
+    />
+  ),
 
-    children: [
-      {
-        path: "/organization-instructor-dashboard",
-        element: <InstructorDashboard />,
-      },
-      {
-        path: "/instructor/live-room",
-        element: <LiveRoom />,
-      },
-    ],
-  },
+  children: [
+    {
+      path: "/organization-overview",
+      element: <OrganizationOverview />,
+    },
+    {
+      path: "/organization-instructor-dashboard",
+      element: <InstructorDashboard />,
+    },
+    {
+      path: "/instructor/live-room",
+      element: <LiveRoom />,
+    },
+  ],
+},
 
 
-  // Organization Admin Routes
   // Organization Admin Routes
 {
   element: (

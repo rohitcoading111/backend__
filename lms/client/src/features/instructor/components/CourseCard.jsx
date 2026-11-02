@@ -24,8 +24,7 @@ const focusRing =
 
 function CourseCard({
   course,
-  currentInstructorId,
-  isCourseOwner,
+  isOwner = false,
   onEdit,
   onDelete,
   onPublish,
@@ -38,21 +37,12 @@ function CourseCard({
   const thumbnail = course.thumbnail?.url;
   const price = Number(course.price) || 0;
 
-  const courseInstructorId =
-    course.instructor?._id ||
-    course.instructor?.id ||
-    course.instructor;
-
-  const isOwner =
-    Boolean(currentInstructorId) &&
-    String(courseInstructorId) === String(currentInstructorId);
-
   return (
     <article
       className={`group flex h-full flex-col overflow-hidden rounded-3xl bg-black text-white transition-all duration-500 ${
         isDraft
           ? "border border-dashed border-white/20"
-          : "border border-white/10 hover:-translate-y-1 hover:border-white/30"
+          : "border border-white/10 hover:-translate-y-1 hover:border-white/30 hover:shadow-[0_24px_60px_-20px_rgba(255,255,255,0.18)]"
       }`}
     >
       {/* Thumbnail */}
@@ -81,7 +71,12 @@ function CourseCard({
 
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent" />
 
-        <span className="absolute left-4 top-4 rounded-full border border-white/20 bg-black/60 px-3 py-1 text-xs text-white backdrop-blur-md">
+        <span className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/60 px-3 py-1 text-xs font-medium text-white backdrop-blur-md">
+          <span
+            className={`h-1.5 w-1.5 ${
+              isDraft ? "border border-white" : "bg-white"
+            } rounded-full`}
+          />
           {isDraft ? "Draft" : "Published"}
         </span>
 
@@ -92,7 +87,7 @@ function CourseCard({
         )}
       </div>
 
-      {/* Content */}
+      {/* Course details */}
       <div className="flex flex-1 flex-col px-6 pb-6 pt-2">
         <h3 className="line-clamp-1 text-lg font-semibold tracking-tight">
           {course.title}
@@ -103,20 +98,20 @@ function CourseCard({
         </p>
 
         <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-5">
-          <p className="text-2xl font-semibold tabular-nums">
+          <p className="text-2xl font-semibold tabular-nums tracking-tight">
             {price > 0
               ? `₹${priceFormatter.format(price)}`
               : "Free"}
           </p>
 
-          {/* Owner actions only */}
+          {/* Owner-only actions */}
           {isOwner && (
             <div className="flex items-center gap-1">
               <button
                 type="button"
                 onClick={() => onEdit(course)}
-                title="Edit"
                 aria-label={`Edit ${course.title}`}
+                title="Edit"
                 className={`rounded-full p-2.5 text-white/50 transition-colors hover:bg-white/10 hover:text-white ${focusRing}`}
               >
                 <Icon>
@@ -128,8 +123,8 @@ function CourseCard({
               <button
                 type="button"
                 onClick={() => onDelete(course._id)}
-                title="Delete"
                 aria-label={`Delete ${course.title}`}
+                title="Delete"
                 className={`rounded-full p-2.5 text-white/50 transition-colors hover:bg-white hover:text-black ${focusRing}`}
               >
                 <Icon>
@@ -169,7 +164,7 @@ function CourseCard({
               <button
                 type="button"
                 onClick={() => onPublish(course._id)}
-                className={`rounded-full bg-white px-4 py-3 text-sm font-semibold text-black hover:bg-white/85 ${focusRing}`}
+                className={`rounded-full bg-white px-4 py-3 text-sm font-semibold text-black transition-all hover:bg-white/85 ${focusRing}`}
               >
                 Publish
               </button>
@@ -177,7 +172,7 @@ function CourseCard({
               <button
                 type="button"
                 onClick={() => onUnpublish(course._id)}
-                className={`rounded-full border border-white px-4 py-3 text-sm font-semibold text-white hover:bg-white hover:text-black ${focusRing}`}
+                className={`rounded-full border border-white px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-white hover:text-black ${focusRing}`}
               >
                 Unpublish
               </button>

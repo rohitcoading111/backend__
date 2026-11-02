@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
+
 import {
   ArrowLeft,
   BookOpen,
@@ -15,31 +16,34 @@ import {
 } from "lucide-react";
 
 import { logoutUser } from "../../auth/authThunk/authThunks.js";
+import { logout } from "../../auth/authSlices/authSlice.js";
+
 import LectureWorkspace from "../components/LectureWorkspace";
 import LiveSessionWorkspace from "../components/LiveSessionWorkspace.jsx";
 import CourseForm from "../components/CourseForm";
 import CourseList from "../components/CourseList";
 import ModuleManagement from "../components/ModuleManagement.jsx";
+
 import useCourseForm from "../hooks/useCourseForm";
 import useInstructorCourses from "../hooks/useInstructorCourses";
 
 const NAV_ITEMS = [
   {
     id: "courses",
-    label: "My Courses",
-    hint: "Create courses and manage their content",
+    label: "Organization Courses",
+    hint: "View organization courses and manage your own",
     icon: BookOpen,
   },
   {
     id: "modules",
     label: "Modules",
-    hint: "Organise each course into modules",
+    hint: "View and manage course modules",
     icon: Layers,
   },
   {
     id: "lectures",
     label: "Lectures",
-    hint: "Upload and arrange your lessons",
+    hint: "View and manage course lectures",
     icon: Video,
   },
   {
@@ -56,12 +60,13 @@ const focusRing =
 function CourseSkeleton() {
   return (
     <div className="overflow-hidden rounded-3xl border border-white/10">
-      <div className="aspect-[16/10] animate-pulse bg-white/5 motion-reduce:animate-none" />
+      <div className="aspect-[16/10] animate-pulse bg-white/5" />
+
       <div className="space-y-3 p-6">
-        <div className="h-4 w-2/3 animate-pulse rounded-full bg-white/10 motion-reduce:animate-none" />
-        <div className="h-3 w-full animate-pulse rounded-full bg-white/5 motion-reduce:animate-none" />
-        <div className="h-3 w-4/5 animate-pulse rounded-full bg-white/5 motion-reduce:animate-none" />
-        <div className="h-10 w-full animate-pulse rounded-full bg-white/5 motion-reduce:animate-none" />
+        <div className="h-4 w-2/3 animate-pulse rounded-full bg-white/10" />
+        <div className="h-3 w-full animate-pulse rounded-full bg-white/5" />
+        <div className="h-3 w-4/5 animate-pulse rounded-full bg-white/5" />
+        <div className="h-10 w-full animate-pulse rounded-full bg-white/5" />
       </div>
     </div>
   );
@@ -69,6 +74,7 @@ function CourseSkeleton() {
 
 export default function InstructorDashboard() {
   const user = useSelector((state) => state.auth.user);
+
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
@@ -88,66 +94,87 @@ export default function InstructorDashboard() {
     error: formError,
   } = useCourseForm(selectedCourse);
 
- const {
-  courses,
-  loading: coursesLoading,
-  error: coursesError,
-  refreshCourses,
-  handleDelete,
-  handlePublish,
-  handleUnpublish,
-  isCourseOwner,
-} = useInstructorCourses();
+  const {
+    courses,
+    coursesWithOwnership,
+    loading: coursesLoading,
+    error: coursesError,
+    refreshCourses,
+    isCourseOwner,
+    handleDelete,
+    handlePublish,
+    handleUnpublish,
+  } = useInstructorCourses();
 
-  // Sync activeSection if passed from navigation state
+  // Sync active section from navigation state.
   useEffect(() => {
     if (location.state?.activeSection) {
       setActiveSection(location.state.activeSection);
     }
-  }, [location.state]);
+  }, [location.state?.activeSection]);
 
-  // Close the mobile sidebar with Escape
+  // Close mobile sidebar with Escape.
   useEffect(() => {
     if (!sidebarOpen) return undefined;
+
     const onKeyDown = (event) => {
-      if (event.key === "Escape") setSidebarOpen(false);
+      if (event.key === "Escape") {
+        setSidebarOpen(false);
+      }
     };
+
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+    };
   }, [sidebarOpen]);
 
+  // Dashboard statistics.
   const stats = useMemo(() => {
-    const list = Array.isArray(courses) ? courses : [];
-    const published = list.filter((c) => c.status !== "DRAFT").length;
+    const published = courses.filter(
+      (course) => course.status === "PUBLISHED"
+    ).length;
+
     return [
-      { label: "Total courses", value: list.length },
+      { label: "Total courses", value: courses.length },
       { label: "Published", value: published },
-      { label: "Drafts", value: list.length - published },
+      { label: "Drafts", value: courses.length - published },
     ];
   }, [courses]);
 
-  const activeItem = NAV_ITEMS.find((item) => item.id === activeSection);
+  const activeItem = NAV_ITEMS.find(
+    (item) => item.id === activeSection
+  );
+
   const showStats =
     activeSection === "courses" &&
     !isFormOpen &&
     !coursesLoading &&
     !coursesError;
 
+  // Return to organization overview.
   function handleDashboardRedirect() {
-    navigate("/dashboard");
+    navigate("/organization-overview");
   }
 
+  // Logout with local fallback.
   async function handleLogout() {
+    if (loggingOut) return;
+
     try {
       setLoggingOut(true);
       await dispatch(logoutUser()).unwrap();
-      navigate("/login", { replace: true });
     } catch (error) {
       console.error("Logout failed:", error);
+      dispatch(logout());
+    } finally {
+      navigate("/login", { replace: true });
       setLoggingOut(false);
     }
   }
 
+  // Change dashboard section.
   function handleSectionChange(section) {
     setActiveSection(section);
     setSidebarOpen(false);
@@ -155,40 +182,48 @@ export default function InstructorDashboard() {
     setSelectedCourse(null);
   }
 
+  // Create course.
   function handleCreateCourse() {
     setSelectedCourse(null);
     setIsFormOpen(true);
   }
 
+  // Edit course: owner only.
   function handleEditCourse(course) {
+    if (!isCourseOwner(course)) return;
+
     setSelectedCourse(course);
     setIsFormOpen(true);
   }
 
+  // Submit course form.
   async function handleCourseSubmit(courseData) {
     try {
       await submitCourse(courseData);
+
       setIsFormOpen(false);
       setSelectedCourse(null);
+
       await refreshCourses();
     } catch (error) {
       console.error("Course submission failed:", error);
     }
   }
 
+  // Cancel course form.
   function handleCancelForm() {
     setIsFormOpen(false);
     setSelectedCourse(null);
   }
 
+  // Open modules for any organization course.
   function handleAddModule(course) {
     setActiveSection("modules");
     setSelectedCourse(null);
     setIsFormOpen(false);
     setSidebarOpen(false);
 
-    navigate("/instructor-dashboard", {
-      replace: false,
+    navigate("/organization-instructor-dashboard", {
       state: {
         activeSection: "modules",
         courseId: course._id,
@@ -197,38 +232,48 @@ export default function InstructorDashboard() {
     });
   }
 
-  function handleAddLecture({ courseId, courseTitle, moduleId, moduleTitle }) {
+  // Open lecture workspace for selected module.
+  function handleAddLecture({
+    courseId,
+    courseTitle,
+    moduleId,
+    moduleTitle,
+    readOnly = false,
+  }) {
     setActiveSection("lectures");
     setSelectedCourse(null);
     setIsFormOpen(false);
     setSidebarOpen(false);
 
-    navigate("/instructor-dashboard", {
-      replace: false,
+    navigate("/organization-instructor-dashboard", {
       state: {
         activeSection: "lectures",
         lectureCourseId: courseId,
         lectureCourseTitle: courseTitle,
         lectureModuleId: moduleId,
         lectureModuleTitle: moduleTitle,
+        readOnly,
       },
     });
   }
 
   return (
     <div className="min-h-screen bg-black text-white antialiased">
+
       {/* Mobile overlay */}
       <div
         onClick={() => setSidebarOpen(false)}
         aria-hidden="true"
         className={`fixed inset-0 z-40 bg-black/70 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
-          sidebarOpen ? "opacity-100" : "pointer-events-none opacity-0"
+          sidebarOpen
+            ? "opacity-100"
+            : "pointer-events-none opacity-0"
         }`}
       />
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-white/10 bg-black transition-transform duration-300 ease-out motion-reduce:transition-none lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-white/10 bg-black transition-transform duration-300 ease-out lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -238,30 +283,40 @@ export default function InstructorDashboard() {
           </div>
 
           <div>
-            <h1 className="font-semibold tracking-tight">LearnHub</h1>
-            <p className="text-xs text-white/40">Instructor workspace</p>
+            <h1 className="font-semibold tracking-tight">
+              LearnHub
+            </h1>
+
+            <p className="text-xs text-white/40">
+              Organization instructor
+            </p>
           </div>
 
           <button
             type="button"
             onClick={() => setSidebarOpen(false)}
             aria-label="Close menu"
-            className={`ml-auto rounded-full p-2 text-white/60 transition-colors hover:bg-white/10 hover:text-white lg:hidden ${focusRing}`}
+            className={`ml-auto rounded-full p-2 text-white/60 hover:bg-white/10 hover:text-white lg:hidden ${focusRing}`}
           >
             <X size={18} />
           </button>
         </div>
 
-        <nav className="flex-1 space-y-1 px-4 py-6" aria-label="Workspace">
+        {/* Navigation */}
+        <nav
+          className="flex-1 space-y-1 px-4 py-6"
+          aria-label="Workspace"
+        >
           {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
             const active = activeSection === id;
+
             return (
               <button
                 key={id}
                 type="button"
                 onClick={() => handleSectionChange(id)}
                 aria-current={active ? "page" : undefined}
-                className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-medium transition-all duration-300 ${focusRing} ${
+                className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-medium transition-all ${focusRing} ${
                   active
                     ? "bg-white text-black"
                     : "text-white/50 hover:bg-white/[0.06] hover:text-white"
@@ -274,14 +329,21 @@ export default function InstructorDashboard() {
           })}
         </nav>
 
+        {/* Profile */}
         <div className="border-t border-white/10 p-4">
           <div className="flex items-center gap-3 px-2 pb-3">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/20 text-sm font-semibold">
               {initial}
             </div>
+
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium">{instructorName}</p>
-              <p className="text-xs text-white/40">Instructor account</p>
+              <p className="truncate text-sm font-medium">
+                {instructorName}
+              </p>
+
+              <p className="text-xs text-white/40">
+                Instructor account
+              </p>
             </div>
           </div>
 
@@ -291,7 +353,7 @@ export default function InstructorDashboard() {
             className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-sm text-white/60 transition-colors hover:bg-white/[0.06] hover:text-white ${focusRing}`}
           >
             <LayoutDashboard size={18} />
-            Dashboard
+            Organization overview
           </button>
 
           <button
@@ -301,20 +363,22 @@ export default function InstructorDashboard() {
             className={`mt-1 flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-sm text-white/60 transition-colors hover:bg-white hover:text-black disabled:opacity-40 ${focusRing}`}
           >
             <LogOut size={18} />
-            {loggingOut ? "Logging out" : "Log out"}
+            {loggingOut ? "Logging out..." : "Log out"}
           </button>
         </div>
       </aside>
 
-      {/* Main column */}
+      {/* Main content */}
       <div className="min-h-screen lg:pl-64">
+
+        {/* Header */}
         <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-white/10 bg-black/70 px-5 backdrop-blur-xl sm:px-8">
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => setSidebarOpen(true)}
               aria-label="Open menu"
-              className={`rounded-full border border-white/15 p-2.5 text-white/70 transition-colors hover:border-white/40 hover:text-white lg:hidden ${focusRing}`}
+              className={`rounded-full border border-white/15 p-2.5 text-white/70 hover:border-white/40 hover:text-white lg:hidden ${focusRing}`}
             >
               <Menu size={18} />
             </button>
@@ -323,6 +387,7 @@ export default function InstructorDashboard() {
               <h2 className="font-semibold tracking-tight">
                 {activeItem?.label}
               </h2>
+
               <p className="hidden text-xs text-white/40 sm:block">
                 {activeItem?.hint}
               </p>
@@ -333,24 +398,32 @@ export default function InstructorDashboard() {
             <button
               type="button"
               onClick={handleCreateCourse}
-              className={`inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black transition-all hover:bg-white/85 active:scale-[0.97] motion-reduce:active:scale-100 ${focusRing}`}
+              className={`inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black transition-all hover:bg-white/85 active:scale-[0.97] ${focusRing}`}
             >
               <Plus size={16} />
-              <span className="hidden sm:inline">Create course</span>
+              <span className="hidden sm:inline">
+                Create course
+              </span>
             </button>
           )}
         </header>
 
         <main className="mx-auto max-w-7xl px-5 py-10 sm:px-8">
-          {/* Greeting (hidden while the course form is open) */}
+
+          {/* Greeting */}
           {!(activeSection === "courses" && isFormOpen) && (
             <div className="mb-10">
-              <p className="text-sm text-white/40">Welcome back</p>
+              <p className="text-sm text-white/40">
+                Welcome back
+              </p>
+
               <h1 className="mt-2 text-4xl font-semibold tracking-tight sm:text-5xl">
                 {instructorName}
               </h1>
+
               <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/40">
-                Create and manage your courses, lessons and live sessions.
+                View organization courses and manage your own courses,
+                modules, lectures and live sessions.
               </p>
             </div>
           )}
@@ -366,6 +439,7 @@ export default function InstructorDashboard() {
                   <p className="text-3xl font-semibold tabular-nums tracking-tight">
                     {stat.value}
                   </p>
+
                   <p className="mt-1 text-xs text-white/40 sm:text-sm">
                     {stat.label}
                   </p>
@@ -408,10 +482,12 @@ export default function InstructorDashboard() {
                 <div>
                   <div className="mb-6">
                     <h3 className="text-xl font-semibold tracking-tight">
-                      My courses
+                      Organization courses
                     </h3>
+
                     <p className="mt-1 text-sm text-white/40">
-                      Create courses and manage their content.
+                      All courses in your organization. You can manage
+                      courses created by you.
                     </p>
                   </div>
 
@@ -430,22 +506,21 @@ export default function InstructorDashboard() {
                     </p>
                   ) : (
                     <CourseList
-                    courses={courses}
-                    currentInstructorId={user?.id || user?._id}
-                    onEdit={handleEditCourse}
-                    onDelete={handleDelete}
-                    onPublish={handlePublish}
-                    onUnpublish={handleUnpublish}
-                    onAddModule={handleAddModule}
-                    onCreate={handleCreateCourse}
-                    isCourseOwner={isCourseOwner}
-                  />
+                      courses={coursesWithOwnership}
+                      onEdit={handleEditCourse}
+                      onDelete={handleDelete}
+                      onPublish={handlePublish}
+                      onUnpublish={handleUnpublish}
+                      onAddModule={handleAddModule}
+                      onCreate={handleCreateCourse}
+                    />
                   )}
                 </div>
               )}
             </section>
           )}
 
+          {/* Modules */}
           {activeSection === "modules" && (
             <section>
               <ModuleManagement
@@ -456,12 +531,17 @@ export default function InstructorDashboard() {
             </section>
           )}
 
+          {/* Lectures */}
           {activeSection === "lectures" && (
             <section>
-              <LectureWorkspace courses={courses} />
+              <LectureWorkspace
+                courses={courses}
+                readOnly={Boolean(location.state?.readOnly)}
+              />
             </section>
           )}
 
+          {/* Live Classes */}
           {activeSection === "live-classes" && (
             <section>
               <LiveSessionWorkspace />

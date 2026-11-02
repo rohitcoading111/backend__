@@ -1,6 +1,8 @@
 export const getDashboardPath = (user) => {
   if (!user?.role) {
-    throw new Error("User role is missing from authentication response.");
+    throw new Error(
+      "User role is missing from authentication response."
+    );
   }
 
   const role = String(user.role).toUpperCase();
@@ -12,15 +14,18 @@ export const getDashboardPath = (user) => {
     case "INSTRUCTOR": {
       const isHiredInstructor =
         Boolean(user.organizationId) &&
-        user.employmentStatus === "ACTIVE";
+        Boolean(user.hiredBy) &&
+        String(user.employmentStatus).toUpperCase() === "ACTIVE";
 
       return isHiredInstructor
-        ? "/organization-instructor-dashboard"
+        ? "/organization-overview"
         : "/instructor-dashboard";
     }
 
     case "ADMIN": {
-      const adminType = String(user.adminType || "").toUpperCase();
+      const adminType = String(
+        user.adminType || ""
+      ).toUpperCase();
 
       if (adminType === "SUPER_ADMIN") {
         return "/super-admin-dashboard";

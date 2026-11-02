@@ -1,5 +1,5 @@
+import { useCallback, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useCallback, useEffect } from "react";
 
 import {
   fetchInstructorCourses,
@@ -11,16 +11,20 @@ import {
 export default function useInstructorCourses() {
   const dispatch = useDispatch();
 
-  const { courses, loading, error } = useSelector(
+  const { courses: storedCourses, loading, error } = useSelector(
     (state) => state.instructor
   );
 
   const user = useSelector((state) => state.auth.user);
 
+  const courses = Array.isArray(storedCourses)
+    ? storedCourses
+    : [];
+
   const currentInstructorId = user?.id || user?._id;
 
-  // Fetch all courses available to this instructor.
-  // Backend decides organization scope.
+  // Fetch organization courses or personal courses.
+  // Backend decides which courses the user can access.
   const refreshCourses = useCallback(() => {
     return dispatch(fetchInstructorCourses()).unwrap();
   }, [dispatch]);
@@ -29,7 +33,7 @@ export default function useInstructorCourses() {
     refreshCourses().catch(() => {});
   }, [refreshCourses]);
 
-  // Find course by ID
+  // Find a course by MongoDB ID.
   const getCourseById = useCallback(
     (courseId) => {
       return courses.find(
@@ -39,11 +43,11 @@ export default function useInstructorCourses() {
     [courses]
   );
 
-  // Check course ownership
+  // Ownership calculation.
   const isCourseOwner = useCallback(
     (courseOrId) => {
       const course =
-        typeof courseOrId === "object"
+        courseOrId && typeof courseOrId === "object"
           ? courseOrId
           : getCourseById(courseOrId);
 
@@ -57,13 +61,24 @@ export default function useInstructorCourses() {
           : course.instructor;
 
       return (
+        Boolean(ownerId) &&
         String(ownerId) === String(currentInstructorId)
       );
     },
     [currentInstructorId, getCourseById]
   );
 
-  // Common ownership validation
+  // Attach ownership information to each course.
+  const coursesWithOwnership = useMemo(
+    () =>
+      courses.map((course) => ({
+        ...course,
+        isOwner: isCourseOwner(course),
+      })),
+    [courses, isCourseOwner]
+  );
+
+  // Check ownership before write actions.
   const ensureOwnership = (courseId) => {
     if (!isCourseOwner(courseId)) {
       throw new Error(
@@ -72,7 +87,7 @@ export default function useInstructorCourses() {
     }
   };
 
-  // Delete own course only
+  // Delete own course.
   const handleDelete = async (courseId) => {
     ensureOwnership(courseId);
 
@@ -81,7 +96,7 @@ export default function useInstructorCourses() {
     ).unwrap();
   };
 
-  // Publish own course only
+  // Publish own course.
   const handlePublish = async (courseId) => {
     ensureOwnership(courseId);
 
@@ -90,7 +105,7 @@ export default function useInstructorCourses() {
     ).unwrap();
   };
 
-  // Unpublish own course only
+  // Unpublish own course.
   const handleUnpublish = async (courseId) => {
     ensureOwnership(courseId);
 
@@ -101,10 +116,11 @@ export default function useInstructorCourses() {
 
   return {
     courses,
+    coursesWithOwnership,
+    currentInstructorId,
+
     loading,
     error,
-
-    currentInstructorId,
 
     refreshCourses,
     getCourseById,

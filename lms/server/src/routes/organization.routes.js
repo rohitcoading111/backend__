@@ -14,6 +14,7 @@ import {
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { roleMiddleware } from "../middleware/role.middleware.js";
 import { organizationAdminMiddleware } from "../middleware/organizationAdmin.middleware.js";
+import { instructorAccessMiddleware } from "../middleware/instructorAccess.middleware.js";
 
 const router = express.Router();
 
