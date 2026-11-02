@@ -1,17 +1,30 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+
 import {
   ShieldCheck,
   RefreshCw,
   Building2,
-  ArrowUpRight,
-  LockKeyhole,
+  LogOut,
 } from "lucide-react";
 
 import AdminStats from "../components/AdminStats.jsx";
 import UsersTable from "../components/UsersTable.jsx";
 import useAdminUsers from "../hooks/useAdminUsers.js";
 
+import AdminRequestsSection from
+  "../components/AdminRequestsSection.jsx";
+
+import { logoutUser } from "../../auth/authThunk/authThunks.js";
+import { logout } from "../../auth/authSlices/authSlice.js";
+
 function AdminDashboard() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
   const {
     users,
     isLoadingUsers,
@@ -19,18 +32,35 @@ function AdminDashboard() {
     fetchUsers,
   } = useAdminUsers();
 
-  const navigate = useNavigate();
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+
+    try {
+      setIsLoggingOut(true);
+
+      // Backend logout: revoke refresh token / clear cookie.
+      await dispatch(logoutUser()).unwrap();
+
+    } catch (error) {
+      console.error("Logout request failed:", error);
+
+      // Even if API fails, clear local Redux authentication.
+      dispatch(logout());
+
+    } finally {
+      navigate("/login", { replace: true });
+      setIsLoggingOut(false);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-[#f4f6fb] px-4 py-6 text-slate-900 sm:px-6 lg:px-8 lg:py-9">
       <div className="mx-auto max-w-[1440px]">
 
-        {/* Premium Header */}
-        <header className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 px-6 py-8 text-white shadow-xl shadow-slate-900/10 sm:px-9 sm:py-10">
+        {/* Header */}
+        <header className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 px-6 py-8 text-white shadow-xl sm:px-9 sm:py-10">
 
-          {/* Background decoration */}
           <div className="pointer-events-none absolute -right-20 -top-32 h-80 w-80 rounded-full bg-indigo-500/20 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-40 right-1/3 h-72 w-72 rounded-full bg-violet-500/10 blur-3xl" />
 
           <div className="relative z-10 flex flex-col justify-between gap-7 md:flex-row md:items-center">
 
@@ -51,22 +81,6 @@ function AdminDashboard() {
                 Manage organizations, oversee administrator accounts
                 and maintain your LearnHub platform.
               </p>
-
-              <div className="mt-6 flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2">
-                  <Building2 size={15} className="text-indigo-300" />
-                  <span className="text-xs font-medium text-slate-200">
-                    Organization Management
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2">
-                  <LockKeyhole size={15} className="text-indigo-300" />
-                  <span className="text-xs font-medium text-slate-200">
-                    Restricted Admin Access
-                  </span>
-                </div>
-              </div>
             </div>
 
             {/* Header Actions */}
@@ -91,15 +105,27 @@ function AdminDashboard() {
               <button
                 type="button"
                 onClick={fetchUsers}
-                disabled={isLoadingUsers}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-lg transition hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={isLoadingUsers || isLoggingOut}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-indigo-50 disabled:opacity-50"
               >
                 <RefreshCw
                   size={16}
                   className={isLoadingUsers ? "animate-spin" : ""}
                 />
 
-                {isLoadingUsers ? "Refreshing..." : "Refresh Data"}
+                Refresh
+              </button>
+
+              {/* Logout */}
+              <button
+                type="button"
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-200 transition hover:border-red-400/50 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <LogOut size={16} />
+
+                {isLoggingOut ? "Logging out..." : "Logout"}
               </button>
 
             </div>
@@ -128,10 +154,12 @@ function AdminDashboard() {
           )}
         </section>
 
-        {/* Organization Admins */}
-        <section className="mt-8 overflow-hidden rounded-[24px] border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.03]">
+        {/* Organization Requests */}
+        <AdminRequestsSection />
 
-          {/* Section Header */}
+        {/* Organization Administrators */}
+        <section className="mt-8 overflow-hidden rounded-[24px] border border-slate-200/80 bg-white shadow-sm">
+
           <div className="flex flex-col justify-between gap-4 border-b border-slate-100 px-5 py-6 sm:flex-row sm:items-center sm:px-7">
 
             <div>
@@ -140,7 +168,7 @@ function AdminDashboard() {
                   <Building2 size={18} className="text-indigo-600" />
                 </div>
 
-                <h2 className="text-lg font-bold tracking-tight text-slate-900">
+                <h2 className="text-lg font-bold text-slate-900">
                   Organization Administrators
                 </h2>
               </div>
@@ -151,44 +179,34 @@ function AdminDashboard() {
             </div>
 
             {!isLoadingUsers && !usersError && (
-              <div className="inline-flex w-fit items-center gap-2 rounded-full bg-slate-100 px-3.5 py-2">
+              <span className="inline-flex w-fit items-center gap-2 rounded-full bg-slate-100 px-3.5 py-2 text-xs font-semibold text-slate-600">
                 <span className="h-2 w-2 rounded-full bg-indigo-500" />
-
-                <span className="text-xs font-semibold text-slate-600">
-                  {users.length} Admin Accounts
-                </span>
-              </div>
+                {users.length} Admin Accounts
+              </span>
             )}
           </div>
 
-          {/* Error */}
           {usersError && (
             <div className="flex flex-wrap items-center justify-between gap-3 p-8">
-              <p className="text-sm text-red-600">{usersError}</p>
+              <p className="text-sm text-red-600">
+                {usersError}
+              </p>
 
               <button
                 type="button"
                 onClick={fetchUsers}
-                className="rounded-lg bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-100"
+                className="text-sm font-semibold text-red-700"
               >
                 Try Again
               </button>
             </div>
           )}
 
-          {/* Loading */}
-          {isLoadingUsers && (
-            <div className="flex min-h-64 flex-col items-center justify-center gap-3">
-              <RefreshCw size={25} className="animate-spin text-indigo-500" />
-
-              <p className="text-sm font-medium text-slate-500">
-                Loading organization administrators...
-              </p>
+          {isLoadingUsers ? (
+            <div className="p-8 text-sm text-slate-500">
+              Loading organization administrators...
             </div>
-          )}
-
-          {/* Table */}
-          {!isLoadingUsers && !usersError && (
+          ) : usersError ? null : (
             <UsersTable
               users={users}
               onAdminSuspended={fetchUsers}
@@ -197,7 +215,7 @@ function AdminDashboard() {
         </section>
 
         {/* Footer */}
-        <footer className="mt-7 flex flex-col justify-between gap-2 border-t border-slate-200 pt-5 text-xs text-slate-400 sm:flex-row sm:items-center">
+        <footer className="mt-7 flex flex-col justify-between gap-2 border-t border-slate-200 pt-5 text-xs text-slate-400 sm:flex-row">
           <p>LearnHub Platform Administration</p>
 
           <p className="flex items-center gap-1.5">

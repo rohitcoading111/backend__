@@ -328,35 +328,62 @@ export const verifyEmailLoginOTP = async ({ email, code }) => {
     throw new Error("INVALID_LOGIN_OTP");
   }
 
-  const existingUser = await userModel.findById(pendingLogin.userId);
+  const existingUser = await userModel.findById(
+    pendingLogin.userId
+  );
 
-  if (!existingUser || existingUser.email?.toLowerCase() !== normalizedEmail) {
+  if (
+    !existingUser ||
+    existingUser.email?.toLowerCase() !== normalizedEmail
+  ) {
     await PendingLogin.deleteOne({ _id: pendingLogin._id });
     throw new Error("LOGIN_SESSION_NOT_FOUND");
   }
 
+  // Generate tokens
   const accessToken = generateAccessToken(existingUser);
   const refreshToken = generateRefreshToken(existingUser);
 
   existingUser.refreshToken = refreshToken;
   await existingUser.save();
-  await sendLoginNotification({
-  email: existingUser.email,
-  name: existingUser.name,
-  loginMethod: "EMAIL OTP",
-});
 
-  await PendingLogin.deleteOne({ _id: pendingLogin._id });
+  // Login notification
+  await sendLoginNotification({
+    email: existingUser.email,
+    name: existingUser.name,
+    loginMethod: "EMAIL OTP",
+  });
+
+  await PendingLogin.deleteOne({
+    _id: pendingLogin._id,
+  });
 
   return {
     accessToken,
     refreshToken,
+
     user: {
       id: existingUser._id,
       name: existingUser.name,
       email: existingUser.email,
       mobile: existingUser.mobile,
+
+      // Role and admin identification
       role: existingUser.role,
+      adminType: existingUser.adminType || null,
+      adminStatus: existingUser.adminStatus || null,
+
+      // Organization information
+      organizationId: existingUser.organizationId || null,
+      hiredBy: existingUser.hiredBy || null,
+
+      // Instructor information
+      instructorCode: existingUser.instructorCode || null,
+      employmentStatus: existingUser.employmentStatus || null,
+
+      // Existing account information
+      accountType: existingUser.accountType,
+      isVerified: existingUser.isVerified,
       mobileVerified: existingUser.mobileVerified,
     },
   };
