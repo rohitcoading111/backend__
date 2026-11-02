@@ -300,6 +300,7 @@ export const approveAdminRequest = async ({
     throw createError("Admin request not found", 404);
   }
 
+  // Only verified requests can be approved
   if (adminRequest.status !== "VERIFIED") {
     throw createError(
       "Verify this request before approving it",
@@ -307,11 +308,19 @@ export const approveAdminRequest = async ({
     );
   }
 
+  // Check whether an account already exists
+  const duplicateConditions = [
+    { email: adminRequest.email },
+  ];
+
+  if (adminRequest.mobile) {
+    duplicateConditions.push({
+      mobile: adminRequest.mobile,
+    });
+  }
+
   const existingUser = await User.findOne({
-    $or: [
-      { email: adminRequest.email },
-      { mobile: adminRequest.mobile },
-    ],
+    $or: duplicateConditions,
   });
 
   if (existingUser) {
@@ -325,33 +334,45 @@ export const approveAdminRequest = async ({
   let organization;
 
   try {
+    // 1. Create Organization Admin account
     createdUser = await User.create({
       name: adminRequest.name,
       email: adminRequest.email,
       mobile: adminRequest.mobile,
+
       role: "ADMIN",
       accountType: "STUDENT",
       adminType: "ORGANIZATION_ADMIN",
-      isVerified: false,
+
+      // Request email has already been verified
+      isVerified: true,
+
+      // Explicit active status
+      adminStatus: "ACTIVE",
+
       password: adminRequest.password,
     });
 
+    // 2. Create Organization
     organization = await Organization.create({
       name: adminRequest.organizationName,
       owner: createdUser._id,
       organizationType: adminRequest.organizationType,
       description: adminRequest.description || "",
       logo: adminRequest.logo || {},
+      status: "ACTIVE",
     });
 
-    // Link Organization Admin with their organization
-createdUser.organizationId = organization._id;
+    // 3. Link Organization with Admin
+    createdUser.organizationId = organization._id;
 
-await createdUser.save();
+    await createdUser.save();
 
+    // 4. Update Admin Request
     adminRequest.status = "APPROVED";
     adminRequest.reviewedBy = superAdminId;
     adminRequest.reviewedAt = new Date();
+
     adminRequest.createdAdmin = createdUser._id;
     adminRequest.organization = organization._id;
 
@@ -360,25 +381,39 @@ await createdUser.save();
 
     await adminRequest.save();
 
+    // 5. Return created data
     return {
       admin: {
         id: createdUser._id,
         name: createdUser.name,
         email: createdUser.email,
         mobile: createdUser.mobile,
+
         role: createdUser.role,
         adminType: createdUser.adminType,
+        adminStatus: createdUser.adminStatus,
+
+        organizationId: createdUser.organizationId,
+        isVerified: createdUser.isVerified,
       },
+
       organization,
+
       request: safeRequest(adminRequest),
     };
+
   } catch (error) {
+    // Rollback if anything fails
     if (organization?._id) {
-      await Organization.findByIdAndDelete(organization._id);
+      await Organization.findByIdAndDelete(
+        organization._id
+      );
     }
 
     if (createdUser?._id) {
-      await User.findByIdAndDelete(createdUser._id);
+      await User.findByIdAndDelete(
+        createdUser._id
+      );
     }
 
     throw error;
