@@ -2,16 +2,40 @@
 
 ## Local and deployed API
 
-Vite uses `.env.development` for `npm run dev` (the local backend at
-`http://localhost:3000`) and `.env.production` for production builds (the
-deployed backend at `https://learnhub-com.onrender.com`). Set `VITE_API_URL`
-and `VITE_SOCKET_URL` as build environment variables on the frontend host if
-you need to override these defaults.
+Vite uses `.env.development` for `npm run dev` and `.env.production` for
+production builds. Both default to the deployed backend at
+`https://learnhub-com.onrender.com`, so the local frontend can use the live
+backend. To run the local backend instead, create `.env.development.local`:
+
+```env
+VITE_API_URL=http://localhost:3000/api
+VITE_SOCKET_URL=http://localhost:3000
+```
+
+Set `VITE_API_URL` and `VITE_SOCKET_URL` as build environment variables on the
+frontend host if you need to override these defaults.
 
 On the backend host, set `FRONTEND_URL=https://learnhub-in.onrender.com`,
 `API_BASE_URL=https://learnhub-com.onrender.com/api`, and
 `GOOGLE_CALLBACK_URL=https://learnhub-com.onrender.com/api/auth/google/callback`.
 Register the Google callback URL in the Google OAuth client configuration.
+Google sign-in redirects to the frontend URL configured in the backend's
+`FRONTEND_URL` setting.
+
+For local frontend development against the live backend, set
+`VITE_API_URL=https://learnhub-com.onrender.com/api` and
+`VITE_SOCKET_URL=https://learnhub-com.onrender.com` in the development
+environment.
+
+For React Router deep links on Render, add a static-site rewrite in the
+frontend service's **Redirects/Rewrites** settings:
+
+- Source: `/*`
+- Destination: `/index.html`
+- Action: **Rewrite**
+
+Without this rule, routes such as `/login` and `/auth/google/callback` return
+404 when opened directly or when Google redirects back to the frontend.
 
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
