@@ -77,22 +77,6 @@ return res.redirect(
   `${frontendUrl}/auth/google/callback?code=${rawCode}`
 );
 
-    return res.status(200).json({
-      success: true,
-      message: isNewUser
-        ? "Google registration successful"
-        : "Google login successful",
-      data: {
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          avatar: user.avatar,
-        },
-        accessToken,
-      },
-    });
   } catch (error) {
     console.error("Google Auth Error:", error.message);
 
@@ -158,8 +142,8 @@ export const exchangeGoogleAuthCode = async (req, res) => {
     }
 
     const user = await User.findById(authCode.userId).select(
-      "_id name email role avatar"
-    );
+  "_id name email role avatar adminType organizationId hiredBy employmentStatus"
+);
 
     if (!user) {
       return res.status(401).json({
@@ -180,6 +164,10 @@ export const exchangeGoogleAuthCode = async (req, res) => {
           email: user.email,
           role: user.role,
           avatar: user.avatar,
+          adminType: user.adminType,
+organizationId: user.organizationId,
+hiredBy: user.hiredBy,
+employmentStatus: user.employmentStatus,
         },
         accessToken,
       },
