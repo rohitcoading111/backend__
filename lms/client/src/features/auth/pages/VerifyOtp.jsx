@@ -1,7 +1,15 @@
+
 import { useState } from "react";
-import { Mail, ArrowRight, Smartphone } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import {
+  Mail,
+  Smartphone,
+  ArrowRight,
+  ShieldCheck,
+} from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+
 import useVerifyOtp from "../hooks/useVerifyOtp.js";
+import AuthLayout from "../components/AuthLayout";
 
 function VerifyOtp() {
   const navigate = useNavigate();
@@ -19,22 +27,26 @@ function VerifyOtp() {
 
   const [localError, setLocalError] = useState("");
 
+  const isEmail = method === "email";
+
   if (!flow || !identifier || !method) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-950 p-6 text-white">
-        <p>OTP verification session not found.</p>
-
+      <AuthLayout
+        eyebrow="Verification"
+        title="Session not found"
+        description="Your OTP verification session is unavailable."
+      >
         <button
+          type="button"
           onClick={() => navigate("/login", { replace: true })}
-          className="rounded-xl bg-indigo-600 px-5 py-2 hover:bg-indigo-500"
+          className="auth-primary-button"
         >
           Back to Login
+          <ArrowRight size={17} />
         </button>
-      </div>
+      </AuthLayout>
     );
   }
-
-  const isEmail = method === "email";
 
   const handleSubmit = (event) => {
     setLocalError("");
@@ -49,78 +61,106 @@ function VerifyOtp() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4 text-white">
-      <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 sm:p-8">
-        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-500/15">
-          {isEmail ? (
-            <Mail size={26} className="text-indigo-400" />
-          ) : (
-            <Smartphone size={26} className="text-indigo-400" />
-          )}
-        </div>
+    <AuthLayout
+      eyebrow="Security verification"
+      title={`Verify your ${isEmail ? "email" : "mobile"}`}
+      description="Enter the verification code to securely continue."
+    >
+      {/* OTP Icon */}
+      <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/15 bg-white/[0.04] text-white shadow-[0_0_18px_rgba(255,255,255,0.07)]">
+        {isEmail ? (
+          <Mail size={25} />
+        ) : (
+          <Smartphone size={25} />
+        )}
+      </div>
 
-        <h1 className="text-2xl font-bold">
-          Verify your {isEmail ? "email" : "mobile"}
-        </h1>
-
-        <p className="mt-2 text-sm text-slate-400">
-          Enter the OTP sent to{" "}
-          <span className="break-all text-slate-200">
-            {identifier}
-          </span>
+      <div className="mb-6">
+        <p className="text-sm text-neutral-400">
+          Enter the OTP sent to:
         </p>
 
-        <p className="mt-2 text-xs text-slate-500">
+        <p className="mt-2 break-all text-sm font-semibold text-white">
+          {identifier}
+        </p>
+
+        <p className="mt-3 text-xs text-neutral-500">
           {flow === "login"
             ? "Complete login verification."
             : "Complete your account registration."}
         </p>
+      </div>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div>
           <label
             htmlFor="otp"
-            className="block text-sm font-medium text-slate-200"
+            className="mb-2 block text-sm font-medium text-neutral-300"
           >
-            6-digit OTP
+            6-digit verification code
           </label>
 
-          <input
-            id="otp"
-            name="otp"
-            type="text"
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            maxLength={6}
-            required
-            value={otp}
-            onChange={(event) => {
-              setOtp(
-                event.target.value.replace(/\D/g, "").slice(0, 6)
-              );
-              setLocalError("");
-            }}
-            placeholder="Enter OTP"
-            className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-center text-xl tracking-[0.5em] outline-none focus:border-indigo-500"
-          />
+          <div className="auth-input-wrapper">
+            <ShieldCheck
+              size={19}
+              className="shrink-0 text-neutral-400"
+            />
 
-          {(localError || error) && (
-            <p role="alert" className="text-sm text-red-400">
-              {localError || error}
-            </p>
-          )}
+            <input
+              id="otp"
+              name="otp"
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              maxLength={6}
+              required
+              value={otp}
+              onChange={(event) => {
+                setOtp(
+                  event.target.value.replace(/\D/g, "").slice(0, 6)
+                );
+                setLocalError("");
+              }}
+              placeholder="000000"
+              className="auth-input text-center text-xl tracking-[0.5em]"
+            />
+          </div>
+        </div>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 font-semibold hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+        {(localError || error) && (
+          <p
+            role="alert"
+            className="rounded-xl border border-red-500/20 bg-red-500/[0.06] px-3 py-2 text-sm text-red-400"
           >
-            {isSubmitting ? "Verifying..." : "Verify OTP"}
+            {localError || error}
+          </p>
+        )}
 
-            {!isSubmitting && <ArrowRight size={17} />}
-          </button>
-        </form>
-      </div>
-    </div>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="auth-primary-button"
+        >
+          {isSubmitting ? "Verifying..." : "Verify OTP"}
+
+          {!isSubmitting && <ArrowRight size={17} />}
+        </button>
+      </form>
+
+      <p className="mt-7 text-center text-xs text-neutral-500">
+        Need to start again?{" "}
+        <Link
+          to="/login"
+          className="font-semibold text-white hover:underline"
+        >
+          Back to login
+        </Link>
+      </p>
+
+      <p className="mt-6 text-center text-[11px] text-neutral-600">
+        Your verification is protected by LearnHub.
+      </p>
+    </AuthLayout>
   );
 }
 

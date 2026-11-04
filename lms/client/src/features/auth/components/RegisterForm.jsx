@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import {
   UserRound,
@@ -5,12 +6,18 @@ import {
   Smartphone,
   Lock,
   ArrowRight,
+  GraduationCap,
+  ChevronDown,
+  Check,
 } from "lucide-react";
 
+import "./auth.css";
 import useRegisterForm from "../hooks/useRegisterForm";
 
 function RegisterForm() {
   const [identifier, setIdentifier] = useState("");
+  const [roleOpen, setRoleOpen] = useState(false);
+  const [selectedRole, setSelectedRole] = useState("STUDENT");
 
   const isPhone =
     /^[0-9+ ]*$/.test(identifier) && identifier.length > 0;
@@ -39,29 +46,41 @@ function RegisterForm() {
       "Enter a valid email or 10-digit mobile number",
   });
 
+  const roles = [
+    { value: "STUDENT", label: "Student" },
+    { value: "INSTRUCTOR", label: "Instructor" },
+  ];
+
+  const handleRoleSelect = (value) => {
+    setSelectedRole(value);
+    setRoleOpen(false);
+  };
+
+  const handleFormSubmit = (data) => {
+    onSubmit({
+      ...data,
+      name: data.name.trim(),
+      identifier: data.identifier.trim(),
+      // Public registration never grants instructor privileges.
+      role: "STUDENT",
+      requestedRole: selectedRole,
+    });
+  };
+
   return (
     <form
-      className="space-y-3.5"
-      onSubmit={handleSubmit((data) =>
-        onSubmit({
-          ...data,
-          name: data.name.trim(),
-          identifier: data.identifier.trim(),
-        })
-      )}
+      className="auth-form"
+      onSubmit={handleSubmit(handleFormSubmit)}
       noValidate
     >
-      {/* Full Name */}
-      <div>
-        <label
-          htmlFor="name"
-          className="mb-1.5 block text-xs font-medium text-slate-200"
-        >
+      {/* Name */}
+      <div className="auth-form-group">
+        <label htmlFor="name" className="auth-label">
           Full Name
         </label>
 
-        <div className="flex items-center gap-2.5 rounded-xl border border-slate-700 bg-slate-800/70 px-3.5 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20">
-          <UserRound size={18} className="shrink-0 text-slate-400" />
+        <div className="auth-field">
+          <UserRound className="auth-icon" size={18} />
 
           <input
             id="name"
@@ -75,70 +94,101 @@ function RegisterForm() {
                 message: "Name must be at least 2 characters",
               },
             })}
-            className="w-full bg-transparent py-2.5 text-sm outline-none placeholder:text-slate-500"
+            className="auth-input"
           />
         </div>
 
         {errors.name && (
-          <p className="mt-1 text-xs text-red-400">
-            {errors.name.message}
-          </p>
+          <p className="auth-error">{errors.name.message}</p>
         )}
       </div>
 
-      {/* Account Role */}
-      <div>
-        <label
-          htmlFor="role"
-          className="mb-1.5 block text-xs font-medium text-slate-200"
-        >
+      {/* Custom Role Dropdown */}
+      <div className="auth-form-group">
+        <label className="auth-label">
           I want to join as
         </label>
 
-        <select
-          id="role"
-          {...register("role", {
-            required: "Please select an account type",
-          })}
-          className="w-full rounded-xl border border-slate-700 bg-slate-800/70 px-3.5 py-3 text-sm text-white outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-        >
-          <option value="STUDENT" className="bg-slate-800">
-            Student
-          </option>
+        <input
+          type="hidden"
+          {...register("role")}
+          value="STUDENT"
+          readOnly
+        />
 
-          <option value="INSTRUCTOR" className="bg-slate-800">
-            Instructor
-          </option>
-        </select>
+        <div className="auth-dropdown">
+          <button
+            type="button"
+            className={`auth-dropdown-trigger ${
+              roleOpen ? "is-open" : ""
+            }`}
+            aria-haspopup="listbox"
+            aria-expanded={roleOpen}
+            onClick={() => setRoleOpen((previous) => !previous)}
+          >
+            <GraduationCap size={19} className="auth-icon" />
 
-        {errors.role && (
-          <p className="mt-1 text-xs text-red-400">
-            {errors.role.message}
+            <span>
+              {roles.find((role) => role.value === selectedRole)?.label}
+            </span>
+
+            <ChevronDown
+              size={19}
+              className={`auth-chevron ${
+                roleOpen ? "rotate" : ""
+              }`}
+            />
+          </button>
+
+          {roleOpen && (
+            <div className="auth-dropdown-menu" role="listbox">
+              {roles.map((role) => (
+                <button
+                  key={role.value}
+                  type="button"
+                  role="option"
+                  aria-selected={selectedRole === role.value}
+                  className={`auth-dropdown-option ${
+                    selectedRole === role.value ? "selected" : ""
+                  }`}
+                  onClick={() => handleRoleSelect(role.value)}
+                >
+                  <GraduationCap size={17} />
+
+                  <span>{role.label}</span>
+
+                  {selectedRole === role.value && (
+                    <Check size={16} className="auth-option-check" />
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {selectedRole === "INSTRUCTOR" && (
+          <p className="auth-hint">
+            Instructor access requires assignment by an Organization Admin.
           </p>
         )}
       </div>
 
-      {/* Email or Mobile */}
-      <div>
-        <label
-          htmlFor="identifier"
-          className="mb-1.5 block text-xs font-medium text-slate-200"
-        >
+      {/* Email / Mobile */}
+      <div className="auth-form-group">
+        <label htmlFor="identifier" className="auth-label">
           Email or Mobile Number
         </label>
 
-        <div className="flex items-center gap-2.5 rounded-xl border border-slate-700 bg-slate-800/70 px-3.5 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20">
+        <div className="auth-field">
           {isPhone ? (
-            <Smartphone size={18} className="shrink-0 text-indigo-400" />
+            <Smartphone size={18} className="auth-icon" />
           ) : (
-            <Mail size={18} className="shrink-0 text-slate-400" />
+            <Mail size={18} className="auth-icon" />
           )}
 
           {isPhone ? (
             <>
-              <span className="shrink-0 text-sm text-slate-300">
-                +91
-              </span>
+              <span className="auth-prefix">+91</span>
 
               <input
                 id="identifier"
@@ -148,13 +198,15 @@ function RegisterForm() {
                 maxLength={10}
                 {...phoneIdentifierField}
                 onChange={(event) => {
-                  const value = event.target.value.replace(/\D/g, "");
+                  const value = event.target.value
+                    .replace(/\D/g, "")
+                    .slice(0, 10);
 
                   event.target.value = value;
                   phoneIdentifierField.onChange(event);
                   setIdentifier(value);
                 }}
-                className="w-full bg-transparent py-2.5 text-sm outline-none placeholder:text-slate-500"
+                className="auth-input"
               />
             </>
           ) : (
@@ -168,29 +220,26 @@ function RegisterForm() {
                 emailIdentifierField.onChange(event);
                 setIdentifier(event.target.value);
               }}
-              className="w-full bg-transparent py-2.5 text-sm outline-none placeholder:text-slate-500"
+              className="auth-input"
             />
           )}
         </div>
 
         {errors.identifier && (
-          <p className="mt-1 text-xs text-red-400">
+          <p className="auth-error">
             {errors.identifier.message}
           </p>
         )}
       </div>
 
       {/* Password */}
-      <div>
-        <label
-          htmlFor="password"
-          className="mb-1.5 block text-xs font-medium text-slate-200"
-        >
+      <div className="auth-form-group">
+        <label htmlFor="password" className="auth-label">
           Password
         </label>
 
-        <div className="flex items-center gap-2.5 rounded-xl border border-slate-700 bg-slate-800/70 px-3.5 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20">
-          <Lock size={18} className="shrink-0 text-slate-400" />
+        <div className="auth-field">
+          <Lock size={18} className="auth-icon" />
 
           <input
             id="password"
@@ -204,12 +253,12 @@ function RegisterForm() {
                 message: "Password must be at least 8 characters",
               },
             })}
-            className="w-full bg-transparent py-2.5 text-sm outline-none placeholder:text-slate-500"
+            className="auth-input"
           />
         </div>
 
         {errors.password && (
-          <p className="mt-1 text-xs text-red-400">
+          <p className="auth-error">
             {errors.password.message}
           </p>
         )}
@@ -217,7 +266,7 @@ function RegisterForm() {
 
       {/* Backend Error */}
       {serverError && (
-        <p role="alert" className="text-sm text-red-400">
+        <p role="alert" className="auth-error">
           {typeof serverError === "string"
             ? serverError
             : "Registration failed. Please try again."}
@@ -228,11 +277,11 @@ function RegisterForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold transition hover:bg-indigo-500 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+        className="auth-submit"
       >
         {isSubmitting ? "Creating Account..." : "Create Account"}
 
-        {!isSubmitting && <ArrowRight size={16} />}
+        {!isSubmitting && <ArrowRight size={17} />}
       </button>
     </form>
   );

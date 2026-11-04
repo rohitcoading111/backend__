@@ -1,13 +1,18 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Mail, Lock, ArrowRight, Smartphone } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  ArrowRight,
+  Smartphone,
+} from "lucide-react";
+
 import useLoginForm from "../hooks/useLoginForm";
 
 function LoginForm() {
   const [identifier, setIdentifier] = useState("");
 
-  // Detect whether the user is entering a mobile number
   const isPhone =
     /^[0-9+ ]*$/.test(identifier) && identifier.length > 0;
 
@@ -22,90 +27,96 @@ function LoginForm() {
     setRememberMe,
   } = useLoginForm();
 
+  const identifierField = register("identifier", {
+    required: "Email or mobile number is required",
+
+    validate: (value) => {
+      const input = value.trim();
+
+      const isEmail =
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input);
+
+      const isPhone =
+        /^[6-9]\d{9}$/.test(input);
+
+      return (
+        isEmail ||
+        isPhone ||
+        "Enter a valid email or 10-digit mobile number"
+      );
+    },
+
+    onChange: (event) => {
+      setIdentifier(event.target.value);
+    },
+  });
+
   return (
     <div className="w-full max-w-md">
-      <div className="mb-5"></div>
 
       <form
         className="space-y-4"
         onSubmit={handleSubmit(onSubmit)}
         noValidate
       >
+
         {/* Email or Mobile */}
+
         <div>
           <label
             htmlFor="identifier"
-            className="mb-1.5 block text-xs font-medium text-slate-200"
+            className="mb-2 block text-xs font-medium text-slate-200"
           >
             Email or Mobile Number
           </label>
 
-          <div className="flex items-center gap-2.5 rounded-xl border border-slate-700 bg-slate-800/70 px-3.5 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20">
+          <div className="auth-field">
+
             {isPhone ? (
               <Smartphone
-                size={18}
-                className="shrink-0 text-indigo-400"
+                size={19}
+                className="shrink-0 text-slate-400"
               />
             ) : (
-              <Mail size={18} className="shrink-0 text-slate-400" />
-            )}
-
-            {/* Fixed +91 prefix for mobile; email input remains unchanged */}
-            {isPhone ? (
-              <>
-                <span className="shrink-0 text-sm text-slate-300">
-                  +91
-                </span>
-
-                <input
-                  id="identifier"
-                  type="tel"
-                  autoComplete="tel-national"
-                  placeholder="10-digit mobile number"
-                  maxLength={10}
-                  {...register("identifier", {
-                    required: "Mobile number is required",
-                    validate: (value) =>
-                      /^[6-9]\d{9}$/.test(value) ||
-                      "Enter a valid 10-digit Indian mobile number",
-                  })}
-                  onChange={(event) => {
-                    const value = event.target.value.replace(/\D/g, "");
-                    event.target.value = value;
-                    setIdentifier(value);
-                  }}
-                  className="w-full bg-transparent py-2.5 text-sm text-white outline-none placeholder:text-slate-500"
-                />
-              </>
-            ) : (
-              <input
-                id="identifier"
-                type="text"
-                autoComplete="username"
-                placeholder="Email or mobile number"
-                {...register("identifier", {
-                  required: "Email or mobile number is required",
-                  validate: (value) => {
-                    const input = value.trim();
-
-                    const isEmail =
-                      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input);
-
-                    const isPhone = /^\+?[0-9]{10,15}$/.test(input);
-
-                    return (
-                      isEmail ||
-                      isPhone ||
-                      "Enter a valid email or mobile number"
-                    );
-                  },
-                  onChange: (event) => {
-                    setIdentifier(event.target.value);
-                  },
-                })}
-                className="w-full bg-transparent py-2.5 text-sm text-white outline-none placeholder:text-slate-500"
+              <Mail
+                size={19}
+                className="shrink-0 text-slate-400"
               />
             )}
+
+            {isPhone && (
+              <span className="shrink-0 text-sm text-slate-300">
+                +91
+              </span>
+            )}
+
+            <input
+              id="identifier"
+              type={isPhone ? "tel" : "text"}
+              inputMode={isPhone ? "numeric" : "text"}
+              autoComplete="username"
+              placeholder={
+                isPhone
+                  ? "10-digit mobile number"
+                  : "Email or mobile number"
+              }
+              maxLength={isPhone ? 10 : undefined}
+              {...identifierField}
+              onChange={(event) => {
+                if (isPhone) {
+                  const value = event.target.value
+                    .replace(/\D/g, "")
+                    .slice(0, 10);
+
+                  event.target.value = value;
+                  identifierField.onChange(event);
+                } else {
+                  identifierField.onChange(event);
+                }
+              }}
+              className="auth-input"
+            />
+
           </div>
 
           {errors.identifier && (
@@ -116,16 +127,21 @@ function LoginForm() {
         </div>
 
         {/* Password */}
+
         <div>
           <label
             htmlFor="password"
-            className="mb-1.5 block text-xs font-medium text-slate-200"
+            className="mb-2 block text-xs font-medium text-slate-200"
           >
             Password
           </label>
 
-          <div className="flex items-center gap-2.5 rounded-xl border border-slate-700 bg-slate-800/70 px-3.5 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20">
-            <Lock size={18} className="shrink-0 text-slate-400" />
+          <div className="auth-field">
+
+            <Lock
+              size={19}
+              className="shrink-0 text-slate-400"
+            />
 
             <input
               id="password"
@@ -135,8 +151,9 @@ function LoginForm() {
               {...register("password", {
                 required: "Password is required",
               })}
-              className="w-full bg-transparent py-2.5 text-sm text-white outline-none placeholder:text-slate-500"
+              className="auth-input"
             />
+
           </div>
 
           {errors.password && (
@@ -147,26 +164,35 @@ function LoginForm() {
         </div>
 
         {/* Remember Me & Forgot Password */}
-        <div className="flex items-center justify-between gap-2 text-xs">
-          <label className="flex items-center gap-2 text-slate-400">
+
+        <div className="flex items-center justify-between gap-3 text-xs">
+
+          <label className="flex items-center gap-2 text-slate-400 cursor-pointer">
+
             <input
               type="checkbox"
               checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-              className="h-3.5 w-3.5 rounded accent-indigo-500"
+              onChange={(event) =>
+                setRememberMe(event.target.checked)
+              }
+              className="h-4 w-4 accent-white"
             />
+
             Remember me
+
           </label>
 
           <Link
             to="/forgot-password"
-            className="font-medium text-indigo-400 hover:text-indigo-300"
+            className="font-medium text-slate-300 transition hover:text-white"
           >
             Forgot password?
           </Link>
+
         </div>
 
         {/* Backend Error */}
+
         {serverError && (
           <p role="alert" className="text-sm text-red-400">
             {typeof serverError === "string"
@@ -176,15 +202,19 @@ function LoginForm() {
         )}
 
         {/* Submit */}
+
         <button
           type="submit"
           disabled={isSubmitting}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+          className="auth-primary-button"
         >
           {isSubmitting ? "Logging in..." : "Login"}
-          {!isSubmitting && <ArrowRight size={16} />}
+
+          {!isSubmitting && <ArrowRight size={17} />}
         </button>
+
       </form>
+
     </div>
   );
 }
