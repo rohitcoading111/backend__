@@ -140,3 +140,20 @@ export const logoutUser = createAsyncThunk(
     }
   }
 );
+
+// Reset Password
+export const resetPassword = createAsyncThunk(
+  "auth/resetPassword",
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await authService.resetPassword(data);
+      return response;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+          error.message ||
+          "Password reset failed. Please try again."
+      );
+    }
+  }
+);
