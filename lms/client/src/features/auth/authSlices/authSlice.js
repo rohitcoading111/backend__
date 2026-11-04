@@ -10,6 +10,7 @@ import {
   verifyMobileRegistrationOtp,
   restoreAuth,
   logoutUser,
+  resetPassword,
 } from "../authThunk/authThunks.js";
 
 // Initial authentication state
@@ -20,6 +21,8 @@ const initialState = {
   status: "idle",
   isLoggingOut: false,
   error: null,
+  resetPasswordStatus: "idle",
+  resetPasswordError: null,
 };
 
 // Handles different API response structures
@@ -65,6 +68,8 @@ const clearAuthState = (state) => {
   state.isLoggingOut = false;
 };
 
+
+
 // Redux authentication slice
 const authSlice = createSlice({
   name: "auth",
@@ -98,6 +103,11 @@ const authSlice = createSlice({
     // Update access token after refresh
     setAccessToken: (state, action) => {
       state.accessToken = action.payload;
+    },
+
+    clearResetPasswordState: (state) => {
+     state.resetPasswordStatus = "idle";
+      state.resetPasswordError = null;
     },
 
     // Google authentication
@@ -352,8 +362,31 @@ const authSlice = createSlice({
           action.payload ||
           action.error.message ||
           "Logout request failed.";
-      });
+      })
+// ---------------------------------
+// RESET PASSWORD
+// ---------------------------------
+
+.addCase(resetPassword.pending, (state) => {
+  state.resetPasswordStatus = "loading";
+  state.resetPasswordError = null;
+})
+
+.addCase(resetPassword.fulfilled, (state) => {
+  state.resetPasswordStatus = "succeeded";
+  state.resetPasswordError = null;
+})
+
+.addCase(resetPassword.rejected, (state, action) => {
+  state.resetPasswordStatus = "failed";
+  state.resetPasswordError =
+    action.payload ||
+    action.error.message ||
+    "Password reset failed. Please try again.";
+})
+      
   },
+  
 });
 
 export const {
@@ -362,6 +395,7 @@ export const {
   clearAuthError,
   setGoogleAuth,
   setAccessToken,
+  clearResetPasswordState,
 } = authSlice.actions;
 
 export default authSlice.reducer;
