@@ -31,6 +31,8 @@ const config = {
 
     NODE_ENV: process.env.NODE_ENV || "development",
     IS_RENDER: process.env.RENDER === "true",
+    API_BASE_URL: process.env.API_BASE_URL,
+    FRONTEND_URL: process.env.FRONTEND_URL,
 
    WHATSAPP_FROM: process.env.WHATSAPP_FROM || "whatsapp:+17372508034",  
    APPOINTMENT_TEMPLATE_SID: process.env.APPOINTMENT_TEMPLATE_SID || "HXfe5ab5f00277942d4d4200328b4d403c",

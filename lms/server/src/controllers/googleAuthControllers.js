@@ -21,8 +21,37 @@ export const googleAuthCallback = async (req, res) => {
       });
     }
 
-    const { user, isNewUser } =
-      await findOrCreateGoogleUser(googleUser);
+    const { user, isNewUser } = await findOrCreateGoogleUser(
+      googleUser,
+      { createIfMissing: false }
+    );
+
+    if (!user) {
+      const rawCode = crypto.randomBytes(32).toString("hex");
+      const codeHash = crypto
+        .createHash("sha256")
+        .update(rawCode)
+        .digest("hex");
+
+      await GoogleAuthCode.create({
+        codeHash,
+        googleUser: {
+          googleId: googleUser.googleId,
+          name: googleUser.name,
+          email: googleUser.email,
+          avatar: googleUser.avatar,
+          emailVerified: googleUser.emailVerified,
+        },
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+      });
+
+      const frontendUrl =
+        process.env.FRONTEND_URL || "http://localhost:5173";
+
+      return res.redirect(
+        `${frontendUrl}/auth/google/callback?code=${rawCode}&registration=1`
+      );
+    }
 
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
@@ -107,6 +136,102 @@ return res.redirect(
   }
 };
 
+export const completeGoogleRegistration = async (req, res) => {
+  try {
+    const { code, role } = req.body;
+
+    if (
+      typeof code !== "string" ||
+      !["STUDENT", "INSTRUCTOR"].includes(
+        String(role).trim().toUpperCase()
+      )
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Authorization code and a valid role are required",
+      });
+    }
+
+    const codeHash = crypto
+      .createHash("sha256")
+      .update(code)
+      .digest("hex");
+
+    const authCode = await GoogleAuthCode.findOneAndDelete({
+      codeHash,
+      userId: { $exists: false },
+      expiresAt: { $gt: new Date() },
+    });
+
+    if (!authCode?.googleUser?.googleId || !authCode.googleUser.email) {
+      return res.status(401).json({
+        success: false,
+        message: "Google registration session is invalid or expired",
+      });
+    }
+
+    const { user, isNewUser } = await findOrCreateGoogleUser(
+      authCode.googleUser,
+      { role: String(role).trim().toUpperCase() }
+    );
+
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+
+    user.refreshToken = refreshToken;
+    await user.save();
+    setRefreshCookie(res, refreshToken);
+
+    if (isNewUser) {
+      try {
+        await sendRegistrationNotification({
+          email: user.email,
+          name: user.name,
+        });
+      } catch (notificationError) {
+        console.error(
+          "Google registration notification failed:",
+          notificationError.message
+        );
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Google registration successful",
+      data: {
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          avatar: user.avatar,
+          instructorCode: user.instructorCode || null,
+          adminType: user.adminType,
+          organizationId: user.organizationId,
+          hiredBy: user.hiredBy,
+          employmentStatus: user.employmentStatus,
+        },
+        accessToken,
+      },
+    });
+  } catch (error) {
+    console.error("Google registration error:", error.message);
+
+    if (error.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: "Account already exists. Please try Google login again.",
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Google registration failed",
+    });
+  }
+};
+
 export const exchangeGoogleAuthCode = async (req, res) => {
   try {
     const { code } = req.body;
@@ -137,8 +262,8 @@ export const exchangeGoogleAuthCode = async (req, res) => {
     }
 
     const user = await User.findById(authCode.userId).select(
-  "_id name email role avatar adminType organizationId hiredBy employmentStatus"
-);
+      "_id name email role avatar instructorCode adminType organizationId hiredBy employmentStatus"
+    );
 
     if (!user) {
       return res.status(401).json({
@@ -159,10 +284,11 @@ export const exchangeGoogleAuthCode = async (req, res) => {
           email: user.email,
           role: user.role,
           avatar: user.avatar,
+          instructorCode: user.instructorCode || null,
           adminType: user.adminType,
-organizationId: user.organizationId,
-hiredBy: user.hiredBy,
-employmentStatus: user.employmentStatus,
+          organizationId: user.organizationId,
+          hiredBy: user.hiredBy,
+          employmentStatus: user.employmentStatus,
         },
         accessToken,
       },

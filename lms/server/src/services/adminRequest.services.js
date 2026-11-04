@@ -15,6 +15,26 @@ const createError = (message, statusCode) => {
 const hashToken = (token) =>
   crypto.createHash("sha256").update(token).digest("hex");
 
+const getApiBaseUrl = () => {
+  const productionUrl = "https://learnhub-com.onrender.com/api";
+  const defaultUrl =
+    config.NODE_ENV === "production"
+      ? productionUrl
+      : "http://localhost:3000/api";
+  const configuredUrl = config.API_BASE_URL?.trim();
+  const apiBaseUrl = configuredUrl || defaultUrl;
+  const hostname = new URL(apiBaseUrl).hostname;
+
+  if (
+    config.NODE_ENV === "production" &&
+    ["localhost", "127.0.0.1"].includes(hostname)
+  ) {
+    return productionUrl;
+  }
+
+  return apiBaseUrl.replace(/\/+$/, "");
+};
+
 const safeRequest = (request) => {
   const data = request.toObject ? request.toObject() : { ...request };
 
@@ -90,14 +110,9 @@ export const createAdminRequest = async (data) => {
     ),
   });
 
-  // Set this in .env:
-  // API_BASE_URL=http://localhost:3000/api
-  const apiBaseUrl = (
-    process.env.API_BASE_URL || "http://localhost:3000/api"
-  ).replace(/\/+$/, "");
-
- const verificationUrl =
-  `${apiBaseUrl}/admin-requests/verify-email/${verificationToken}`;
+  const apiBaseUrl = getApiBaseUrl();
+  const verificationUrl =
+    `${apiBaseUrl}/admin-requests/verify-email/${verificationToken}`;
   const escapeHtml = (value = "") =>
     String(value).replace(/[&<>"']/g, (char) => ({
       "&": "&amp;",

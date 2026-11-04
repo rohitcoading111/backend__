@@ -107,6 +107,15 @@ const authService = {
 
     return response.data;
   },
+
+  completeGoogleRegistration: async ({ code, role }) => {
+    const response = await api.post("/auth/google/register", {
+      code,
+      role,
+    });
+
+    return response.data;
+  },
 };
 
 export default authService;

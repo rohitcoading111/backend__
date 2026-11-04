@@ -1,7 +1,11 @@
 
 import User from "../models/user.models.js";
+import crypto from "node:crypto";
 
-export const findOrCreateGoogleUser = async (googleUser) => {
+export const findOrCreateGoogleUser = async (
+  googleUser,
+  { createIfMissing = true, role = "STUDENT" } = {}
+) => {
   const { googleId, name, email, emailVerified, avatar } = googleUser;
 
   const normalizedEmail = email?.trim().toLowerCase();
@@ -57,18 +61,41 @@ export const findOrCreateGoogleUser = async (googleUser) => {
     };
   }
 
-  // 3. New Google user
-  const newUser = await User.create({
+  if (!createIfMissing) {
+    return {
+      user: null,
+      isNewUser: false,
+    };
+  }
+
+  const normalizedRole = String(role).trim().toUpperCase();
+  if (!["STUDENT", "INSTRUCTOR"].includes(normalizedRole)) {
+    throw new Error("INVALID_ROLE");
+  }
+
+  const userData = {
     googleId,
     name: name?.trim() || "Google User",
     email: normalizedEmail,
     password: undefined,
     isVerified: true,
+    role: normalizedRole,
     avatar: {
       url: avatar || null,
       fileId: null,
     },
-  });
+  };
+
+  if (normalizedRole === "INSTRUCTOR") {
+    userData.instructorCode =
+      `INS-${crypto.randomBytes(10).toString("hex").toUpperCase()}`;
+    userData.employmentStatus = "INDEPENDENT";
+    userData.organizationId = null;
+    userData.hiredBy = null;
+  }
+
+  // 3. New Google user
+  const newUser = await User.create(userData);
 
   return {
     user: newUser,

@@ -18,6 +18,8 @@ frontend host if you need to override these defaults.
 On the backend host, set `FRONTEND_URL=https://learnhub-in.onrender.com`,
 `API_BASE_URL=https://learnhub-com.onrender.com/api`, and
 `GOOGLE_CALLBACK_URL=https://learnhub-com.onrender.com/api/auth/google/callback`.
+Organization request verification emails link to the backend API configured by
+`API_BASE_URL`; if it is unset, they use the deployed LearnHub backend URL.
 Register the Google callback URL in the Google OAuth client configuration.
 Google sign-in redirects to the frontend URL configured in the backend's
 `FRONTEND_URL` setting.

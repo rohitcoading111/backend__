@@ -13,6 +13,7 @@ import upload from "../middleware/upload.middleware.js";
 import { verifyMobileRegistrationController } from "../controllers/mobileRegistration.controllers.js";
 import {
   exchangeGoogleAuthCode,
+  completeGoogleRegistration,
 } from "../controllers/googleAuthControllers.js";
 import {
   verifyMobileOTPValidator,
@@ -156,5 +157,6 @@ router.get("/google/failure", (req, res) => {
 });
 
 router.post("/google/exchange", exchangeGoogleAuthCode);
+router.post("/google/register", completeGoogleRegistration);
 
 export default router;

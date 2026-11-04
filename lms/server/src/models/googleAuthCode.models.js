@@ -10,7 +10,14 @@ const googleAuthCodeSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    required: true,
+  },
+
+  googleUser: {
+    googleId: String,
+    name: String,
+    email: String,
+    avatar: String,
+    emailVerified: Boolean,
   },
 
   expiresAt: {
