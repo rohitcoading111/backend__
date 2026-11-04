@@ -1,5 +1,11 @@
-
 User-agent: *
 Allow: /
+
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /instructor
+Disallow: /student
+Disallow: /my-enrollments
+Disallow: /live-class
 
 Sitemap: https://learnhubcloud.in/sitemap.xml
