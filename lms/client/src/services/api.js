@@ -6,12 +6,27 @@ import {
   logout,
 } from "../features/auth/authSlices/authSlice";
 
-// Local and production API configuration
+const productionApiUrl = "https://learnhub-com.onrender.com/api";
+const developmentApiUrl = "http://localhost:3000/api";
+const configuredApiUrl = import.meta.env.VITE_API_URL?.trim();
+
+const isLocalApiUrl = (value) => {
+  try {
+    const hostname = new URL(value).hostname.replace(/^\[|\]$/g, "");
+    return ["localhost", "127.0.0.1", "::1"].includes(hostname);
+  } catch {
+    return false;
+  }
+};
+
+const fallbackApiUrl = import.meta.env.DEV
+  ? developmentApiUrl
+  : productionApiUrl;
+
 const baseURL =
-  import.meta.env.VITE_API_URL ||
-  (import.meta.env.DEV
-    ? "http://localhost:3000/api"
-    : "https://learnhub-com.onrender.com/api");
+  import.meta.env.PROD && configuredApiUrl && isLocalApiUrl(configuredApiUrl)
+    ? productionApiUrl
+    : configuredApiUrl || fallbackApiUrl;
 
 // Main Axios instance
 const api = axios.create({

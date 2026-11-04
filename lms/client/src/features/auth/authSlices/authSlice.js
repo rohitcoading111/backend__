@@ -18,6 +18,7 @@ const initialState = {
   user: null,
   accessToken: null,
   isAuthenticated: false,
+  isRestoring: false,
   status: "idle",
   isLoggingOut: false,
   error: null,
@@ -313,11 +314,12 @@ const authSlice = createSlice({
       // ---------------------------------
 
       .addCase(restoreAuth.pending, (state) => {
-        state.status = "loading";
+        state.isRestoring = true;
         state.error = null;
       })
 
       .addCase(restoreAuth.fulfilled, (state, action) => {
+        state.isRestoring = false;
         const authenticated = applyAuthResponse(
           state,
           action.payload
@@ -325,18 +327,16 @@ const authSlice = createSlice({
 
         if (!authenticated) {
           clearAuthState(state);
-          state.status = "failed";
-          state.error = "Authentication restoration failed.";
+          state.status = "idle";
+          state.error = null;
         }
       })
 
-      .addCase(restoreAuth.rejected, (state, action) => {
+      .addCase(restoreAuth.rejected, (state) => {
+        state.isRestoring = false;
         clearAuthState(state);
-        state.status = "failed";
-        state.error =
-          action.payload ||
-          action.error.message ||
-          "Failed to restore authentication.";
+        state.status = "idle";
+        state.error = null;
       })
 
       // ---------------------------------
