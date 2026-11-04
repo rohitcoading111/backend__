@@ -61,9 +61,7 @@ function RegisterForm() {
       ...data,
       name: data.name.trim(),
       identifier: data.identifier.trim(),
-      // Public registration never grants instructor privileges.
-      role: "STUDENT",
-      requestedRole: selectedRole,
+      role: selectedRole,
     });
   };
 
@@ -112,7 +110,7 @@ function RegisterForm() {
         <input
           type="hidden"
           {...register("role")}
-          value="STUDENT"
+          value={selectedRole}
           readOnly
         />
 
@@ -168,7 +166,7 @@ function RegisterForm() {
 
         {selectedRole === "INSTRUCTOR" && (
           <p className="auth-hint">
-            Instructor access requires assignment by an Organization Admin.
+            Independent instructors can use their account directly. Organization access requires assignment by an Organization Admin.
           </p>
         )}
       </div>
