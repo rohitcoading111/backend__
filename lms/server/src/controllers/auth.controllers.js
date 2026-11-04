@@ -6,6 +6,11 @@ import { LogoutUser } from "../services/auth.services.js";
 import { refreshTokenService } from "../services/auth.services.js";
 import { startMobileRegistration } from "../services/mobileRegistration.services.js";
 import { clearRefreshCookie } from "../utils/refreshCookie.js";
+import {
+  startPasswordReset,
+  verifyPasswordResetOTP,
+  resetPassword,
+} from "../services/auth.services.js";
 
 
 
@@ -294,11 +299,6 @@ export const adminTest = async (req, res) => {
 };
 
 
-import {
-  startPasswordReset,
-  verifyPasswordResetOTP,
-  resetPassword,
-} from "../services/auth.services.js";
 
 export const forgotPasswordController = async (req, res) => {
   try {
