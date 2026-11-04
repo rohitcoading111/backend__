@@ -157,3 +157,32 @@ export const resetPassword = createAsyncThunk(
     }
   }
 );
+
+export const forgotPassword = createAsyncThunk(
+  "auth/forgotPassword",
+  async (data, { rejectWithValue }) => {
+    try {
+      return await authService.forgotPassword(data);
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+          "Unable to send password reset OTP."
+      );
+    }
+  }
+);
+
+
+export const verifyResetOtp = createAsyncThunk(
+  "auth/verifyResetOtp",
+  async (data, { rejectWithValue }) => {
+    try {
+      return await authService.verifyResetOtp(data);
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+          "OTP verification failed."
+      );
+    }
+  }
+);

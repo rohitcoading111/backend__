@@ -36,7 +36,7 @@ import IndependentInstructorDashboard from
 import ProtectedRoute from "../routes/ProtectedRoute.jsx";
 import PublicOnlyRoute from "../routes/PublicOnlyRoute.jsx";
 
-
+import ForgotPassword from "../features/auth/components/ForgotPassword.jsx";
 
 
 
@@ -202,5 +202,10 @@ export const router = createBrowserRouter([
       },
     ],
   },
+
+  {
+  path: "/forgot-password",
+  element: <ForgotPassword />,
+},
 
 ]);
