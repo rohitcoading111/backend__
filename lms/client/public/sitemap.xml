@@ -3,20 +3,34 @@
 
   <url>
     <loc>https://learnhubcloud.in/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
-
-  <url>
-    <loc>https://learnhubcloud.in/courses</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
   </url>
 
   <url>
     <loc>https://learnhubcloud.in/about</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://learnhubcloud.in/contact</loc>
+  </url>
+
+  <url>
+    <loc>https://learnhubcloud.in/how-it-works</loc>
+  </url>
+
+  <url>
+    <loc>https://learnhubcloud.in/student-guide</loc>
+  </url>
+
+  <url>
+    <loc>https://learnhubcloud.in/instructor-guide</loc>
+  </url>
+
+  <url>
+    <loc>https://learnhubcloud.in/organization-admin-guide</loc>
+  </url>
+
+  <url>
+    <loc>https://learnhubcloud.in/super-admin-guide</loc>
   </url>
 
 </urlset>
