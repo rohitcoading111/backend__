@@ -209,7 +209,7 @@
   max-width: 820px;
   border: 1px solid rgba(255,255,255,0.18);
   border-radius: 20px;
-  overflow: visible;
+  overflow: hidden;
   background: #090909;
   box-shadow:
     0 0 10px rgba(255,255,255,0.07),
