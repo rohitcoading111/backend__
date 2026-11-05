@@ -38,15 +38,15 @@ import PublicOnlyRoute from "../routes/PublicOnlyRoute.jsx";
 
 import ForgotPassword from "../features/auth/components/ForgotPassword.jsx";
 
-
+import HomePage from "../features/allPages/HomePage.jsx";
 
 export const router = createBrowserRouter([
 
   // Root
-  {
-    path: "/",
-    element: <Navigate to="/login" replace />,
-  },
+{
+  path: "/",
+  element: <HomePage />,
+},
 
 
   // Public Authentication Routes
