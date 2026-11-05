@@ -244,7 +244,7 @@ const existingUser = await userModel
   .select("+password");
 
 
-if (!password || !existingUser.password) {
+if (!existingUser || !password || !existingUser.password) {
   throw new Error("Invalid email or password");
 }
 

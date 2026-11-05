@@ -67,6 +67,87 @@
   opacity: 1;
 }
 
+.learnhub-about-feature-row {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.learnhub-home .learnhub-about-feature-row::before {
+  content: none;
+}
+
+.learnhub-home .learnhub-about-feature-row:hover {
+  transform: none;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+.learnhub-about-feature {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-color: rgba(255, 255, 255, 0.13);
+  background:
+    radial-gradient(ellipse at 82% 0%, rgba(255, 255, 255, 0.045), transparent 42%),
+    linear-gradient(145deg, #151515, #090909 74%);
+  box-shadow:
+    0 0 14px rgba(255, 255, 255, 0.035),
+    0 18px 38px rgba(0, 0, 0, 0.32);
+  transition:
+    transform 300ms ease,
+    border-color 300ms ease,
+    box-shadow 300ms ease;
+}
+
+.learnhub-about-feature::after {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--learnhub-home-glow-angle),
+    transparent 0deg,
+    transparent 275deg,
+    rgba(255, 255, 255, 0.18) 300deg,
+    rgba(255, 255, 255, 0.9) 325deg,
+    rgba(190, 190, 190, 0.42) 340deg,
+    transparent 360deg
+  );
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  transition: opacity 250ms ease;
+}
+
+.learnhub-about-feature:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.38);
+  box-shadow:
+    0 0 12px rgba(255, 255, 255, 0.15),
+    0 0 30px rgba(255, 255, 255, 0.075),
+    0 20px 42px rgba(0, 0, 0, 0.4);
+}
+
+.learnhub-about-feature:hover::after {
+  opacity: 1;
+  animation: learnhub-home-lightning 3s linear infinite;
+}
+
+.learnhub-about-cta-panel {
+  border-color: rgba(255, 255, 255, 0.16);
+  background:
+    radial-gradient(ellipse at 80% 0%, rgba(255, 255, 255, 0.06), transparent 42%),
+    linear-gradient(145deg, #151515, #090909 74%);
+}
+
 .learnhub-home [class*="text-cyan-"] {
   color: #c4c4c4 !important;
 }
@@ -254,6 +335,8 @@
   .learnhub-about-link,
   .learnhub-home article::before,
   .learnhub-home details::before,
+  .learnhub-about-feature,
+  .learnhub-about-feature::after,
   .learnhub-home-hero::after {
     transition: none;
   }
