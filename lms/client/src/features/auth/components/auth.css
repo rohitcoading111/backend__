@@ -619,6 +619,106 @@
   }
 }
 
+.auth-page-with-navbar {
+  display: block;
+  padding: 0;
+}
+
+.auth-layout-content {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-layout-content-with-navbar {
+  min-height: calc(100vh - 76px);
+  padding: 14px;
+}
+
+.auth-topbar {
+  position: relative;
+  z-index: 5;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(8, 8, 8, 0.88);
+  backdrop-filter: blur(18px);
+}
+
+.auth-topbar-inner {
+  width: min(100%, 1280px);
+  min-height: 76px;
+  margin: 0 auto;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.auth-topbar-brand {
+  color: #fff;
+  font-size: 1.35rem;
+  font-weight: 750;
+  letter-spacing: -0.04em;
+}
+
+.auth-topbar-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.auth-topbar-link {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid transparent;
+  border-radius: 0.7rem;
+  padding: 9px 13px;
+  color: #c4c4c4;
+  font-size: 0.875rem;
+  font-weight: 550;
+  transition:
+    color 200ms ease,
+    border-color 200ms ease,
+    background 200ms ease,
+    box-shadow 200ms ease,
+    transform 200ms ease;
+}
+
+.auth-topbar-link:hover,
+.auth-topbar-link:focus-visible {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.055);
+  color: #fff;
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.07);
+}
+
+@media (max-width: 640px) {
+  .auth-layout-content-with-navbar {
+    min-height: calc(100vh - 66px);
+    padding: 12px;
+  }
+
+  .auth-topbar-inner {
+    min-height: 66px;
+    padding: 10px 14px;
+    gap: 8px;
+  }
+
+  .auth-topbar-brand {
+    font-size: 1.1rem;
+  }
+
+  .auth-topbar-links {
+    gap: 2px;
+  }
+
+  .auth-topbar-link {
+    padding: 8px;
+    font-size: 0.75rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .auth-main-card::before,
   .auth-dropdown-menu {
@@ -841,6 +941,10 @@
 
   .auth-main-card:hover {
     transform: none;
+  }
+
+  .auth-topbar-link {
+    transition: none;
   }
 }
 

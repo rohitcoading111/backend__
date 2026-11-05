@@ -154,42 +154,47 @@ export default function HomePage() {
       <header className="sticky top-0 z-50 border-b border-white/10 bg-[#080d18]/90 backdrop-blur-xl">
         <nav
           aria-label="Main navigation"
-          className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8"
+          className="learnhub-home-nav mx-auto grid max-w-7xl items-center px-5 py-4 lg:px-8"
         >
           <Link to="/" className="text-2xl font-bold tracking-tight">
             Learn<span className="text-cyan-400">Hub</span>
           </Link>
 
-          <Link to="/about" className="learnhub-about-link">
-            About
-          </Link>
-
-          <div className="hidden items-center gap-8 text-sm text-slate-300 md:flex">
-            <a href="#features" className="transition hover:text-cyan-400">
+          <div className="learnhub-home-section-links hidden items-center text-sm md:flex">
+            <a href="#features" className="learnhub-home-section-link">
               Features
             </a>
-            <a href="#courses" className="transition hover:text-cyan-400">
+            <a href="#courses" className="learnhub-home-section-link">
               Learning
             </a>
-            <a href="#how-it-works" className="transition hover:text-cyan-400">
+            <a href="#how-it-works" className="learnhub-home-section-link">
               How It Works
             </a>
-            <a href="#faq" className="transition hover:text-cyan-400">
+            <a href="#faq" className="learnhub-home-section-link">
               FAQs
             </a>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="learnhub-home-nav-actions flex items-center">
+            <div className="learnhub-home-page-links flex items-center">
+              <Link to="/about" className="learnhub-about-link">
+                About
+              </Link>
+              <Link to="/contact" className="learnhub-about-link">
+                Contact
+              </Link>
+            </div>
+
             <Link
               to="/login"
-              className="hidden rounded-lg px-4 py-2 text-sm font-medium text-slate-200 transition hover:text-cyan-400 sm:block"
+              className="learnhub-about-link hidden sm:block"
             >
               Login
             </Link>
 
             <Link
               to="/register"
-              className="rounded-lg bg-cyan-400 px-4 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-cyan-300"
+              className="learnhub-about-link"
             >
               Get Started
             </Link>

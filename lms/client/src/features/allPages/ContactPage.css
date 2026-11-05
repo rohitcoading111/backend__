@@ -1,0 +1,99 @@
+.learnhub-contact .learnhub-about-link {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 0.65rem;
+  padding: 0.55rem 0.9rem;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.08), transparent 72%),
+    #171717;
+  color: #e5e5e5;
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow:
+    0 0 12px rgba(255, 255, 255, 0.04),
+    inset 0 0 16px rgba(255, 255, 255, 0.02);
+  transition:
+    transform 250ms ease,
+    border-color 250ms ease,
+    background 250ms ease,
+    box-shadow 250ms ease,
+    color 250ms ease;
+}
+
+.learnhub-contact .learnhub-about-link:hover,
+.learnhub-contact .learnhub-about-link:focus-visible {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.65);
+  background-color: #242424;
+  color: #fff;
+  box-shadow:
+    0 0 10px rgba(255, 255, 255, 0.2),
+    0 0 24px rgba(255, 255, 255, 0.1);
+}
+
+.learnhub-contact .contact-panel {
+  border-color: rgba(255, 255, 255, 0.14);
+  background:
+    radial-gradient(ellipse at 82% 0%, rgba(255, 255, 255, 0.05), transparent 42%),
+    linear-gradient(145deg, #151515, #0b0b0b 74%);
+  box-shadow:
+    0 0 14px rgba(255, 255, 255, 0.035),
+    0 16px 36px rgba(0, 0, 0, 0.28);
+}
+
+.learnhub-contact .contact-info-card {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.learnhub-contact .contact-field {
+  border-color: rgba(255, 255, 255, 0.13);
+  background: #0c0c0c;
+}
+
+.learnhub-contact .contact-field:focus {
+  border-color: rgba(255, 255, 255, 0.52);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.07);
+}
+
+.learnhub-contact .contact-social-card {
+  border-color: rgba(255, 255, 255, 0.12);
+  background:
+    radial-gradient(ellipse at 80% 0%, rgba(255, 255, 255, 0.045), transparent 45%),
+    linear-gradient(145deg, #151515, #0b0b0b 74%);
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.025);
+}
+
+.learnhub-contact .contact-social-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.38);
+  background: #151515;
+  box-shadow:
+    0 0 12px rgba(255, 255, 255, 0.14),
+    0 0 28px rgba(255, 255, 255, 0.075);
+}
+
+.learnhub-contact .contact-social-card > span:first-child {
+  background: #222;
+  color: #ddd;
+}
+
+.learnhub-contact .contact-social-card:hover > span:first-child {
+  background: #303030;
+  color: #fff;
+}
+
+.learnhub-contact a[class*="bg-cyan-"] {
+  border-color: rgba(255, 255, 255, 0.3);
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.09), transparent 72%),
+    #191919;
+  color: #f5f5f5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .learnhub-contact .contact-social-card {
+    transition: none;
+  }
+}

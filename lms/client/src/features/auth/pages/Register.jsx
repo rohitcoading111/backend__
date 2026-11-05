@@ -7,6 +7,7 @@ import RegisterForm from "../components/RegisterForm";
 function Register() {
   return (
     <AuthLayout
+      navbarPage="register"
       eyebrow="Get started"
       title="Create your account"
       description="Join LearnHub, explore new skills, and build your future."

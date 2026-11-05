@@ -9,16 +9,12 @@ export default function AboutNavbar() {
           Learn<span className="text-cyan-400">Hub</span>
         </Link>
 
-        <div className="hidden items-center gap-8 text-sm text-slate-300 md:flex">
-          <Link to="/" className="hover:text-cyan-400">
+        <div className="hidden items-center gap-2 text-sm text-slate-300 md:flex">
+          <Link to="/" className="learnhub-about-link">
             Home
           </Link>
 
-          <Link to="/about" className="text-cyan-400">
-            About
-          </Link>
-
-          <Link to="/contact" className="hover:text-cyan-400">
+          <Link to="/contact" className="learnhub-about-link">
             Contact
           </Link>
         </div>
@@ -26,14 +22,14 @@ export default function AboutNavbar() {
         <div className="flex items-center gap-3">
           <Link
             to="/login"
-            className="hidden text-sm text-slate-300 hover:text-cyan-400 sm:block"
+            className="learnhub-about-link hidden sm:block"
           >
             Login
           </Link>
 
           <Link
             to="/register"
-            className="rounded-lg bg-cyan-400 px-4 py-2.5 text-sm font-bold text-slate-950 hover:bg-cyan-300"
+            className="learnhub-about-link"
           >
             Get Started
           </Link>

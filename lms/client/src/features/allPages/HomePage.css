@@ -16,6 +16,63 @@
   background: rgba(8, 8, 8, 0.9);
 }
 
+.learnhub-home-nav {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  column-gap: clamp(1rem, 3vw, 2.75rem);
+}
+
+.learnhub-home-section-links {
+  justify-content: flex-start;
+  gap: clamp(0.9rem, 2vw, 1.8rem);
+}
+
+.learnhub-home-section-link {
+  position: relative;
+  padding: 0.6rem 0;
+  color: #a3a3a3;
+  transition: color 200ms ease;
+}
+
+.learnhub-home-section-link::after {
+  position: absolute;
+  right: 0;
+  bottom: 0.2rem;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e5e5e5, transparent);
+  content: "";
+  opacity: 0;
+  transform: scaleX(0.45);
+  transition:
+    opacity 200ms ease,
+    transform 200ms ease;
+}
+
+.learnhub-home-section-link:hover,
+.learnhub-home-section-link:focus-visible {
+  color: #fff;
+}
+
+.learnhub-home-section-link:hover::after,
+.learnhub-home-section-link:focus-visible::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.learnhub-home-nav-actions,
+.learnhub-home-page-links {
+  gap: 0.55rem;
+}
+
+.learnhub-home-nav-actions {
+  justify-content: flex-end;
+  gap: 0.8rem;
+}
+
+.learnhub-home-nav-actions .learnhub-about-link {
+  white-space: nowrap;
+}
+
 .learnhub-home section[id],
 .learnhub-home footer {
   border-color: rgba(255, 255, 255, 0.1);
@@ -282,6 +339,7 @@
   padding: 0.55rem 0.9rem;
   font-size: 0.875rem;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .learnhub-about-link.is-active {
@@ -327,6 +385,51 @@
   }
 }
 
+@media (max-width: 900px) {
+  .learnhub-home-nav {
+    column-gap: 1rem;
+  }
+
+  .learnhub-home-section-links {
+    gap: 0.8rem;
+  }
+
+  .learnhub-home-nav-actions {
+    gap: 0.45rem;
+  }
+
+  .learnhub-home-page-links {
+    gap: 0.35rem;
+  }
+
+  .learnhub-home-nav-actions .learnhub-about-link {
+    padding-right: 0.65rem;
+    padding-left: 0.65rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .learnhub-home-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .learnhub-home-nav-actions {
+    gap: 0.35rem;
+  }
+
+  .learnhub-home-page-links {
+    gap: 0.3rem;
+  }
+
+  .learnhub-home-nav-actions .learnhub-about-link {
+    padding: 0.45rem 0.55rem;
+    font-size: 0.72rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .learnhub-home article,
   .learnhub-home details,
@@ -338,6 +441,11 @@
   .learnhub-about-feature,
   .learnhub-about-feature::after,
   .learnhub-home-hero::after {
+    transition: none;
+  }
+
+  .learnhub-home-section-link,
+  .learnhub-home-section-link::after {
     transition: none;
   }
 

@@ -40,7 +40,7 @@ import ForgotPassword from "../features/auth/components/ForgotPassword.jsx";
 
 import HomePage from "../features/allPages/HomePage.jsx";
 import AboutPage from "../features/allPages/AboutPage.jsx";
-
+import ContactPage from "../features/allPages/ContactPage.jsx";
 export const router = createBrowserRouter([
 
   // Root
@@ -52,6 +52,10 @@ export const router = createBrowserRouter([
 {
   path: "/about",
   element: <AboutPage />,
+},
+{
+  path: "/contact",
+  element: <ContactPage />,
 },
 
 

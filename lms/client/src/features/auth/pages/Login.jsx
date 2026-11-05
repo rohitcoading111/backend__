@@ -13,6 +13,7 @@ function Login() {
 
   return (
     <AuthLayout
+      navbarPage="login"
       eyebrow="Welcome back"
       title="Login to your account"
       description="Enter your credentials to continue learning."
