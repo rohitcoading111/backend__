@@ -13,6 +13,7 @@ import {
 import { useNavigate } from "react-router-dom";
 
 import CourseCard from "../components/CourseCard";
+import "./CourseCatalog.css";
 import { getPublishedCourses } from "../services/courseService";
 import {
   createPayment,
@@ -317,18 +318,18 @@ function CourseCatalog() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f7f7f5] text-[#171717] antialiased">
+    <div className="course-catalog-page min-h-screen antialiased">
       {/* HEADER */}
-      <header className="sticky top-0 z-30 border-b border-black/[0.07] bg-white/90 backdrop-blur-xl">
+      <header className="course-catalog-header sticky top-0 z-30 border-b backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
           {/* LOGO */}
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#171717] text-white">
+            <div className="course-catalog-logo flex h-10 w-10 items-center justify-center rounded-xl">
               <GraduationCap size={23} />
             </div>
 
             <div>
-              <p className="text-lg font-bold tracking-tight">
+              <p className="text-lg font-bold tracking-tight text-white">
                 LearnHub
               </p>
 
@@ -340,7 +341,7 @@ function CourseCatalog() {
 
           {/* HEADER ACTIONS */}
           <div className="flex items-center gap-2">
-            <div className="hidden items-center gap-2 rounded-full border border-black/[0.07] bg-neutral-50 px-4 py-2 text-xs font-medium text-neutral-600 sm:flex">
+            <div className="course-catalog-store hidden items-center gap-2 rounded-full border px-4 py-2 text-xs font-medium sm:flex">
               <ShoppingBag size={15} />
               Course Store
             </div>
@@ -348,7 +349,7 @@ function CourseCatalog() {
             <button
               type="button"
               onClick={() => navigate("/dashboard")}
-              className="group inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-medium text-white transition duration-300 hover:bg-neutral-800"
+              className="course-catalog-dashboard group inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium text-white transition duration-300"
             >
               <ArrowLeft
                 size={16}
@@ -362,7 +363,7 @@ function CourseCatalog() {
 
       <main className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8 sm:py-12">
         {/* HERO SECTION */}
-        <section className="relative isolate overflow-hidden rounded-[28px] bg-[#101010] px-6 py-12 text-white sm:px-10 sm:py-16 lg:px-14">
+        <section className="course-catalog-hero relative isolate overflow-hidden rounded-[28px] px-6 py-12 text-white sm:px-10 sm:py-16 lg:px-14">
           <div className="pointer-events-none absolute -right-20 -top-28 h-80 w-80 rounded-full border border-white/[0.08]" />
 
           <div className="pointer-events-none absolute -right-10 -top-16 h-60 w-60 rounded-full border border-white/[0.08]" />
@@ -395,7 +396,7 @@ function CourseCatalog() {
                   block: "start",
                 })
               }
-              className="mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-neutral-200"
+              className="course-catalog-explore mt-8 inline-flex items-center gap-2 rounded-xl border px-5 py-3 text-sm font-semibold text-white transition"
             >
               Explore courses
               <ArrowUpRight size={16} />
@@ -424,7 +425,7 @@ function CourseCatalog() {
             </div>
 
             {/* SEARCH */}
-            <label className="flex w-full items-center gap-3 rounded-xl border border-black/[0.08] bg-white px-4 py-3 transition focus-within:border-black sm:max-w-sm">
+            <label className="course-catalog-search flex w-full items-center gap-3 rounded-xl border px-4 py-3 transition sm:max-w-sm">
               <Search size={18} className="shrink-0 text-neutral-400" />
 
               <input
@@ -433,14 +434,14 @@ function CourseCatalog() {
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Search courses..."
                 aria-label="Search online courses"
-                className="w-full bg-transparent text-sm outline-none placeholder:text-neutral-400"
+                className="w-full bg-transparent text-sm text-white outline-none placeholder:text-neutral-500"
               />
 
               {search && (
                 <button
                   type="button"
                   onClick={() => setSearch("")}
-                  className="text-xs text-neutral-400 hover:text-black"
+                  className="text-xs text-neutral-400 hover:text-white"
                 >
                   Clear
                 </button>
@@ -480,13 +481,13 @@ function CourseCatalog() {
               <p className="text-sm">Loading courses...</p>
             </div>
           ) : error ? (
-            <div className="mt-8 rounded-2xl border border-black/[0.08] bg-white px-6 py-16 text-center">
+            <div className="course-catalog-message mt-8 rounded-2xl border px-6 py-16 text-center">
               <p className="text-sm text-red-600">{error}</p>
 
               <button
                 type="button"
                 onClick={fetchCourses}
-                className="mt-5 inline-flex items-center gap-2 rounded-xl bg-black px-5 py-3 text-sm font-medium text-white hover:bg-neutral-800"
+                className="course-catalog-retry mt-5 inline-flex items-center gap-2 rounded-xl border px-5 py-3 text-sm font-medium text-white transition"
               >
                 <RefreshCw size={15} />
                 Try again
@@ -513,8 +514,8 @@ function CourseCatalog() {
               })}
             </div>
           ) : (
-            <div className="mt-8 rounded-2xl border border-dashed border-black/15 bg-white px-6 py-20 text-center">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f7f7f5]">
+            <div className="course-catalog-message mt-8 rounded-2xl border border-dashed px-6 py-20 text-center">
+              <div className="course-catalog-empty-icon mx-auto flex h-14 w-14 items-center justify-center rounded-2xl">
                 <BookOpen size={25} strokeWidth={1.5} />
               </div>
 
@@ -534,7 +535,7 @@ function CourseCatalog() {
         </section>
 
         {/* FOOTER */}
-        <footer className="mt-16 border-t border-black/[0.07] py-7 text-center text-xs text-neutral-400">
+        <footer className="course-catalog-footer mt-16 border-t py-7 text-center text-xs text-neutral-400">
           © {new Date().getFullYear()} LearnHub · Your learning journey.
         </footer>
       </main>
