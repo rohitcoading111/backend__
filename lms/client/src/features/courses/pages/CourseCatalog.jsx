@@ -20,6 +20,14 @@ import {
 } from "../../payments/services/paymentService";
 import { getMyEnrollments } from "../../enrollments/services/enrollmentService";
 
+const SEO_TITLE =
+  "Online Courses | Explore Expert-Led Courses – LearnHub";
+
+const SEO_DESCRIPTION =
+  "Explore online courses on LearnHub. Discover expert-led courses, develop practical skills, learn from instructors, and advance your knowledge.";
+
+const CANONICAL_URL = "https://learnhubcloud.in/courses";
+
 function CourseCatalog() {
   const navigate = useNavigate();
 
@@ -32,6 +40,123 @@ function CourseCatalog() {
   const [error, setError] = useState("");
   const [purchaseError, setPurchaseError] = useState("");
   const [buyingCourseId, setBuyingCourseId] = useState(null);
+
+  // SEO: Set page-specific metadata
+  useEffect(() => {
+    document.title = SEO_TITLE;
+
+    let descriptionTag = document.querySelector(
+      'meta[name="description"]'
+    );
+
+    if (!descriptionTag) {
+      descriptionTag = document.createElement("meta");
+      descriptionTag.setAttribute("name", "description");
+      document.head.appendChild(descriptionTag);
+    }
+
+    descriptionTag.setAttribute("content", SEO_DESCRIPTION);
+
+    let canonicalTag = document.querySelector(
+      'link[rel="canonical"]'
+    );
+
+    if (!canonicalTag) {
+      canonicalTag = document.createElement("link");
+      canonicalTag.setAttribute("rel", "canonical");
+      document.head.appendChild(canonicalTag);
+    }
+
+    canonicalTag.setAttribute("href", CANONICAL_URL);
+
+    // Open Graph metadata
+    const setMeta = (property, content, attribute = "property") => {
+      let tag = document.querySelector(
+        `meta[${attribute}="${property}"]`
+      );
+
+      if (!tag) {
+        tag = document.createElement("meta");
+        tag.setAttribute(attribute, property);
+        document.head.appendChild(tag);
+      }
+
+      tag.setAttribute("content", content);
+    };
+
+    setMeta("og:type", "website");
+    setMeta("og:site_name", "LearnHub");
+    setMeta("og:title", SEO_TITLE);
+    setMeta("og:description", SEO_DESCRIPTION);
+    setMeta("og:url", CANONICAL_URL);
+    setMeta(
+      "og:image",
+      "https://learnhubcloud.in/og-image.png"
+    );
+
+    setMeta("twitter:card", "summary_large_image", "name");
+    setMeta("twitter:title", SEO_TITLE, "name");
+    setMeta("twitter:description", SEO_DESCRIPTION, "name");
+    setMeta(
+      "twitter:image",
+      "https://learnhubcloud.in/og-image.png",
+      "name"
+    );
+  }, []);
+
+  // SEO: Structured data for the course listing
+  useEffect(() => {
+    if (!courses.length) return;
+
+    const structuredData = {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: "Online Courses – LearnHub",
+      description: SEO_DESCRIPTION,
+      url: CANONICAL_URL,
+      isPartOf: {
+        "@type": "WebSite",
+        name: "LearnHub",
+        url: "https://learnhubcloud.in/",
+      },
+      mainEntity: {
+        "@type": "ItemList",
+        name: "Available Online Courses",
+        numberOfItems: courses.length,
+        itemListElement: courses.map((course, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          item: {
+            "@type": "Course",
+            name: course.title,
+            description: course.description || "",
+            provider: {
+              "@type": "Organization",
+              name: "LearnHub",
+              sameAs: "https://learnhubcloud.in/",
+            },
+          },
+        })),
+      },
+    };
+
+    let script = document.getElementById(
+      "learnhub-course-structured-data"
+    );
+
+    if (!script) {
+      script = document.createElement("script");
+      script.id = "learnhub-course-structured-data";
+      script.type = "application/ld+json";
+      document.head.appendChild(script);
+    }
+
+    script.textContent = JSON.stringify(structuredData);
+
+    return () => {
+      script?.remove();
+    };
+  }, [courses]);
 
   // Fetch published courses
   const fetchCourses = async () => {
@@ -193,11 +318,9 @@ function CourseCatalog() {
 
   return (
     <div className="min-h-screen bg-[#f7f7f5] text-[#171717] antialiased">
-
       {/* HEADER */}
       <header className="sticky top-0 z-30 border-b border-black/[0.07] bg-white/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
-
           {/* LOGO */}
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#171717] text-white">
@@ -205,9 +328,9 @@ function CourseCatalog() {
             </div>
 
             <div>
-              <h1 className="text-lg font-bold tracking-tight">
+              <p className="text-lg font-bold tracking-tight">
                 LearnHub
-              </h1>
+              </p>
 
               <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-neutral-400">
                 Learn without limits
@@ -217,14 +340,11 @@ function CourseCatalog() {
 
           {/* HEADER ACTIONS */}
           <div className="flex items-center gap-2">
-
-            {/* COURSE STORE */}
             <div className="hidden items-center gap-2 rounded-full border border-black/[0.07] bg-neutral-50 px-4 py-2 text-xs font-medium text-neutral-600 sm:flex">
               <ShoppingBag size={15} />
               Course Store
             </div>
 
-            {/* DASHBOARD BUTTON */}
             <button
               type="button"
               onClick={() => navigate("/dashboard")}
@@ -236,16 +356,13 @@ function CourseCatalog() {
               />
               Dashboard
             </button>
-
           </div>
         </div>
       </header>
 
       <main className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8 sm:py-12">
-
         {/* HERO SECTION */}
         <section className="relative isolate overflow-hidden rounded-[28px] bg-[#101010] px-6 py-12 text-white sm:px-10 sm:py-16 lg:px-14">
-
           <div className="pointer-events-none absolute -right-20 -top-28 h-80 w-80 rounded-full border border-white/[0.08]" />
 
           <div className="pointer-events-none absolute -right-10 -top-16 h-60 w-60 rounded-full border border-white/[0.08]" />
@@ -258,16 +375,16 @@ function CourseCatalog() {
               Your next chapter starts here
             </span>
 
-            <h2 className="mt-7 text-4xl font-semibold leading-[1.1] tracking-[-0.05em] sm:text-5xl lg:text-6xl">
-              Invest in your
+            <h1 className="mt-7 text-4xl font-semibold leading-[1.1] tracking-[-0.05em] sm:text-5xl lg:text-6xl">
+              Explore online courses
               <span className="block text-neutral-400">
-                next big skill.
+                and build your next big skill.
               </span>
-            </h2>
+            </h1>
 
             <p className="mt-6 max-w-lg text-sm leading-7 text-neutral-400 sm:text-base">
-              Explore expert-led courses, develop practical skills
-              and move closer to your goals with LearnHub.
+              Discover expert-led online courses, develop practical
+              skills and move closer to your goals with LearnHub.
             </p>
 
             <button
@@ -292,7 +409,6 @@ function CourseCatalog() {
           className="scroll-mt-24 mt-12 sm:mt-16"
         >
           <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
-
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
                 Explore the library
@@ -303,7 +419,7 @@ function CourseCatalog() {
               </h2>
 
               <p className="mt-2 text-sm text-neutral-500">
-                Choose a course that fits your learning goals.
+                Choose an online course that fits your learning goals.
               </p>
             </div>
 
@@ -316,6 +432,7 @@ function CourseCatalog() {
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Search courses..."
+                aria-label="Search online courses"
                 className="w-full bg-transparent text-sm outline-none placeholder:text-neutral-400"
               />
 
@@ -420,7 +537,6 @@ function CourseCatalog() {
         <footer className="mt-16 border-t border-black/[0.07] py-7 text-center text-xs text-neutral-400">
           © {new Date().getFullYear()} LearnHub · Your learning journey.
         </footer>
-
       </main>
     </div>
   );

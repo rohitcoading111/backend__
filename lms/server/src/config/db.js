@@ -1,14 +1,13 @@
 import mongoose from "mongoose";
 import config from "./config.js";
 
-const db = async ()=>{
-     try {
-      await mongoose.connect(config.MONGO_URI)
-      console.log("db has been connected");
-      
-     } catch (error) {
-         console.log(error);
-     }
-}
+const db = async () => {
+  if (!config.MONGO_URI) {
+    throw new Error("MONGO_URI is required to connect to MongoDB");
+  }
 
-export default db
+  await mongoose.connect(config.MONGO_URI);
+  console.log("db has been connected");
+};
+
+export default db;
