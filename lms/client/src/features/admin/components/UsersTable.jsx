@@ -142,7 +142,12 @@ function UsersTable({ users = [], onAdminSuspended }) {
       ) : (
 
         /* Table */
-        <div className="overflow-x-auto">
+        <div
+          className="max-w-full overflow-x-auto overscroll-x-contain"
+          role="region"
+          aria-label="Organization administrator accounts"
+          tabIndex={0}
+        >
           <table className="w-full min-w-[950px] text-left">
 
             <thead>

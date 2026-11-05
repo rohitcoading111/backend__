@@ -34,7 +34,7 @@ function ControlButton({
       disabled={disabled}
       aria-label={ariaLabel || label}
       aria-pressed={pressed}
-      className={`inline-flex items-center justify-center gap-2 rounded-full px-4 py-3 text-sm font-medium transition-all duration-300 active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:active:scale-100 sm:px-5 ${focusRing} ${
+      className={`inline-flex items-center justify-center gap-2 rounded-full px-3 py-2.5 text-sm font-medium transition-all duration-300 active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:active:scale-100 sm:px-5 sm:py-3 ${focusRing} ${
         highlighted
           ? "bg-white text-black hover:bg-white/85"
           : "border border-white/20 text-white hover:border-white hover:bg-white/10"
@@ -263,8 +263,8 @@ function LiveRoom() {
       </div>
 
       {/* Floating controls */}
-      <div className="pointer-events-none fixed inset-x-0 bottom-6 z-30 flex justify-center px-4">
-        <div className="pointer-events-auto flex flex-wrap items-center justify-center gap-2 rounded-full border border-white/15 bg-black/70 p-2 shadow-[0_24px_60px_-20px_rgba(255,255,255,0.18)] backdrop-blur-xl">
+      <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30 flex justify-center px-2 sm:bottom-6 sm:px-4">
+        <div className="pointer-events-auto flex flex-wrap items-center justify-center gap-1 rounded-full border border-white/15 bg-black/70 p-1.5 shadow-[0_24px_60px_-20px_rgba(255,255,255,0.18)] backdrop-blur-xl sm:gap-2 sm:p-2">
           <ControlButton
             onClick={toggleMic}
             disabled={!isConnected}
@@ -300,7 +300,7 @@ function LiveRoom() {
             type="button"
             onClick={handleEndLive}
             disabled={!isConnected || isEnding}
-            className={`inline-flex items-center justify-center gap-2 rounded-full border border-white px-4 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-white hover:text-black active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:active:scale-100 sm:px-5 ${focusRing}`}
+            className={`inline-flex items-center justify-center gap-2 rounded-full border border-white px-3 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white hover:text-black active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:active:scale-100 sm:px-5 sm:py-3 ${focusRing}`}
           >
             <PhoneOff size={18} />
             <span className="hidden sm:inline">

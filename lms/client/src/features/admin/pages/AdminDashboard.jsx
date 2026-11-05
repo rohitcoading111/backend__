@@ -58,7 +58,7 @@ function AdminDashboard() {
       <div className="mx-auto max-w-[1440px]">
 
         {/* Header */}
-        <header className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 px-6 py-8 text-white shadow-xl sm:px-9 sm:py-10">
+        <header className="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 px-5 py-6 text-white shadow-xl sm:rounded-[28px] sm:px-9 sm:py-10">
 
           <div className="pointer-events-none absolute -right-20 -top-32 h-80 w-80 rounded-full bg-indigo-500/20 blur-3xl" />
 
@@ -73,7 +73,7 @@ function AdminDashboard() {
                 </span>
               </div>
 
-              <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+              <h1 className="text-2xl font-bold tracking-tight text-white sm:text-4xl">
                 Super Admin Dashboard
               </h1>
 
@@ -84,9 +84,9 @@ function AdminDashboard() {
             </div>
 
             {/* Header Actions */}
-            <div className="relative flex flex-wrap items-center gap-3">
+            <div className="relative flex w-full flex-wrap items-center gap-2 sm:w-auto sm:gap-3">
 
-              <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+              <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-3 sm:flex-none sm:px-4">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/20">
                   <ShieldCheck size={17} className="text-indigo-300" />
                 </div>
@@ -106,7 +106,7 @@ function AdminDashboard() {
                 type="button"
                 onClick={fetchUsers}
                 disabled={isLoadingUsers || isLoggingOut}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-indigo-50 disabled:opacity-50"
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-white px-3 py-3 text-sm font-semibold text-slate-900 transition hover:bg-indigo-50 disabled:opacity-50 sm:flex-none sm:px-4"
               >
                 <RefreshCw
                   size={16}
@@ -121,7 +121,7 @@ function AdminDashboard() {
                 type="button"
                 onClick={handleLogout}
                 disabled={isLoggingOut}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-200 transition hover:border-red-400/50 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-red-400/30 bg-red-500/10 px-3 py-3 text-sm font-semibold text-red-200 transition hover:border-red-400/50 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none sm:px-4"
               >
                 <LogOut size={16} />
 

@@ -117,7 +117,7 @@ function LiveClassesPage() {
     return (
       <main
         ref={classroomRef}
-        className="flex h-screen min-h-0 w-full flex-col overflow-hidden bg-black text-white"
+        className="flex h-screen min-h-0 w-full flex-col overflow-hidden bg-black text-white supports-[height:100dvh]:h-[100dvh]"
       >
         <header className="flex shrink-0 items-center justify-between border-b border-white/10 bg-[#080808] px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">

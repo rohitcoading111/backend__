@@ -87,7 +87,7 @@ const organizationName = organization?.name || "Your Organization";
       <div className="mx-auto max-w-[1440px]">
 
         {/* Header */}
-        <header className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 px-6 py-8 text-white shadow-xl sm:px-9 sm:py-10">
+        <header className="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 px-5 py-6 text-white shadow-xl sm:rounded-[28px] sm:px-9 sm:py-10">
 
           <div className="pointer-events-none absolute -right-20 -top-32 h-80 w-80 rounded-full bg-indigo-500/20 blur-3xl" />
 
@@ -102,7 +102,7 @@ const organizationName = organization?.name || "Your Organization";
                 </span>
               </div>
 
-              <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+              <h1 className="text-2xl font-bold tracking-tight text-white sm:text-4xl">
                 Organization Dashboard
               </h1>
 
@@ -133,13 +133,13 @@ const organizationName = organization?.name || "Your Organization";
             </div>
 
             {/* Actions */}
-            <div className="relative flex flex-wrap items-center gap-3">
+            <div className="relative flex w-full flex-wrap items-center gap-2 sm:w-auto sm:gap-3">
 
               <button
                 type="button"
                 onClick={fetchInstructors}
                 disabled={isLoading || isLoggingOut}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-indigo-50 disabled:opacity-50"
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-white px-3 py-3 text-sm font-semibold text-slate-900 transition hover:bg-indigo-50 disabled:opacity-50 sm:flex-none sm:px-4"
               >
                 <RefreshCw
                   size={16}
@@ -153,7 +153,7 @@ const organizationName = organization?.name || "Your Organization";
                 type="button"
                 onClick={handleLogout}
                 disabled={isLoggingOut}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-200 transition hover:bg-red-500/20 disabled:opacity-50"
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-red-400/30 bg-red-500/10 px-3 py-3 text-sm font-semibold text-red-200 transition hover:bg-red-500/20 disabled:opacity-50 sm:flex-none sm:px-4"
               >
                 <LogOut size={16} />
 
@@ -231,7 +231,7 @@ const organizationName = organization?.name || "Your Organization";
     </section>
 
         {/* Stats */}
-        <section className="mt-7 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        <section className="mt-7 grid gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3">
 
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between">

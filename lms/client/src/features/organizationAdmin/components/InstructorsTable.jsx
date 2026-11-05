@@ -135,7 +135,12 @@ function InstructorsTable({
         </div>
       ) : (
         /* Instructor Table */
-        <div className="overflow-x-auto">
+        <div
+          className="max-w-full overflow-x-auto overscroll-x-contain"
+          role="region"
+          aria-label="Organization instructors"
+          tabIndex={0}
+        >
           <table className="w-full min-w-[780px] text-left">
 
             <thead>
@@ -274,7 +279,7 @@ function InstructorsTable({
 
       {/* Footer */}
       {!isLoading && instructors.length > 0 && (
-        <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/50 px-6 py-4">
+        <div className="flex flex-col justify-between gap-2 border-t border-slate-100 bg-slate-50/50 px-5 py-4 sm:flex-row sm:items-center sm:px-6">
           <p className="text-xs text-slate-400">
             Showing {instructors.length} organization instructors
           </p>

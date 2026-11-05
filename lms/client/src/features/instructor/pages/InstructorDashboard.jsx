@@ -372,8 +372,8 @@ export default function InstructorDashboard() {
       <div className="min-h-screen lg:pl-64">
 
         {/* Header */}
-        <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-white/10 bg-black/70 px-5 backdrop-blur-xl sm:px-8">
-          <div className="flex items-center gap-3">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-white/10 bg-black/70 px-4 backdrop-blur-xl sm:h-20 sm:px-8">
+          <div className="flex min-w-0 items-center gap-3">
             <button
               type="button"
               onClick={() => setSidebarOpen(true)}
@@ -383,7 +383,7 @@ export default function InstructorDashboard() {
               <Menu size={18} />
             </button>
 
-            <div>
+            <div className="min-w-0">
               <h2 className="font-semibold tracking-tight">
                 {activeItem?.label}
               </h2>
@@ -398,7 +398,8 @@ export default function InstructorDashboard() {
             <button
               type="button"
               onClick={handleCreateCourse}
-              className={`inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black transition-all hover:bg-white/85 active:scale-[0.97] ${focusRing}`}
+              aria-label="Create course"
+              className={`inline-flex shrink-0 items-center gap-2 rounded-full bg-white px-3 py-2.5 text-sm font-semibold text-black transition-all hover:bg-white/85 active:scale-[0.97] sm:px-5 ${focusRing}`}
             >
               <Plus size={16} />
               <span className="hidden sm:inline">
@@ -408,7 +409,7 @@ export default function InstructorDashboard() {
           )}
         </header>
 
-        <main className="mx-auto max-w-7xl px-5 py-10 sm:px-8">
+        <main className="mx-auto max-w-7xl px-4 py-6 sm:px-8 sm:py-10">
 
           {/* Greeting */}
           {!(activeSection === "courses" && isFormOpen) && (
@@ -417,7 +418,7 @@ export default function InstructorDashboard() {
                 Welcome back
               </p>
 
-              <h1 className="mt-2 text-4xl font-semibold tracking-tight sm:text-5xl">
+              <h1 className="mt-2 break-words text-3xl font-semibold tracking-tight sm:text-5xl">
                 {instructorName}
               </h1>
 
@@ -430,13 +431,13 @@ export default function InstructorDashboard() {
 
           {/* Stats */}
           {showStats && (
-            <div className="mb-10 grid grid-cols-3 gap-3 sm:gap-4">
+            <div className="mb-10 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
               {stats.map((stat) => (
                 <div
                   key={stat.label}
-                  className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5"
+                  className="min-w-0 rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5"
                 >
-                  <p className="text-3xl font-semibold tabular-nums tracking-tight">
+                  <p className="text-2xl font-semibold tabular-nums tracking-tight sm:text-3xl">
                     {stat.value}
                   </p>
 

@@ -73,8 +73,8 @@ html {
 
 body {
   margin: 0;
-  min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden;
   background: var(--background);
   color: var(--foreground);
   -webkit-font-smoothing: antialiased;
@@ -94,6 +94,25 @@ button {
 
 button:disabled {
   cursor: not-allowed;
+}
+
+img,
+video,
+iframe {
+  max-width: 100%;
+}
+
+main,
+section,
+article,
+aside {
+  min-width: 0;
+}
+
+input,
+textarea,
+select {
+  max-width: 100%;
 }
 
 /* ========================================
@@ -343,6 +362,12 @@ button:disabled {
 @media (max-width: 640px) {
   :root {
     --radius-card: 15px;
+  }
+
+  input,
+  textarea,
+  select {
+    font-size: max(16px, 1em);
   }
 }
 

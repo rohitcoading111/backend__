@@ -112,13 +112,13 @@ function ModulesPage() {
 
       {/* HEADER */}
       <header className="sticky top-0 z-30 border-b border-white/[0.08] bg-black/75 backdrop-blur-2xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8 lg:px-10">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-3 sm:gap-4 sm:px-8 sm:py-4 lg:px-10">
 
          
           <button
   type="button"
   onClick={() => navigate("/dashboard")}
-  className="group inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-neutral-300 transition hover:border-white/30 hover:bg-white hover:text-black"
+  className="group inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-2.5 py-2.5 text-xs font-medium text-neutral-300 transition hover:border-white/30 hover:bg-white hover:text-black sm:gap-2 sm:px-4 sm:text-sm"
 >
             <ArrowLeft
               size={16}
@@ -127,12 +127,12 @@ function ModulesPage() {
             Back
           </button>
 
-          <div className="flex items-center gap-2.5">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-black">
+          <div className="flex shrink-0 items-center gap-2.5">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-black sm:h-10 sm:w-10">
               <GraduationCap size={21} />
             </span>
 
-            <div>
+            <div className="hidden sm:block">
               <h1 className="text-sm font-bold tracking-tight">
                 LearnHub
               </h1>
@@ -145,7 +145,7 @@ function ModulesPage() {
           <button
             type="button"
             onClick={() => navigate("/dashboard")}
-            className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-neutral-300 transition hover:bg-white hover:text-black"
+            className="shrink-0 rounded-xl border border-white/10 bg-white/[0.03] px-2.5 py-2.5 text-xs font-medium text-neutral-300 transition hover:bg-white hover:text-black sm:px-4 sm:text-sm"
           >
             Dashboard
           </button>
