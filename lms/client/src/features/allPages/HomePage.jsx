@@ -160,6 +160,10 @@ export default function HomePage() {
             Learn<span className="text-cyan-400">Hub</span>
           </Link>
 
+          <Link to="/about" className="learnhub-about-link">
+            About
+          </Link>
+
           <div className="hidden items-center gap-8 text-sm text-slate-300 md:flex">
             <a href="#features" className="transition hover:text-cyan-400">
               Features

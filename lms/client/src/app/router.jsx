@@ -39,6 +39,7 @@ import PublicOnlyRoute from "../routes/PublicOnlyRoute.jsx";
 import ForgotPassword from "../features/auth/components/ForgotPassword.jsx";
 
 import HomePage from "../features/allPages/HomePage.jsx";
+import AboutPage from "../features/allPages/AboutPage.jsx";
 
 export const router = createBrowserRouter([
 
@@ -46,6 +47,11 @@ export const router = createBrowserRouter([
 {
   path: "/",
   element: <HomePage />,
+},
+
+{
+  path: "/about",
+  element: <AboutPage />,
 },
 
 

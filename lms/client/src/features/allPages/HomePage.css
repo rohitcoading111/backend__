@@ -176,6 +176,65 @@
     0 0 24px rgba(255, 255, 255, 0.1);
 }
 
+.learnhub-about-link,
+.learnhub-about-action {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.08), transparent 72%),
+    #171717;
+  color: #e5e5e5;
+  box-shadow:
+    0 0 12px rgba(255, 255, 255, 0.04),
+    inset 0 0 16px rgba(255, 255, 255, 0.02);
+  transition:
+    transform 250ms ease,
+    border-color 250ms ease,
+    background 250ms ease,
+    box-shadow 250ms ease,
+    color 250ms ease;
+}
+
+.learnhub-about-link {
+  border-radius: 0.65rem;
+  padding: 0.55rem 0.9rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.learnhub-about-link.is-active {
+  border-color: rgba(255, 255, 255, 0.34);
+  color: #fff;
+  box-shadow:
+    0 0 12px rgba(255, 255, 255, 0.1),
+    inset 0 0 16px rgba(255, 255, 255, 0.035);
+}
+
+.learnhub-about-cta {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.1), transparent 72%),
+    #191919;
+  color: #f5f5f5;
+}
+
+.learnhub-about-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.learnhub-about-link:hover,
+.learnhub-about-action:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.65);
+  background-color: #242424;
+  color: #fff;
+  box-shadow:
+    0 0 10px rgba(255, 255, 255, 0.2),
+    0 0 24px rgba(255, 255, 255, 0.1);
+}
+
 .learnhub-home a:hover,
 .learnhub-home summary:hover {
   color: #fff;
@@ -191,6 +250,8 @@
   .learnhub-home article,
   .learnhub-home details,
   .learnhub-home a,
+  .learnhub-about-action,
+  .learnhub-about-link,
   .learnhub-home article::before,
   .learnhub-home details::before,
   .learnhub-home-hero::after {
@@ -200,6 +261,11 @@
   .learnhub-home article:hover,
   .learnhub-home details:hover,
   .learnhub-home a:hover {
+    transform: none;
+  }
+
+  .learnhub-about-action:hover,
+  .learnhub-about-link:hover {
     transform: none;
   }
 }
