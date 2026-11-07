@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 
 import {
@@ -152,6 +152,26 @@ function AdminDashboard() {
           ) : (
             <AdminStats users={users} />
           )}
+        </section>
+
+        <section className="mt-7 grid gap-4 md:grid-cols-2">
+          <Link
+            to="/super-admin/payment-analytics"
+            className="rounded-2xl border border-white/10 bg-[#111111] p-5 text-left shadow-[0_0_30px_rgba(255,255,255,0.02)] transition hover:-translate-y-1 hover:border-white/20"
+          >
+            <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">Finance</p>
+            <h3 className="mt-3 text-xl font-semibold text-white">Payment analytics</h3>
+            <p className="mt-2 text-sm text-slate-300">Monitor platform revenue, transactions, and organization performance.</p>
+          </Link>
+
+          <Link
+            to="/super-admin/bank-details"
+            className="rounded-2xl border border-white/10 bg-[#111111] p-5 text-left shadow-[0_0_30px_rgba(255,255,255,0.02)] transition hover:-translate-y-1 hover:border-white/20"
+          >
+            <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">Finance</p>
+            <h3 className="mt-3 text-xl font-semibold text-white">Bank details</h3>
+            <p className="mt-2 text-sm text-slate-300">Review all organizations’ submitted banking information and verification status.</p>
+          </Link>
         </section>
 
         {/* Organization Requests */}

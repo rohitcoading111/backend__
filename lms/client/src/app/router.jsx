@@ -28,6 +28,11 @@ import OrganizationRequest from "../features/adminRequests/pages/OrganizationReq
 import OrganizationAdminDashboard from "../features/organizationAdmin/pages/OrganizationAdminDashboard.jsx";
 import OrganizationDetailsPage from "../features/organizationAdmin/pages/OrganizationDetailsPage.jsx";
 
+import PaymentAnalyticsOverview from "../features/paymentAnalytics/pages/SuperAdminPaymentAnalytics.jsx";
+import OrganizationPaymentAnalytics from "../features/paymentAnalytics/pages/OrganizationPaymentAnalytics.jsx";
+import OrganizationBankDetails from "../features/organizationBankDetails/pages/OrganizationBankDetails.jsx";
+import SuperAdminBankDetails from "../features/organizationBankDetails/pages/SuperAdminBankDetails.jsx";
+
 import IndependentInstructorDashboard from
   "../features/independentInstructor/pages/IndependentInstructorDashboard.jsx";
 
@@ -181,6 +186,14 @@ export const router = createBrowserRouter([
       path: "/organization-details",
       element: <OrganizationDetailsPage />,
     },
+    {
+      path: "/organization-admin/payment-analytics",
+      element: <OrganizationPaymentAnalytics />,
+    },
+    {
+      path: "/organization-admin/bank-details",
+      element: <OrganizationBankDetails />,
+    },
   ],
 },
 
@@ -198,6 +211,18 @@ export const router = createBrowserRouter([
       {
         path: "/super-admin-dashboard",
         element: <AdminDashboard />,
+      },
+      {
+        path: "/super-admin/payment-analytics",
+        element: <PaymentAnalyticsOverview />,
+      },
+      {
+        path: "/super-admin/payment-analytics/:organizationId",
+        element: <PaymentAnalyticsOverview />,
+      },
+      {
+        path: "/super-admin/bank-details",
+        element: <SuperAdminBankDetails />,
       },
 
       // Backward compatibility

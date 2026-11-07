@@ -230,6 +230,26 @@ const organizationName = organization?.name || "Your Organization";
 
     </section>
 
+    <section className="mt-7 grid gap-4 md:grid-cols-2">
+      <Link
+        to="/organization-admin/payment-analytics"
+        className="rounded-2xl border border-white/10 bg-[#111111] p-5 text-left shadow-[0_0_30px_rgba(255,255,255,0.02)] transition hover:-translate-y-1 hover:border-white/20"
+      >
+        <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">Finance</p>
+        <h3 className="mt-3 text-xl font-semibold text-white">Payment analytics</h3>
+        <p className="mt-2 text-sm text-slate-300">Review your org revenue, transactions, and course performance.</p>
+      </Link>
+
+      <Link
+        to="/organization-admin/bank-details"
+        className="rounded-2xl border border-white/10 bg-[#111111] p-5 text-left shadow-[0_0_30px_rgba(255,255,255,0.02)] transition hover:-translate-y-1 hover:border-white/20"
+      >
+        <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">Finance</p>
+        <h3 className="mt-3 text-xl font-semibold text-white">Bank details</h3>
+        <p className="mt-2 text-sm text-slate-300">Submit and manage your verified organization bank information.</p>
+      </Link>
+    </section>
+
         {/* Stats */}
         <section className="mt-7 grid gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3">
 
