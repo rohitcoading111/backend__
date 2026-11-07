@@ -9,12 +9,13 @@ import {
 
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { roleMiddleware } from "../middleware/role.middleware.js";
+import { organizationAdminMiddleware } from "../middleware/organizationAdmin.middleware.js";
 
 const router = express.Router();
 
 // ==========================================
-// SUPER ADMIN
-// Get all organizations payment analytics
+// SUPER ADMIN ONLY
+// All organizations analytics
 // ==========================================
 
 router.get(
@@ -25,8 +26,8 @@ router.get(
 );
 
 // ==========================================
-// SUPER ADMIN
-// Get a particular organization's analytics
+// SUPER ADMIN ONLY
+// Particular organization's analytics
 // ==========================================
 
 router.get(
@@ -37,14 +38,14 @@ router.get(
 );
 
 // ==========================================
-// ORGANIZATION ADMIN
-// Get own organization's analytics
+// ORGANIZATION ADMIN ONLY
+// Own organization analytics
 // ==========================================
 
 router.get(
   "/organization",
   authMiddleware,
-  roleMiddleware("ORGANIZATION_ADMIN"),
+  organizationAdminMiddleware,
   getMyOrganizationAnalyticsController
 );
 

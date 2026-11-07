@@ -8,6 +8,7 @@ export const organizationAdminMiddleware = async (
   next
 ) => {
   try {
+    // 1. Authentication check
     if (!req.user?.id) {
       return res.status(401).json({
         success: false,
@@ -15,12 +16,15 @@ export const organizationAdminMiddleware = async (
       });
     }
 
-    // Fetch latest Admin data from database
+    // 2. Verify actual Organization Admin from database
     const admin = await User.findOne({
       _id: req.user.id,
       role: "ADMIN",
       adminType: "ORGANIZATION_ADMIN",
-    }).select("_id name email organizationId adminType role");
+      adminStatus: "ACTIVE",
+    }).select(
+      "_id name email organizationId adminType adminStatus role"
+    );
 
     if (!admin) {
       return res.status(403).json({
@@ -29,6 +33,7 @@ export const organizationAdminMiddleware = async (
       });
     }
 
+    // 3. Check organization association
     if (!admin.organizationId) {
       return res.status(403).json({
         success: false,
@@ -36,12 +41,12 @@ export const organizationAdminMiddleware = async (
       });
     }
 
-    // Verify that this organization actually belongs to this Admin
+    // 4. Verify organization ownership and active status
     const organization = await Organization.findOne({
       _id: admin.organizationId,
       owner: admin._id,
       status: "ACTIVE",
-    }).select("_id name owner status");
+    }).select("_id name owner status organizationType");
 
     if (!organization) {
       return res.status(403).json({
@@ -50,12 +55,20 @@ export const organizationAdminMiddleware = async (
       });
     }
 
-    // Attach trusted database data for upcoming services
+    // 5. Attach trusted database records
     req.organizationAdmin = admin;
     req.organization = organization;
-    req.organizationId = organization._id;
+    req.organizationId = organization._id.toString();
 
-    next();
+    // 6. Attach bank-details context for future services
+    req.bankDetailsContext = {
+      organizationId: organization._id.toString(),
+      organizationName: organization.name,
+      adminId: admin._id.toString(),
+    };
+
+    return next();
+
   } catch (error) {
     console.error("Organization Admin Middleware Error:", error);
 
