@@ -1,19 +1,15 @@
-
 import razorpay from "../config/razorpay.js";
 import Payment from "../models/payment.models.js";
 import Course from "../models/course.models.js";
-import Organization from "../models/organization.models.js";
 import Enrollment from "../models/enrollment.models.js";
 import crypto from "crypto";
 import config from "../config/config.js";
 
-// Create payment request
 export const createPaymentRequest = async (studentId, courseId) => {
   if (!studentId || !courseId) {
     throw new Error("Student ID and Course ID are required");
   }
 
-  // 1. Find course
   const course = await Course.findById(courseId);
 
   if (!course) {
@@ -23,41 +19,8 @@ export const createPaymentRequest = async (studentId, courseId) => {
   if (course.status !== "PUBLISHED") {
     throw new Error("Course is not available");
   }
+  
 
-  // 2. Course must belong to an organization
-  if (!course.organizationId) {
-    throw new Error(
-      "This course is not linked to an organization"
-    );
-  }
-
-  // 3. Find course-owning organization
-  const organization = await Organization.findById(
-    course.organizationId
-  );
-
-  if (!organization) {
-    throw new Error("Course organization not found");
-  }
-
-  if (organization.status !== "ACTIVE") {
-    throw new Error("This organization is currently inactive");
-  }
-
-  // 4. Verify Razorpay Route linked account
-  if (!organization.razorpay?.linkedAccountId) {
-    throw new Error(
-      "Organization has not completed Razorpay account setup"
-    );
-  }
-
-  if (organization.razorpay.accountStatus !== "ACTIVATED") {
-    throw new Error(
-      "Organization Razorpay account is not activated"
-    );
-  }
-
-  // 5. Check existing active enrollment
   const existingEnrollment = await Enrollment.findOne({
     student: studentId,
     course: courseId,
@@ -68,13 +31,16 @@ export const createPaymentRequest = async (studentId, courseId) => {
     throw new Error("You are already enrolled in this course");
   }
 
-  // 6. Reuse an existing pending order if available
+
+  
+  // Check if an existing payment order is available
   const existingPayment = await Payment.findOne({
     student: studentId,
     course: courseId,
     status: { $in: ["CREATED", "PENDING"] },
   }).sort({ createdAt: -1 });
 
+  // Reuse the existing order if it is still open
   if (existingPayment) {
     const existingOrder = await razorpay.orders.fetch(
       existingPayment.orderId
@@ -88,7 +54,7 @@ export const createPaymentRequest = async (studentId, courseId) => {
     }
   }
 
-  // 7. Create Razorpay order
+  // Razorpay ke liye amount paise mein hoga
   const amountInPaise = Math.round(course.price * 100);
 
   const order = await razorpay.orders.create({
@@ -97,13 +63,10 @@ export const createPaymentRequest = async (studentId, courseId) => {
     receipt: `course_${course._id}_${Date.now()}`,
   });
 
-  // 8. Save payment with organization snapshot
+  // Order ko apne database mein save karo
   const payment = await Payment.create({
     student: studentId,
     course: course._id,
-    organization: organization._id,
-    razorpayLinkedAccountId:
-      organization.razorpay.linkedAccountId,
     amount: course.price,
     currency: "INR",
     status: "CREATED",
@@ -111,10 +74,13 @@ export const createPaymentRequest = async (studentId, courseId) => {
     orderId: order.id,
   });
 
-  return { payment, order };
+  return {
+    payment,
+    order,
+  };
 };
 
-// Verify payment
+
 export const verifyPayment = async ({
   studentId,
   orderId,
@@ -125,7 +91,7 @@ export const verifyPayment = async ({
     throw new Error("All payment verification fields are required");
   }
 
-  // 1. Find payment
+  // 1. Find the payment belonging to this student and order
   const payment = await Payment.findOne({
     student: studentId,
     orderId,
@@ -135,7 +101,7 @@ export const verifyPayment = async ({
     throw new Error("Payment order not found");
   }
 
-  // 2. Verify Razorpay signature
+  // 2. Verify the Razorpay signature
   const expectedSignature = crypto
     .createHmac("sha256", config.razorpayKeySecret)
     .update(`${orderId}|${paymentId}`)
@@ -146,18 +112,13 @@ export const verifyPayment = async ({
 
   if (
     signatureBuffer.length !== expectedBuffer.length ||
-    !crypto.timingSafeEqual(
-      signatureBuffer,
-      expectedBuffer
-    )
+    !crypto.timingSafeEqual(signatureBuffer, expectedBuffer)
   ) {
     throw new Error("Invalid payment signature");
   }
 
-  // 3. Fetch payment from Razorpay
-  const razorpayPayment = await razorpay.payments.fetch(
-    paymentId
-  );
+  // 3. Verify the actual payment with Razorpay
+  const razorpayPayment = await razorpay.payments.fetch(paymentId);
 
   if (razorpayPayment.order_id !== orderId) {
     throw new Error("Payment order mismatch");
@@ -174,12 +135,10 @@ export const verifyPayment = async ({
     throw new Error("Payment amount or currency mismatch");
   }
 
-  // 4. Handle already verified payment
+  // 4. Handle repeated verification of the same successful payment
   if (payment.status === "PAID") {
     if (payment.razorpayPaymentId !== paymentId) {
-      throw new Error(
-        "Payment already verified with a different payment"
-      );
+      throw new Error("Payment already verified with a different payment");
     }
 
     const enrollment = await Enrollment.findOne({
@@ -193,10 +152,11 @@ export const verifyPayment = async ({
       );
     }
 
+    // Return the existing successful result without creating another enrollment
     return { payment, enrollment };
   }
 
-  // 5. Mark payment as paid
+  // 5. Save payment as successful
   payment.razorpayPaymentId = paymentId;
   payment.signatureVerified = true;
   payment.status = "PAID";
@@ -204,7 +164,7 @@ export const verifyPayment = async ({
 
   await payment.save();
 
-  // 6. Activate enrollment
+  // 6. Activate the student's enrollment
   const enrollment = await Enrollment.findOneAndUpdate(
     {
       student: payment.student,
@@ -232,7 +192,7 @@ export const verifyPayment = async ({
   return { payment, enrollment };
 };
 
-// Get student's payment
+
 export const getMyPayment = async (studentId, paymentId) => {
   if (!studentId || !paymentId) {
     throw new Error("Student ID and Payment ID are required");
