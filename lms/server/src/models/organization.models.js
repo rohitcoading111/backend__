@@ -47,6 +47,26 @@ const organizationSchema = new mongoose.Schema(
       enum: ["ACTIVE", "SUSPENDED"],
       default: "ACTIVE",
     },
+
+    // Razorpay Route linked account details
+    razorpay: {
+      linkedAccountId: {
+        type: String,
+        default: null,
+      },
+
+      accountStatus: {
+        type: String,
+        enum: [
+          "NOT_CREATED",
+          "PENDING",
+          "ACTIVATED",
+          "SUSPENDED",
+          "REJECTED",
+        ],
+        default: "NOT_CREATED",
+      },
+    },
   },
   {
     timestamps: true,
