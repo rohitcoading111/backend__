@@ -14,6 +14,45 @@ const paymentSchema = new mongoose.Schema(
       required: true,
     },
 
+    organization: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "Organization",
+  default: null,
+},
+
+razorpayTransferId: {
+  type: String,
+  default: null,
+},
+
+transferStatus: {
+  type: String,
+  enum: [
+    "NOT_REQUIRED",
+    "PENDING",
+    "CREATED",
+    "PROCESSED",
+    "FAILED",
+    "REVERSED",
+  ],
+  default: "NOT_REQUIRED",
+},
+
+transferAmount: {
+  type: Number,
+  default: 0,
+},
+
+transferError: {
+  type: String,
+  default: null,
+},
+
+transferredAt: {
+  type: Date,
+  default: null,
+},
+
     amount: {
       type: Number,
       required: true,
@@ -62,6 +101,10 @@ const paymentSchema = new mongoose.Schema(
 );
 
 paymentSchema.index({ student: 1, course: 1, status: 1 });
+paymentSchema.index({
+  organization: 1,
+  transferStatus: 1,
+});
 
 const Payment = mongoose.model("Payment", paymentSchema);
 
