@@ -1,3 +1,4 @@
+
 import mongoose from "mongoose";
 
 const paymentSchema = new mongoose.Schema(
@@ -14,45 +15,56 @@ const paymentSchema = new mongoose.Schema(
       required: true,
     },
 
+    // Organization receiving the course payment
     organization: {
-  type: mongoose.Schema.Types.ObjectId,
-  ref: "Organization",
-  default: null,
-},
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Organization",
+      default: null,
+    },
 
-razorpayTransferId: {
-  type: String,
-  default: null,
-},
+    // Snapshot of the organization's Razorpay Route account
+    razorpayLinkedAccountId: {
+      type: String,
+      default: null,
+    },
 
-transferStatus: {
-  type: String,
-  enum: [
-    "NOT_REQUIRED",
-    "PENDING",
-    "CREATED",
-    "PROCESSED",
-    "FAILED",
-    "REVERSED",
-  ],
-  default: "NOT_REQUIRED",
-},
+    // Razorpay Route transfer details
+    razorpayTransferId: {
+      type: String,
+      default: null,
+    },
 
-transferAmount: {
-  type: Number,
-  default: 0,
-},
+    transferStatus: {
+      type: String,
+      enum: [
+        "NOT_REQUIRED",
+        "PENDING",
+        "INITIATING",
+        "CREATED",
+        "PROCESSED",
+        "FAILED",
+        "REVERSED",
+      ],
+      default: "NOT_REQUIRED",
+    },
 
-transferError: {
-  type: String,
-  default: null,
-},
+    transferAmount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
 
-transferredAt: {
-  type: Date,
-  default: null,
-},
+    transferError: {
+      type: String,
+      default: null,
+    },
 
+    transferredAt: {
+      type: Date,
+      default: null,
+    },
+
+    // Course payment amount
     amount: {
       type: Number,
       required: true,
@@ -97,13 +109,27 @@ transferredAt: {
       default: null,
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
-paymentSchema.index({ student: 1, course: 1, status: 1 });
+// Student payment history and status
+paymentSchema.index({
+  student: 1,
+  course: 1,
+  status: 1,
+});
+
+// Organization transfer tracking
 paymentSchema.index({
   organization: 1,
   transferStatus: 1,
+});
+
+// Transfer ID lookup
+paymentSchema.index({
+  razorpayTransferId: 1,
 });
 
 const Payment = mongoose.model("Payment", paymentSchema);
