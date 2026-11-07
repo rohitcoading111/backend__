@@ -1,3 +1,4 @@
+
 import razorpay from "../config/razorpay.js";
 import Payment from "../models/payment.models.js";
 import Course from "../models/course.models.js";
@@ -19,7 +20,6 @@ export const createPaymentRequest = async (studentId, courseId) => {
   if (course.status !== "PUBLISHED") {
     throw new Error("Course is not available");
   }
-  
 
   const existingEnrollment = await Enrollment.findOne({
     student: studentId,
@@ -31,8 +31,6 @@ export const createPaymentRequest = async (studentId, courseId) => {
     throw new Error("You are already enrolled in this course");
   }
 
-
-  
   // Check if an existing payment order is available
   const existingPayment = await Payment.findOne({
     student: studentId,
@@ -54,7 +52,7 @@ export const createPaymentRequest = async (studentId, courseId) => {
     }
   }
 
-  // Razorpay ke liye amount paise mein hoga
+  // Razorpay amount is always in paise
   const amountInPaise = Math.round(course.price * 100);
 
   const order = await razorpay.orders.create({
@@ -63,10 +61,17 @@ export const createPaymentRequest = async (studentId, courseId) => {
     receipt: `course_${course._id}_${Date.now()}`,
   });
 
-  // Order ko apne database mein save karo
+  // Save payment with organization and course snapshots
   const payment = await Payment.create({
     student: studentId,
     course: course._id,
+
+    // Snapshot of the organization at purchase time
+    organization: course.organizationId || null,
+
+    // Snapshot of the course title at purchase time
+    courseTitle: course.title,
+
     amount: course.price,
     currency: "INR",
     status: "CREATED",
@@ -79,7 +84,6 @@ export const createPaymentRequest = async (studentId, courseId) => {
     order,
   };
 };
-
 
 export const verifyPayment = async ({
   studentId,
@@ -152,7 +156,6 @@ export const verifyPayment = async ({
       );
     }
 
-    // Return the existing successful result without creating another enrollment
     return { payment, enrollment };
   }
 
@@ -191,7 +194,6 @@ export const verifyPayment = async ({
 
   return { payment, enrollment };
 };
-
 
 export const getMyPayment = async (studentId, paymentId) => {
   if (!studentId || !paymentId) {
