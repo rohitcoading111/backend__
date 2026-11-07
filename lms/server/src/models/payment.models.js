@@ -1,3 +1,4 @@
+
 import mongoose from "mongoose";
 
 const paymentSchema = new mongoose.Schema(
@@ -12,6 +13,21 @@ const paymentSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Course",
       required: true,
+    },
+
+    // Organization owning the course at purchase time
+    organization: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Organization",
+      default: null,
+      index: true,
+    },
+
+    // Course title snapshot at purchase time
+    courseTitle: {
+      type: String,
+      default: null,
+      trim: true,
     },
 
     amount: {
@@ -61,7 +77,26 @@ const paymentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-paymentSchema.index({ student: 1, course: 1, status: 1 });
+// Student payment history
+paymentSchema.index({
+  student: 1,
+  course: 1,
+  status: 1,
+});
+
+// Organization transaction history
+paymentSchema.index({
+  organization: 1,
+  status: 1,
+  verifiedAt: -1,
+});
+
+// Course-wise transaction history
+paymentSchema.index({
+  course: 1,
+  status: 1,
+  verifiedAt: -1,
+});
 
 const Payment = mongoose.model("Payment", paymentSchema);
 
