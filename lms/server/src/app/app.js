@@ -13,7 +13,7 @@ import progressRoutes from "../routes/progress.routes.js";
 import organizationRoutes from "../routes/organization.routes.js";
 import adminRequestRoutes from "../routes/adminRequest.routes.js";
 import organizationInstructorRoutes from "../routes/organizationInstructor.routes.js";
-
+import paymentAnalyticsRoutes from "../routes/paymentAnalytics.routes.js";
 
 import cors from "cors";
 
@@ -77,4 +77,6 @@ app.use("/api/organization", organizationInstructorRoutes);
 app.use("/api/admin-requests", adminRequestRoutes);
 
 app.use("/api/organizations", organizationRoutes);
+
+app.use("/api/payment-analytics", paymentAnalyticsRoutes);
 export default app;
