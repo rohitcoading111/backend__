@@ -7,5 +7,6 @@ Disallow: /instructor
 Disallow: /student
 Disallow: /my-enrollments
 Disallow: /live-class
+Allow: /favicon.png
 
 Sitemap: https://learnhubcloud.in/sitemap.xml
