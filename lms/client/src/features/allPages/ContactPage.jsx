@@ -24,6 +24,10 @@ export default function ContactPage() {
         title="Contact LearnHub – Get in Touch"
         description="Contact LearnHub for questions, learning support and assistance with our online learning platform."
         path="/contact"
+        breadcrumbs={[
+          { name: "Home", path: "/" },
+          { name: "Contact", path: "/contact" },
+        ]}
       />
       <ContactNavbar />
 

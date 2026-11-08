@@ -18,6 +18,10 @@ export default function AboutPage() {
         title="About LearnHub – Our Learning Platform"
         description="Learn about LearnHub, our mission and our approach to making online education accessible through expert-led courses and live classes."
         path="/about"
+        breadcrumbs={[
+          { name: "Home", path: "/" },
+          { name: "About", path: "/about" },
+        ]}
       />
       <AboutNavbar />
 
