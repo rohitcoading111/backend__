@@ -1,10 +1,15 @@
+
 import {
   createPaymentRequest,
   getMyPayment,
-  verifyPayment
+  verifyPayment,
 } from "../services/payment.services.js";
-import config  from "../config/config.js";
 
+import config from "../config/config.js";
+
+// ============================================
+// CREATE PAYMENT REQUEST
+// ============================================
 
 export const createPaymentRequestController = async (req, res) => {
   try {
@@ -38,15 +43,9 @@ export const createPaymentRequestController = async (req, res) => {
 
     if (
       error.message === "Course is not available" ||
-      error.message === "You are already enrolled in this course"
+      error.message === "You are already enrolled in this course" ||
+      error.message === "Student ID and Course ID are required"
     ) {
-      return res.status(400).json({
-        success: false,
-        message: error.message,
-      });
-    }
-
-    if (error.message === "Student ID and Course ID are required") {
       return res.status(400).json({
         success: false,
         message: error.message,
@@ -62,15 +61,17 @@ export const createPaymentRequestController = async (req, res) => {
   }
 };
 
-
+// ============================================
+// VERIFY PAYMENT
+// ============================================
 
 export const verifyPaymentController = async (req, res) => {
   try {
     const { orderId, paymentId, signature } = req.body;
 
-    // Logged-in student ki ID JWT middleware se milegi
     const studentId = req.user.id;
 
+    // Service directly returns Payment document
     const payment = await verifyPayment({
       studentId,
       orderId,
@@ -87,6 +88,8 @@ export const verifyPaymentController = async (req, res) => {
         orderId: payment.orderId,
         razorpayPaymentId: payment.razorpayPaymentId,
         status: payment.status,
+        signatureVerified: payment.signatureVerified,
+        verifiedAt: payment.verifiedAt,
       },
     });
   } catch (error) {
@@ -97,18 +100,30 @@ export const verifyPaymentController = async (req, res) => {
       });
     }
 
-    if (
-      error.message === "Payment order not found" ||
-      error.message === "Payment already verified"
-    ) {
+    if (error.message === "Payment order not found") {
       return res.status(404).json({
         success: false,
         message: error.message,
       });
     }
 
-    if (error.message === "Invalid payment signature") {
+    if (
+      error.message === "Invalid payment signature" ||
+      error.message === "Payment order mismatch" ||
+      error.message === "Payment is not captured" ||
+      error.message === "Payment amount or currency mismatch"
+    ) {
       return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    if (
+      error.message ===
+      "Payment already verified with a different payment"
+    ) {
+      return res.status(409).json({
         success: false,
         message: error.message,
       });
@@ -123,6 +138,9 @@ export const verifyPaymentController = async (req, res) => {
   }
 };
 
+// ============================================
+// GET MY PAYMENT
+// ============================================
 
 export const getMyPaymentController = async (req, res) => {
   try {
@@ -137,8 +155,11 @@ export const getMyPaymentController = async (req, res) => {
         paymentId: payment._id,
         course: payment.course,
         amount: payment.amount,
+        currency: payment.currency,
         status: payment.status,
-        transactionReference: payment.transactionReference,
+        transactionReference: payment.razorpayPaymentId,
+        signatureVerified: payment.signatureVerified,
+        verifiedAt: payment.verifiedAt,
       },
     });
   } catch (error) {

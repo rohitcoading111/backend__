@@ -1,10 +1,13 @@
-
-import razorpay from "../config/razorpay.js";
+  import razorpay from "../config/razorpay.js";
 import Payment from "../models/payment.models.js";
 import Course from "../models/course.models.js";
 import Enrollment from "../models/enrollment.models.js";
 import crypto from "crypto";
 import config from "../config/config.js";
+
+// ============================================
+// CREATE PAYMENT REQUEST
+// ============================================
 
 export const createPaymentRequest = async (studentId, courseId) => {
   if (!studentId || !courseId) {
@@ -31,14 +34,13 @@ export const createPaymentRequest = async (studentId, courseId) => {
     throw new Error("You are already enrolled in this course");
   }
 
-  // Check if an existing payment order is available
+  // Check whether an existing payment order can be reused
   const existingPayment = await Payment.findOne({
     student: studentId,
     course: courseId,
     status: { $in: ["CREATED", "PENDING"] },
   }).sort({ createdAt: -1 });
 
-  // Reuse the existing order if it is still open
   if (existingPayment) {
     const existingOrder = await razorpay.orders.fetch(
       existingPayment.orderId
@@ -52,7 +54,7 @@ export const createPaymentRequest = async (studentId, courseId) => {
     }
   }
 
-  // Razorpay amount is always in paise
+  // Razorpay accepts amount in paise
   const amountInPaise = Math.round(course.price * 100);
 
   const order = await razorpay.orders.create({
@@ -61,17 +63,12 @@ export const createPaymentRequest = async (studentId, courseId) => {
     receipt: `course_${course._id}_${Date.now()}`,
   });
 
-  // Save payment with organization and course snapshots
+  // Save payment with purchase-time snapshots
   const payment = await Payment.create({
     student: studentId,
     course: course._id,
-
-    // Snapshot of the organization at purchase time
     organization: course.organizationId || null,
-
-    // Snapshot of the course title at purchase time
     courseTitle: course.title,
-
     amount: course.price,
     currency: "INR",
     status: "CREATED",
@@ -85,6 +82,10 @@ export const createPaymentRequest = async (studentId, courseId) => {
   };
 };
 
+// ============================================
+// VERIFY PAYMENT
+// ============================================
+
 export const verifyPayment = async ({
   studentId,
   orderId,
@@ -95,7 +96,7 @@ export const verifyPayment = async ({
     throw new Error("All payment verification fields are required");
   }
 
-  // 1. Find the payment belonging to this student and order
+  // 1. Find payment belonging to this student
   const payment = await Payment.findOne({
     student: studentId,
     orderId,
@@ -105,7 +106,12 @@ export const verifyPayment = async ({
     throw new Error("Payment order not found");
   }
 
-  // 2. Verify the Razorpay signature
+  // 2. Validate signature format
+  if (!/^[a-fA-F0-9]{64}$/.test(signature)) {
+    throw new Error("Invalid payment signature");
+  }
+
+  // 3. Generate expected Razorpay signature
   const expectedSignature = crypto
     .createHmac("sha256", config.razorpayKeySecret)
     .update(`${orderId}|${paymentId}`)
@@ -114,6 +120,7 @@ export const verifyPayment = async ({
   const signatureBuffer = Buffer.from(signature, "hex");
   const expectedBuffer = Buffer.from(expectedSignature, "hex");
 
+  // 4. Compare signatures safely
   if (
     signatureBuffer.length !== expectedBuffer.length ||
     !crypto.timingSafeEqual(signatureBuffer, expectedBuffer)
@@ -121,7 +128,7 @@ export const verifyPayment = async ({
     throw new Error("Invalid payment signature");
   }
 
-  // 3. Verify the actual payment with Razorpay
+  // 5. Fetch actual payment from Razorpay
   const razorpayPayment = await razorpay.payments.fetch(paymentId);
 
   if (razorpayPayment.order_id !== orderId) {
@@ -139,35 +146,26 @@ export const verifyPayment = async ({
     throw new Error("Payment amount or currency mismatch");
   }
 
-  // 4. Handle repeated verification of the same successful payment
+  // 6. Handle repeated verification safely
   if (payment.status === "PAID") {
     if (payment.razorpayPaymentId !== paymentId) {
-      throw new Error("Payment already verified with a different payment");
-    }
-
-    const enrollment = await Enrollment.findOne({
-      student: payment.student,
-      course: payment.course,
-    });
-
-    if (!enrollment || enrollment.status !== "ACTIVE") {
       throw new Error(
-        "Payment is paid but enrollment is not active; contact support"
+        "Payment already verified with a different payment"
       );
     }
+  } else {
+    // 7. Mark payment as successful
+    payment.razorpayPaymentId = paymentId;
+    payment.signatureVerified = true;
+    payment.status = "PAID";
+    payment.verifiedAt = new Date();
 
-    return { payment, enrollment };
+    await payment.save();
   }
 
-  // 5. Save payment as successful
-  payment.razorpayPaymentId = paymentId;
-  payment.signatureVerified = true;
-  payment.status = "PAID";
-  payment.verifiedAt = new Date();
-
-  await payment.save();
-
-  // 6. Activate the student's enrollment
+  // 8. Activate enrollment
+  // This also repairs enrollment if an earlier attempt
+  // saved payment as PAID but failed before enrollment activation.
   const enrollment = await Enrollment.findOneAndUpdate(
     {
       student: payment.student,
@@ -177,7 +175,7 @@ export const verifyPayment = async ({
       $set: {
         status: "ACTIVE",
         paymentId: payment._id.toString(),
-        enrolledAt: new Date(),
+        enrolledAt: payment.verifiedAt || new Date(),
       },
       $setOnInsert: {
         student: payment.student,
@@ -192,8 +190,18 @@ export const verifyPayment = async ({
     }
   );
 
-  return { payment, enrollment };
+  if (!enrollment || enrollment.status !== "ACTIVE") {
+    throw new Error("Enrollment activation failed");
+  }
+
+  // 9. Return Payment document directly
+  // Controller expects payment._id, payment.course, etc.
+  return payment;
 };
+
+// ============================================
+// GET MY PAYMENT
+// ============================================
 
 export const getMyPayment = async (studentId, paymentId) => {
   if (!studentId || !paymentId) {
