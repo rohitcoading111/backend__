@@ -9,7 +9,7 @@ import {
   deleteCourseController,
   publishCourseController,
   unpublishCourseController,
-  getPublishedCoursesController
+  getPublishedCoursesController,
 } from "../controllers/course.controllers.js";
 
 import { authMiddleware } from "../middleware/auth.middleware.js";
@@ -17,81 +17,48 @@ import { roleMiddleware } from "../middleware/role.middleware.js";
 import { instructorAccessMiddleware } from "../middleware/instructorAccess.middleware.js";
 
 import upload from "../middleware/upload.middleware.js";
-
 import { courseValidation } from "../validators/course.validator.js";
 
 const router = express.Router();
 
+// Public: Published Courses
+router.get("/published", getPublishedCoursesController);
+
+// All protected instructor routes
+router.use(
+  authMiddleware,
+  roleMiddleware("INSTRUCTOR"),
+  instructorAccessMiddleware
+);
+
 // Create Course
 router.post(
   "/",
-  authMiddleware,
-  roleMiddleware("INSTRUCTOR"),
-  instructorAccessMiddleware,
   upload.single("thumbnail"),
   courseValidation,
   createCourseController
 );
 
 // Get My Courses
-router.get(
-  "/my-courses",
-  authMiddleware,
-  roleMiddleware("INSTRUCTOR"),
-  instructorAccessMiddleware,
-  getMyCourses
-);
-
-// Public: anyone can view published courses
-router.get(
-  "/published",
-  getPublishedCoursesController
-);
+router.get("/my-courses", getMyCourses);
 
 // Get Single Course
-router.get(
-  "/:courseId",
-  authMiddleware,
-  roleMiddleware("INSTRUCTOR"),
-  instructorAccessMiddleware,
-  getSingleCourseController
-);
+router.get("/:courseId", getSingleCourseController);
 
 // Update Course
 router.patch(
   "/:courseId",
-  authMiddleware,
-  roleMiddleware("INSTRUCTOR"),
-  instructorAccessMiddleware,
   upload.single("thumbnail"),
   updateCourseController
 );
 
 // Delete Course
-router.delete(
-  "/:courseId",
-  authMiddleware,
-  roleMiddleware("INSTRUCTOR"),
-  instructorAccessMiddleware,
-  deleteCourseController
-);
+router.delete("/:courseId", deleteCourseController);
 
 // Publish Course
-router.patch(
-  "/:courseId/publish",
-  authMiddleware,
-  roleMiddleware("INSTRUCTOR"),
-  instructorAccessMiddleware,
-  publishCourseController
-);
+router.patch("/:courseId/publish", publishCourseController);
 
 // Unpublish Course
-router.patch(
-  "/:courseId/unpublish",
-  authMiddleware,
-  roleMiddleware("INSTRUCTOR"),
-  instructorAccessMiddleware,
-  unpublishCourseController
-);
+router.patch("/:courseId/unpublish", unpublishCourseController);
 
 export default router;

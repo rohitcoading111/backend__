@@ -54,6 +54,10 @@ export const createPaymentRequest = async (studentId, courseId) => {
     }
   }
 
+  if(!course.organizationId){
+    throw new Error("Course does not belongs to any organization");
+  }
+
   // Razorpay accepts amount in paise
   const amountInPaise = Math.round(course.price * 100);
 
@@ -67,7 +71,7 @@ export const createPaymentRequest = async (studentId, courseId) => {
   const payment = await Payment.create({
     student: studentId,
     course: course._id,
-    organization: course.organizationId || null,
+    organization: course.organizationId ,
     courseTitle: course.title,
     amount: course.price,
     currency: "INR",
