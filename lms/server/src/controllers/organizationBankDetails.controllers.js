@@ -5,6 +5,9 @@ import {
   getMyOrganizationBankDetails,
   getAllOrganizationsBankDetails,
   getOrganizationBankDetailsById,
+  verifyOrganizationBankDetails,
+  rejectOrganizationBankDetails,
+  uploadOrganizationBankProof,
 } from "../services/organizationBankDetails.services.js";
 
 // ==========================================
@@ -205,6 +208,96 @@ export const getOrganizationBankDetailsController = async (
     return res.status(500).json({
       success: false,
       message: "Failed to fetch organization bank details",
+    });
+  }
+};
+
+export const uploadBankProofController = async (req, res) => {
+  try {
+    const bankProof = await uploadOrganizationBankProof(req.file);
+
+    return res.status(200).json({
+      success: true,
+      message: "Bank proof uploaded successfully",
+      data: bankProof,
+    });
+  } catch (error) {
+    console.error("Upload Bank Proof Error:", error);
+
+    return res.status(error.message === "Bank proof file is required" ? 400 : 500).json({
+      success: false,
+      message: error.message || "Failed to upload bank proof",
+    });
+  }
+};
+
+
+// ==========================================
+// SUPER ADMIN - VERIFY BANK DETAILS
+// ==========================================
+
+export const verifyBankDetailsController = async (req, res) => {
+  try {
+    const { organizationId } = req.params;
+
+    const bankDetails = await verifyOrganizationBankDetails({
+      organizationId,
+      superAdminId: req.user.id,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Organization bank details verified successfully",
+      data: bankDetails,
+    });
+  } catch (error) {
+    const statusCode =
+      error.message === "Bank details not found" ? 404 :
+      error.message.startsWith("Bank details cannot be verified") ? 409 :
+      error.message.startsWith("Invalid") ? 400 : 500;
+
+    console.error("Verify Bank Details Error:", error);
+
+    return res.status(statusCode).json({
+      success: false,
+      message: error.message || "Failed to verify bank details",
+    });
+  }
+};
+
+
+// ==========================================
+// SUPER ADMIN - REJECT BANK DETAILS
+// ==========================================
+
+export const rejectBankDetailsController = async (req, res) => {
+  try {
+    const { organizationId } = req.params;
+    const { rejectionReason } = req.body;
+
+    const bankDetails = await rejectOrganizationBankDetails({
+      organizationId,
+      superAdminId: req.user.id,
+      rejectionReason,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Organization bank details rejected successfully",
+      data: bankDetails,
+    });
+  } catch (error) {
+    const statusCode =
+      error.message === "Bank details not found" ? 404 :
+      error.message.startsWith("Bank details cannot be rejected") ? 409 :
+      error.message.startsWith("Invalid") ||
+      error.message === "Rejection reason is required" ? 400 : 500;
+
+    console.error("Reject Bank Details Error:", error);
+
+    return res.status(statusCode).json({
+      success: false,
+      message: error.message || "Failed to reject bank details",
     });
   }
 };

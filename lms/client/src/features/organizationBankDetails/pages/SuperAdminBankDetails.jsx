@@ -110,7 +110,11 @@ function SuperAdminBankDetails() {
       </div>
 
       {selectedOrganizationId ? (
-        <BankDetailsModal organizationId={selectedOrganizationId} onClose={() => setSelectedOrganizationId(null)} />
+        <BankDetailsModal
+          organizationId={selectedOrganizationId}
+          onClose={() => setSelectedOrganizationId(null)}
+          onUpdated={() => fetchBankDetails({ silent: true })}
+        />
       ) : null}
     </main>
   );

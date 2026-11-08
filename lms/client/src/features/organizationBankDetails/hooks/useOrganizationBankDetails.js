@@ -6,6 +6,7 @@ import {
   getMyBankDetails,
   getOrganizationBankDetailsById,
   updateMyBankDetails,
+  uploadMyBankProof,
 } from "../services/organizationBankDetailsService.js";
 
 function useOrganizationBankDetails({ scope = "mine", organizationId = null } = {}) {
@@ -64,13 +65,30 @@ function useOrganizationBankDetails({ scope = "mine", organizationId = null } = 
         delete normalizedPayload.bankProof;
       }
 
-      const result = bankDetails
-        ? await updateMyBankDetails(normalizedPayload)
-        : await createMyBankDetails(normalizedPayload);
+      let result;
+      let createdAfterMissingRecord = false;
+
+      if (bankDetails) {
+        try {
+          result = await updateMyBankDetails(normalizedPayload);
+        } catch (err) {
+          if (
+            err?.response?.status !== 404 ||
+            err?.response?.data?.message !== "Bank details not found"
+          ) {
+            throw err;
+          }
+
+          result = await createMyBankDetails(normalizedPayload);
+          createdAfterMissingRecord = true;
+        }
+      } else {
+        result = await createMyBankDetails(normalizedPayload);
+      }
 
       setBankDetails(result || null);
       setSuccess(
-        bankDetails
+        bankDetails && !createdAfterMissingRecord
           ? "Bank details updated successfully. Verification is pending again."
           : "Bank details submitted successfully. Verification is pending."
       );
@@ -87,6 +105,16 @@ function useOrganizationBankDetails({ scope = "mine", organizationId = null } = 
     }
   }, [bankDetails]);
 
+  const uploadBankProof = useCallback(async (file) => {
+    const uploadedProof = await uploadMyBankProof(file);
+
+    if (!uploadedProof?.url || !uploadedProof?.fileId) {
+      throw new Error("The bank proof upload did not return a file URL.");
+    }
+
+    return uploadedProof;
+  }, []);
+
   useEffect(() => {
     fetchBankDetails();
   }, [fetchBankDetails]);
@@ -99,6 +127,7 @@ function useOrganizationBankDetails({ scope = "mine", organizationId = null } = 
     success,
     fetchBankDetails,
     submitBankDetails,
+    uploadBankProof,
     setBankDetails,
   };
 }

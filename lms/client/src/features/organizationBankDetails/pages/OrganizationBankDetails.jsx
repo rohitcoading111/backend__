@@ -8,16 +8,31 @@ import BankVerificationStatus from "../components/BankVerificationStatus.jsx";
 import useOrganizationBankDetails from "../hooks/useOrganizationBankDetails.js";
 
 function OrganizationBankDetails() {
-  const { bankDetails, isLoading, error, success, fetchBankDetails, submitBankDetails } = useOrganizationBankDetails();
+  const {
+    bankDetails,
+    isLoading,
+    error,
+    success,
+    fetchBankDetails,
+    submitBankDetails,
+    uploadBankProof,
+  } = useOrganizationBankDetails();
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const hasCompleteBankDetails = Boolean(
+    bankDetails?.accountHolderName?.trim() &&
+      bankDetails?.bankName?.trim() &&
+      bankDetails?.accountNumber &&
+      bankDetails?.ifscCode?.trim() &&
+      bankDetails?.accountType
+  );
 
   const handleSubmit = async (payload) => {
     try {
       setIsSubmitting(true);
       await submitBankDetails(payload);
       setIsEditing(false);
-    } catch (error) {
+    } catch {
       // error is already surfaced in hook state
     } finally {
       setIsSubmitting(false);
@@ -49,26 +64,28 @@ function OrganizationBankDetails() {
               <h1 className="mt-2 text-3xl font-bold text-white">Bank details</h1>
             </div>
 
-            {bankDetails?.verificationStatus ? (
+            {hasCompleteBankDetails && bankDetails?.verificationStatus ? (
               <BankVerificationStatus status={bankDetails.verificationStatus} />
             ) : null}
           </div>
 
           {isLoading ? (
             <div className="h-72 animate-pulse rounded-2xl bg-white/5" />
-          ) : bankDetails && !isEditing ? (
+          ) : hasCompleteBankDetails && !isEditing ? (
             <BankDetailsCard details={bankDetails} onEdit={() => setIsEditing(true)} />
           ) : (
             <BankDetailsForm
               initialValues={bankDetails || null}
               onSubmit={handleSubmit}
+              onUploadBankProof={uploadBankProof}
+              incompleteRecord={Boolean(bankDetails && !hasCompleteBankDetails)}
               isSubmitting={isSubmitting}
               error={error}
               success={success}
             />
           )}
 
-          {!isLoading && bankDetails && isEditing ? (
+          {!isLoading && hasCompleteBankDetails && isEditing ? (
             <div className="mt-4 flex justify-end">
               <button
                 type="button"

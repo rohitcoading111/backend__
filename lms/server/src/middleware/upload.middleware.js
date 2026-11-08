@@ -22,4 +22,33 @@ export const uploadVideo = multer({
   },
 });
 
+const bankProofUpload = multer({
+  storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+  },
+  fileFilter: (req, file, callback) => {
+    const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
+
+    if (!allowedTypes.includes(file.mimetype)) {
+      return callback(new Error("Bank proof must be a PDF, JPG, or PNG file."));
+    }
+
+    callback(null, true);
+  },
+});
+
+export const uploadBankProof = (req, res, next) => {
+  bankProofUpload.single("bankProofFile")(req, res, (error) => {
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.message || "Unable to upload bank proof.",
+      });
+    }
+
+    next();
+  });
+};
+
 export default upload;

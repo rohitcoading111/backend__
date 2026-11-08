@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { UploadCloud, X } from "lucide-react";
 
 const emptyForm = {
   accountHolderName: "",
@@ -11,9 +12,21 @@ const emptyForm = {
   bankProofFileId: "",
 };
 
-function BankDetailsForm({ initialValues, onSubmit, isSubmitting, error, success }) {
+function BankDetailsForm({
+  initialValues,
+  onSubmit,
+  onUploadBankProof,
+  incompleteRecord = false,
+  isSubmitting,
+  error,
+  success,
+}) {
   const [form, setForm] = useState(emptyForm);
   const [formErrors, setFormErrors] = useState({});
+  const [isUploadingProof, setIsUploadingProof] = useState(false);
+  const [proofUploadError, setProofUploadError] = useState("");
+  const [proofFileName, setProofFileName] = useState("");
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (!initialValues) return;
@@ -60,8 +73,46 @@ function BankDetailsForm({ initialValues, onSubmit, isSubmitting, error, success
     setFormErrors((previous) => ({ ...previous, [field]: undefined }));
   };
 
+  const handleProofFileChange = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    setProofUploadError("");
+
+    try {
+      setIsUploadingProof(true);
+      const uploadedProof = await onUploadBankProof(file);
+      setForm((previous) => ({
+        ...previous,
+        bankProofUrl: uploadedProof.url,
+        bankProofFileId: uploadedProof.fileId,
+      }));
+      setProofFileName(file.name);
+    } catch (uploadError) {
+      setProofUploadError(
+        uploadError?.response?.data?.message ||
+          uploadError?.message ||
+          "Unable to upload bank proof."
+      );
+    } finally {
+      setIsUploadingProof(false);
+    }
+  };
+
+  const removeProof = () => {
+    setForm((previous) => ({
+      ...previous,
+      bankProofUrl: "",
+      bankProofFileId: "",
+    }));
+    setProofFileName("");
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (isUploadingProof) return;
+
     const nextErrors = validationErrors;
     setFormErrors(nextErrors);
 
@@ -90,7 +141,13 @@ function BankDetailsForm({ initialValues, onSubmit, isSubmitting, error, success
       <div className="mb-6 flex items-center justify-between gap-4">
         <div>
           <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">Bank details</p>
-          <h3 className="mt-2 text-2xl font-semibold text-white">{initialValues ? "Update bank information" : "Submit bank information"}</h3>
+          <h3 className="mt-2 text-2xl font-semibold text-white">
+            {incompleteRecord
+              ? "Complete bank information"
+              : initialValues
+                ? "Update bank information"
+                : "Submit bank information"}
+          </h3>
         </div>
       </div>
 
@@ -168,24 +225,93 @@ function BankDetailsForm({ initialValues, onSubmit, isSubmitting, error, success
           </select>
         </label>
 
-        <label className="space-y-2 text-sm text-slate-300 md:col-span-2">
-          <span>Bank Proof URL or File ID (optional)</span>
-          <input
-            value={form.bankProofUrl}
-            onChange={(event) => handleChange("bankProofUrl", event.target.value)}
-            className="w-full rounded-xl border border-white/10 bg-[#0d0d0d] px-3 py-3 text-white outline-none transition focus:border-white/20"
-            placeholder="https://example.com/bank-proof.jpg"
-          />
-        </label>
+        <div className="space-y-3 text-sm text-slate-300 md:col-span-2">
+          <p>Bank proof (optional)</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+              onChange={handleProofFileChange}
+              className="sr-only"
+              aria-label="Choose bank proof file"
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploadingProof || isSubmitting}
+              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <UploadCloud size={17} />
+              {isUploadingProof ? "Uploading..." : "Choose file"}
+            </button>
+            <span className="text-xs text-slate-400">
+              PDF, JPG or PNG up to 5 MB
+            </span>
+          </div>
+
+          {proofFileName ? (
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+              <span className="truncate text-xs text-slate-300">{proofFileName}</span>
+              <button
+                type="button"
+                onClick={removeProof}
+                disabled={isSubmitting || isUploadingProof}
+                aria-label="Remove uploaded bank proof"
+                className="rounded-lg p-1 text-slate-400 hover:bg-white/10 hover:text-white disabled:opacity-50"
+              >
+                <X size={15} />
+              </button>
+            </div>
+          ) : null}
+
+          {form.bankProofUrl ? (
+            <a
+              href={form.bankProofUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="block truncate text-xs text-cyan-300 underline"
+            >
+              View current bank proof
+            </a>
+          ) : null}
+
+          {proofUploadError ? (
+            <p role="alert" className="text-xs text-red-300">
+              {proofUploadError}
+            </p>
+          ) : null}
+
+          <label className="block space-y-2 text-xs text-slate-400">
+            <span>Or provide a bank proof URL</span>
+            <input
+              value={form.bankProofUrl}
+              onChange={(event) => {
+                handleChange("bankProofUrl", event.target.value);
+                handleChange("bankProofFileId", "");
+                setProofFileName("");
+              }}
+              type="url"
+              className="w-full rounded-xl border border-white/10 bg-[#0d0d0d] px-3 py-3 text-sm text-white outline-none transition focus:border-white/20"
+              placeholder="https://example.com/bank-proof.pdf"
+            />
+          </label>
+        </div>
       </div>
 
       <div className="mt-6 flex justify-end gap-3">
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isUploadingProof}
           className="rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting ? "Submitting..." : initialValues ? "Update details" : "Submit details"}
+          {isSubmitting
+            ? "Submitting..."
+            : incompleteRecord
+              ? "Save bank details"
+              : initialValues
+                ? "Update details"
+                : "Submit details"}
         </button>
       </div>
     </form>

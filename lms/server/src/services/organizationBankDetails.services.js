@@ -2,6 +2,7 @@
 import mongoose from "mongoose";
 
 import OrganizationBankDetails from "../models/organizationBankDetails.models.js";
+import imagekit from "../config/imagekit.js";
 
 import {
   encryptBankAccountNumber,
@@ -45,6 +46,23 @@ const formatBankDetails = (details) => {
 
     createdAt: details.createdAt,
     updatedAt: details.updatedAt,
+  };
+};
+
+export const uploadOrganizationBankProof = async (file) => {
+  if (!file) {
+    throw new Error("Bank proof file is required");
+  }
+
+  const uploadedFile = await imagekit.files.upload({
+    file: file.buffer.toString("base64"),
+    fileName: `${Date.now()}-${file.originalname}`,
+    folder: "/lms/bank-proofs",
+  });
+
+  return {
+    url: uploadedFile.url,
+    fileId: uploadedFile.fileId,
   };
 };
 
@@ -257,6 +275,116 @@ export const getOrganizationBankDetailsById = async (
 
   if (!bankDetails) {
     return null;
+  }
+
+  return formatBankDetails(bankDetails);
+};
+
+
+
+// ==========================================
+// SUPER ADMIN - VERIFY BANK DETAILS
+// ==========================================
+
+export const verifyOrganizationBankDetails = async ({
+  organizationId,
+  superAdminId,
+}) => {
+  if (
+    !mongoose.Types.ObjectId.isValid(organizationId) ||
+    !mongoose.Types.ObjectId.isValid(superAdminId)
+  ) {
+    throw new Error("Invalid Organization or Admin ID");
+  }
+
+  const bankDetails = await OrganizationBankDetails.findOneAndUpdate(
+    {
+      organization: organizationId,
+      verificationStatus: "PENDING",
+    },
+    {
+      $set: {
+        verificationStatus: "VERIFIED",
+        verifiedBy: superAdminId,
+        verifiedAt: new Date(),
+        rejectionReason: null,
+      },
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  if (!bankDetails) {
+    const existing = await OrganizationBankDetails.findOne({
+      organization: organizationId,
+    }).select("verificationStatus");
+
+    if (!existing) {
+      throw new Error("Bank details not found");
+    }
+
+    throw new Error(
+      `Bank details cannot be verified. Current status: ${existing.verificationStatus}`
+    );
+  }
+
+  return formatBankDetails(bankDetails);
+};
+
+
+// ==========================================
+// SUPER ADMIN - REJECT BANK DETAILS
+// ==========================================
+
+export const rejectOrganizationBankDetails = async ({
+  organizationId,
+  superAdminId,
+  rejectionReason,
+}) => {
+  if (
+    !mongoose.Types.ObjectId.isValid(organizationId) ||
+    !mongoose.Types.ObjectId.isValid(superAdminId)
+  ) {
+    throw new Error("Invalid Organization or Admin ID");
+  }
+
+  if (!rejectionReason || !rejectionReason.trim()) {
+    throw new Error("Rejection reason is required");
+  }
+
+  const bankDetails = await OrganizationBankDetails.findOneAndUpdate(
+    {
+      organization: organizationId,
+      verificationStatus: "PENDING",
+    },
+    {
+      $set: {
+        verificationStatus: "REJECTED",
+        rejectionReason: rejectionReason.trim(),
+        verifiedBy: null,
+        verifiedAt: null,
+      },
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  if (!bankDetails) {
+    const existing = await OrganizationBankDetails.findOne({
+      organization: organizationId,
+    }).select("verificationStatus");
+
+    if (!existing) {
+      throw new Error("Bank details not found");
+    }
+
+    throw new Error(
+      `Bank details cannot be rejected. Current status: ${existing.verificationStatus}`
+    );
   }
 
   return formatBankDetails(bankDetails);

@@ -7,6 +7,9 @@ import {
   getMyBankDetailsController,
   getAllBankDetailsController,
   getOrganizationBankDetailsController,
+  verifyBankDetailsController,
+rejectBankDetailsController,
+  uploadBankProofController,
 } from "../controllers/organizationBankDetails.controllers.js";
 
 import {
@@ -18,6 +21,7 @@ import {
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { roleMiddleware } from "../middleware/role.middleware.js";
 import { organizationAdminMiddleware } from "../middleware/organizationAdmin.middleware.js";
+import { uploadBankProof } from "../middleware/upload.middleware.js";
 
 const router = express.Router();
 
@@ -30,6 +34,7 @@ router.post(
   "/my-bank-details",
   authMiddleware,
   organizationAdminMiddleware,
+  uploadBankProof,
   createBankDetailsValidator,
   handleBankDetailsValidationErrors,
   createBankDetailsController
@@ -40,6 +45,7 @@ router.patch(
   "/my-bank-details",
   authMiddleware,
   organizationAdminMiddleware,
+  uploadBankProof,
   updateBankDetailsValidator,
   handleBankDetailsValidationErrors,
   updateBankDetailsController
@@ -51,6 +57,14 @@ router.get(
   authMiddleware,
   organizationAdminMiddleware,
   getMyBankDetailsController
+);
+
+router.post(
+  "/my-bank-details/bank-proof",
+  authMiddleware,
+  organizationAdminMiddleware,
+  uploadBankProof,
+  uploadBankProofController
 );
 
 // ==========================================
@@ -71,6 +85,23 @@ router.get(
   authMiddleware,
   roleMiddleware("SUPER_ADMIN"),
   getOrganizationBankDetailsController
+);
+
+
+// Verify Organization Bank Details
+router.patch(
+  "/super-admin/:organizationId/verify",
+  authMiddleware,
+  roleMiddleware("SUPER_ADMIN"),
+  verifyBankDetailsController
+);
+
+// Reject Organization Bank Details
+router.patch(
+  "/super-admin/:organizationId/reject",
+  authMiddleware,
+  roleMiddleware("SUPER_ADMIN"),
+  rejectBankDetailsController
 );
 
 export default router;
