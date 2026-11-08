@@ -1,6 +1,7 @@
 
 import useContactPage from "./hooks/useContactPage";
 
+import SEO from "../../components/SEO.jsx";
 import ContactNavbar from "./components/ContactNavbar";
 import ContactHero from "./components/ContactHero";
 import ContactForm from "./components/ContactForm";
@@ -19,6 +20,11 @@ export default function ContactPage() {
 
   return (
     <main className="learnhub-home learnhub-contact min-h-screen overflow-hidden text-white">
+      <SEO
+        title="Contact LearnHub – Get in Touch"
+        description="Contact LearnHub for questions, learning support and assistance with our online learning platform."
+        path="/contact"
+      />
       <ContactNavbar />
 
       <ContactHero />

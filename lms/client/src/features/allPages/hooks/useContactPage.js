@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 // Replace this with your actual official support email.
 const CONTACT_EMAIL = "";
@@ -15,68 +15,6 @@ export default function useContactPage() {
   const [formData, setFormData] = useState(initialForm);
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState("");
-
-  useEffect(() => {
-    const previousTitle = document.title;
-
-    document.title = "Contact LearnHub | Get in Touch";
-
-    const description =
-      "Contact LearnHub for questions about online courses, student accounts, instructors, organizations and platform support.";
-
-    const updateMeta = (selector, attribute, key, content) => {
-      let element = document.querySelector(selector);
-
-      if (!element) {
-        element = document.createElement("meta");
-        element.setAttribute(attribute, key);
-        document.head.appendChild(element);
-      }
-
-      element.setAttribute("content", content);
-    };
-
-    updateMeta(
-      'meta[name="description"]',
-      "name",
-      "description",
-      description
-    );
-
-    updateMeta(
-      'meta[property="og:title"]',
-      "property",
-      "og:title",
-      "Contact LearnHub"
-    );
-
-    updateMeta(
-      'meta[property="og:description"]',
-      "property",
-      "og:description",
-      description
-    );
-
-    let canonical = document.querySelector('link[rel="canonical"]');
-
-    const previousCanonical = canonical?.href;
-
-    if (!canonical) {
-      canonical = document.createElement("link");
-      canonical.rel = "canonical";
-      document.head.appendChild(canonical);
-    }
-
-    canonical.href = "https://learnhubcloud.in/contact";
-
-    return () => {
-      document.title = previousTitle;
-
-      if (canonical && previousCanonical) {
-        canonical.href = previousCanonical;
-      }
-    };
-  }, []);
 
   const validateForm = () => {
     const newErrors = {};

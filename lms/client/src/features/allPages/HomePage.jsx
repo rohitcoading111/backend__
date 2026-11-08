@@ -1,7 +1,8 @@
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
+import SEO from "../../components/SEO.jsx";
 import "./HomePage.css";
 
 const features = [
@@ -101,58 +102,13 @@ function SectionHeading({ eyebrow, title, description }) {
 export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  useEffect(() => {
-    document.title =
-      "LearnHub – Online Learning Platform & Online Courses";
-
-    const setMeta = (name, content, attribute = "name") => {
-      let element = document.querySelector(
-        `meta[${attribute}="${name}"]`
-      );
-
-      if (!element) {
-        element = document.createElement("meta");
-        element.setAttribute(attribute, name);
-        document.head.appendChild(element);
-      }
-
-      element.setAttribute("content", content);
-    };
-
-    setMeta(
-      "description",
-      "Explore online courses on LearnHub. Learn new skills, access structured lectures, attend live classes and track your learning progress."
-    );
-
-    setMeta("og:title", "LearnHub – Online Learning Platform", "property");
-    setMeta(
-      "og:description",
-      "Discover online courses, learn from instructors, attend live classes and track your progress with LearnHub.",
-      "property"
-    );
-    setMeta("og:type", "website", "property");
-    setMeta("og:url", "https://learnhubcloud.in/", "property");
-
-    setMeta("twitter:card", "summary_large_image");
-    setMeta("twitter:title", "LearnHub – Online Learning Platform");
-    setMeta(
-      "twitter:description",
-      "Explore courses and build practical skills with LearnHub."
-    );
-
-    let canonical = document.querySelector('link[rel="canonical"]');
-
-    if (!canonical) {
-      canonical = document.createElement("link");
-      canonical.rel = "canonical";
-      document.head.appendChild(canonical);
-    }
-
-    canonical.href = "https://learnhubcloud.in/";
-  }, []);
-
   return (
     <main className="learnhub-home min-h-screen overflow-hidden text-white">
+      <SEO
+        title="LearnHub – Online Learning Platform"
+        description="Discover expert-led online courses, attend live classes, develop practical skills and track your learning progress with LearnHub."
+        path="/"
+      />
       {/* NAVBAR */}
       <header className="sticky top-0 z-50 border-b border-white/10 bg-[#080d18]/90 backdrop-blur-xl">
         <nav
@@ -257,17 +213,17 @@ export default function HomePage() {
           </div>
 
           <h1 className="text-4xl font-extrabold leading-tight tracking-tight sm:text-6xl lg:text-7xl">
-            Learn New Skills.
+            Online Learning.
             <br />
             <span className="bg-gradient-to-r from-cyan-300 to-blue-500 bg-clip-text text-transparent">
-              Build Your Future.
+              Build Practical Skills.
             </span>
           </h1>
 
           <p className="mx-auto mt-7 max-w-2xl text-base leading-8 text-slate-400 sm:text-lg">
-            Discover online courses, learn through structured lectures,
-            attend live classes and track your progress — all in one
-            learning platform.
+            LearnHub is an online learning platform where you can
+            explore courses, follow structured lectures, attend live
+            classes and track your learning progress.
           </p>
 
           <div className="mt-10 flex flex-wrap justify-center gap-4">
@@ -301,7 +257,7 @@ export default function HomePage() {
             </p>
 
             <h2 className="text-3xl font-bold leading-tight sm:text-4xl">
-              Everything you need for a better online learning experience
+              Explore Online Courses, Live Classes and Learning Tools
             </h2>
 
             <p className="mt-6 leading-8 text-slate-400">
@@ -347,7 +303,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl">
           <SectionHeading
             eyebrow="Platform features"
-            title="Learn more with the right tools"
+            title="Tools for Courses, Live Learning and Progress Tracking"
             description="An online learning platform designed to organize courses, support live learning and make progress easier to follow."
           />
 

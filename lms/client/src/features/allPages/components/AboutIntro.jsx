@@ -9,16 +9,16 @@ export default function AboutIntro() {
           </span>
 
           <h1 className="mt-8 text-4xl font-extrabold leading-tight sm:text-6xl lg:text-7xl">
-            Everything You Need
+            About LearnHub
             <span className="block bg-gradient-to-r from-cyan-300 to-blue-500 bg-clip-text text-transparent">
-              To Learn & Teach
+              Online Learning Platform
             </span>
           </h1>
 
           <p className="mx-auto mt-7 max-w-3xl text-base leading-8 text-slate-400 sm:text-lg">
             LearnHub connects students, instructors and organizations
             through online courses, structured lectures, live classes
-            and learning management tools.
+            and tools for tracking learning progress.
           </p>
 
           <a
@@ -33,7 +33,7 @@ export default function AboutIntro() {
       <section className="border-y border-white/10 bg-white/[0.02] px-5 py-20">
         <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-2 md:items-center">
           <h2 className="text-3xl font-bold leading-tight sm:text-4xl">
-            Take a closer look at how LearnHub works
+            Explore LearnHub's Online Learning Platform
           </h2>
 
           <p className="text-sm leading-8 text-slate-400 sm:text-base">

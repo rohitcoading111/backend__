@@ -8,15 +8,16 @@ export default function ContactHero() {
         </span>
 
         <h1 className="mt-8 text-4xl font-extrabold tracking-tight sm:text-6xl">
-          Get in Touch With
+          Contact
           <span className="block bg-gradient-to-r from-cyan-300 to-blue-500 bg-clip-text text-transparent">
             LearnHub
           </span>
         </h1>
 
         <p className="mx-auto mt-7 max-w-2xl text-base leading-8 text-slate-400 sm:text-lg">
-          Have questions about courses, your account or the LearnHub
-          platform? Send us a message and tell us how we can help.
+          Have a question about available courses, your account or how
+          the LearnHub online learning platform works? Use the form below
+          to enter the details.
         </p>
 
         <a

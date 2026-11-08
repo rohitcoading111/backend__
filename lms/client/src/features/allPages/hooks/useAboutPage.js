@@ -1,6 +1,4 @@
 
-import { useEffect } from "react";
-
 const features = [
   {
     number: "01",
@@ -14,7 +12,7 @@ const features = [
       "Navigate learning activities",
     ],
     image: "/images/about/dashboard.png",
-    alt: "LearnHub student dashboard",
+    alt: "LearnHub dashboard for viewing enrolled courses and learning activity",
   },
   {
     number: "02",
@@ -28,7 +26,7 @@ const features = [
       "View course descriptions and pricing",
     ],
     image: "/images/about/courseCatalog.png",
-    alt: "LearnHub online course catalog",
+    alt: "LearnHub catalog for browsing published online courses and course details",
   },
   {
     number: "03",
@@ -42,7 +40,7 @@ const features = [
       "Open module lectures",
     ],
     image: "/images/about/module.png",
-    alt: "LearnHub course modules",
+    alt: "LearnHub course modules organized into lessons",
   },
   {
     number: "04",
@@ -56,7 +54,7 @@ const features = [
       "Mark lectures as completed",
     ],
     image: "/images/about/lecturePlayer.png",
-    alt: "LearnHub lecture player",
+    alt: "LearnHub lecture player for watching course lessons",
   },
   {
     number: "05",
@@ -70,7 +68,7 @@ const features = [
       "Monitor learning completion",
     ],
     image: "/images/about/myprogress.png",
-    alt: "LearnHub learning progress",
+    alt: "LearnHub learning progress view for tracking completed lectures",
   },
   {
     number: "06",
@@ -84,7 +82,7 @@ const features = [
       "Access course sessions",
     ],
     image: "/images/about/liveclasses.png",
-    alt: "LearnHub live classes",
+    alt: "LearnHub live classes view for finding course sessions",
   },
   {
     number: "07",
@@ -98,7 +96,7 @@ const features = [
       "Manage teaching activities",
     ],
     image: "/images/about/instructorDashboard.png",
-    alt: "LearnHub instructor dashboard",
+    alt: "LearnHub instructor dashboard for managing teaching activities",
   },
   {
     number: "08",
@@ -112,7 +110,7 @@ const features = [
       "Manage course content",
     ],
     image: "/images/about/createcourse.png",
-    alt: "LearnHub create course interface",
+    alt: "LearnHub course creation interface for entering course information",
   },
   {
     number: "09",
@@ -126,7 +124,7 @@ const features = [
       "Access organization options",
     ],
     image: "/images/about/exploreOrganisation.png",
-    alt: "LearnHub explore organizations",
+    alt: "LearnHub organization discovery interface",
   },
   {
     number: "10",
@@ -140,7 +138,7 @@ const features = [
       "Navigate management features",
     ],
     image: "/images/about/org-dashboard.png",
-    alt: "LearnHub organization dashboard",
+    alt: "LearnHub organization administrator dashboard",
   },
   {
     number: "11",
@@ -154,7 +152,7 @@ const features = [
       "Organize instructor access",
     ],
     image: "/images/about/org-admin.png",
-    alt: "LearnHub instructor management",
+    alt: "LearnHub organization instructor management screen",
   },
   {
     number: "12",
@@ -168,7 +166,7 @@ const features = [
       "Access platform controls",
     ],
     image: "/images/about/SuperAdminDashboard.png",
-    alt: "LearnHub super admin dashboard",
+    alt: "LearnHub super administrator dashboard",
   },
   {
     number: "13",
@@ -182,71 +180,11 @@ const features = [
       "Complete enrollment payment flow",
     ],
     image: "/images/about/rozarpay.png",
-    alt: "LearnHub course payment interface",
+    alt: "LearnHub course payment interface for reviewing course pricing",
   },
 ];
 
 export default function useAboutPage() {
-  useEffect(() => {
-    const previousTitle = document.title;
-
-    const description =
-      "Explore LearnHub features including student dashboards, online courses, modules, lectures, live classes, instructor tools, organization management and payments.";
-
-    document.title =
-      "About LearnHub – Platform Features and Learning Experience";
-
-    const updateMeta = (selector, attribute, key, content) => {
-      let element = document.querySelector(selector);
-
-      if (!element) {
-        element = document.createElement("meta");
-        element.setAttribute(attribute, key);
-        document.head.appendChild(element);
-      }
-
-      element.setAttribute("content", content);
-    };
-
-    updateMeta(
-      'meta[name="description"]',
-      "name",
-      "description",
-      description
-    );
-
-    updateMeta(
-      'meta[property="og:title"]',
-      "property",
-      "og:title",
-      "About LearnHub – Platform Features"
-    );
-
-    updateMeta(
-      'meta[property="og:description"]',
-      "property",
-      "og:description",
-      description
-    );
-
-    const canonical =
-      document.querySelector('link[rel="canonical"]');
-
-    const previousCanonical = canonical?.href;
-
-    if (canonical) {
-      canonical.href = "https://learnhubcloud.in/about";
-    }
-
-    return () => {
-      document.title = previousTitle;
-
-      if (canonical && previousCanonical) {
-        canonical.href = previousCanonical;
-      }
-    };
-  }, []);
-
   return {
     features,
   };

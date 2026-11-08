@@ -7,6 +7,18 @@ Disallow: /instructor
 Disallow: /student
 Disallow: /my-enrollments
 Disallow: /live-class
+Disallow: /dashboard
+Disallow: /courses
+Disallow: /live-classes
+Disallow: /instructor-dashboard
+Disallow: /organization-overview
+Disallow: /organization-instructor-dashboard
+Disallow: /organization-admin-dashboard
+Disallow: /organization-details
+Disallow: /organization-admin/
+Disallow: /super-admin-dashboard
+Disallow: /super-admin/
+Disallow: /adminDashboard
 Allow: /favicon.png
 
 Sitemap: https://learnhubcloud.in/sitemap.xml

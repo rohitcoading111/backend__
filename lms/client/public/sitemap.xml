@@ -1,4 +1,3 @@
-
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
@@ -12,26 +11,6 @@
 
   <url>
     <loc>https://learnhubcloud.in/contact</loc>
-  </url>
-
-  <url>
-    <loc>https://learnhubcloud.in/how-it-works</loc>
-  </url>
-
-  <url>
-    <loc>https://learnhubcloud.in/student-guide</loc>
-  </url>
-
-  <url>
-    <loc>https://learnhubcloud.in/instructor-guide</loc>
-  </url>
-
-  <url>
-    <loc>https://learnhubcloud.in/organization-admin-guide</loc>
-  </url>
-
-  <url>
-    <loc>https://learnhubcloud.in/super-admin-guide</loc>
   </url>
 
 </urlset>

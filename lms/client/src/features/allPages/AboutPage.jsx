@@ -1,6 +1,7 @@
 
 import useAboutPage from "./hooks/useAboutPage";
 
+import SEO from "../../components/SEO.jsx";
 import AboutNavbar from "./components/AboutNavbar";
 import AboutIntro from "./components/AboutIntro";
 import FeatureSection from "./components/FeatureSection";
@@ -13,6 +14,11 @@ export default function AboutPage() {
 
   return (
     <main className="learnhub-home learnhub-about min-h-screen overflow-hidden text-white">
+      <SEO
+        title="About LearnHub – Our Learning Platform"
+        description="Learn about LearnHub, our mission and our approach to making online education accessible through expert-led courses and live classes."
+        path="/about"
+      />
       <AboutNavbar />
 
       <AboutIntro />
@@ -28,7 +34,7 @@ export default function AboutPage() {
             </p>
 
             <h2 className="text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
-              Discover What You Can Do With LearnHub
+              LearnHub Features for Students, Instructors and Organizations
             </h2>
 
             <p className="mx-auto mt-5 max-w-2xl text-sm leading-8 text-slate-400 sm:text-base">
