@@ -9,7 +9,8 @@ function formatCurrency(value) {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(Number(value || 0));
 }
 
@@ -48,15 +49,23 @@ function OrganizationPaymentAnalytics() {
           ) : null}
 
           {isLoading ? (
-            <div className="grid gap-4 md:grid-cols-4">
-              {[1, 2, 3, 4].map((item) => (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {[1, 2, 3, 4, 5, 6, 7].map((item) => (
                 <div key={item} className="h-28 animate-pulse rounded-2xl bg-white/5" />
               ))}
             </div>
           ) : (
-            <div className="grid gap-4 md:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <AnalyticsStatCard label="Students" value={analytics?.totalStudents || 0} accent="slate" />
-              <AnalyticsStatCard label="Revenue" value={formatCurrency(analytics?.totalRevenue)} accent="emerald" />
+              <AnalyticsStatCard label="Gross revenue" value={formatCurrency(analytics?.grossRevenue)} accent="emerald" />
+              <AnalyticsStatCard label="GST (18% of gross)" value={formatCurrency(analytics?.gstDeduction)} accent="amber" />
+              <AnalyticsStatCard label="Razorpay fee (2% of gross)" value={formatCurrency(analytics?.razorpayFee)} accent="amber" />
+              <AnalyticsStatCard
+                label="Payable amount"
+                value={formatCurrency(analytics?.payableAmount)}
+                subtitle="Gross less GST and Razorpay fee. Display only; no automatic transfer."
+                accent="sky"
+              />
               <AnalyticsStatCard label="Transactions" value={analytics?.totalTransactions || 0} accent="amber" />
               <AnalyticsStatCard label="Courses" value={analytics?.courses?.length || 0} accent="sky" />
             </div>
@@ -65,7 +74,12 @@ function OrganizationPaymentAnalytics() {
 
         <section className="mt-8 rounded-[28px] border border-white/10 bg-[#111111] p-6">
           <div className="mb-5 flex items-center justify-between gap-3">
-            <h2 className="text-xl font-semibold text-white">Course-wise performance</h2>
+            <div>
+              <h2 className="text-xl font-semibold text-white">Course-wise performance</h2>
+              <p className="mt-1 text-xs text-slate-400">
+                Payable estimate = gross course revenue − 18% GST − 2% Razorpay fee. No platform fee is deducted.
+              </p>
+            </div>
           </div>
 
           {!isLoading ? <CourseAnalyticsTable courses={analytics?.courses || []} /> : null}

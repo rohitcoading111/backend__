@@ -2,7 +2,8 @@ function formatCurrency(value) {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(Number(value || 0));
 }
 
@@ -23,7 +24,10 @@ function CourseAnalyticsTable({ courses = [] }) {
             <tr>
               <th className="px-5 py-4 font-medium">Course</th>
               <th className="px-5 py-4 font-medium">Students</th>
-              <th className="px-5 py-4 font-medium">Revenue</th>
+              <th className="px-5 py-4 font-medium">Gross revenue</th>
+              <th className="px-5 py-4 font-medium">GST (18%)</th>
+              <th className="px-5 py-4 font-medium">Razorpay (2%)</th>
+              <th className="px-5 py-4 font-medium">Payable amount</th>
               <th className="px-5 py-4 font-medium">Transactions</th>
             </tr>
           </thead>
@@ -33,6 +37,9 @@ function CourseAnalyticsTable({ courses = [] }) {
                 <td className="px-5 py-4 font-medium">{course?.courseTitle || "Course"}</td>
                 <td className="px-5 py-4">{course?.totalStudents || 0}</td>
                 <td className="px-5 py-4">{formatCurrency(course?.totalRevenue)}</td>
+                <td className="px-5 py-4">{formatCurrency(course?.gstDeduction)}</td>
+                <td className="px-5 py-4">{formatCurrency(course?.razorpayFee)}</td>
+                <td className="px-5 py-4 font-semibold text-emerald-200">{formatCurrency(course?.payableAmount)}</td>
                 <td className="px-5 py-4">{course?.totalTransactions || 0}</td>
               </tr>
             ))}

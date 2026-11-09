@@ -1,5 +1,5 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, BarChart3, Building2, CreditCard, Users } from "lucide-react";
+import { ArrowLeft, BarChart3, Building2 } from "lucide-react";
 
 import AnalyticsStatCard from "../components/AnalyticsStatCard.jsx";
 import CourseAnalyticsTable from "../components/CourseAnalyticsTable.jsx";
@@ -11,7 +11,8 @@ function formatCurrency(value) {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(Number(value || 0));
 }
 
@@ -19,8 +20,8 @@ function SuperAdminPaymentAnalytics() {
   const navigate = useNavigate();
   const { organizationId } = useParams();
 
-  const { summary, organizations, isLoading, error, fetchAnalytics } = useSuperAdminAnalytics();
-  const { analytics, isLoading: isLoadingOrganization, error: organizationError, fetchAnalytics: refetchOrganization } = useOrganizationAnalytics(organizationId);
+  const { summary, organizations, isLoading, error } = useSuperAdminAnalytics();
+  const { analytics, isLoading: isLoadingOrganization, error: organizationError } = useOrganizationAnalytics(organizationId);
 
   if (organizationId) {
     const courseList = analytics?.courses || [];
@@ -58,15 +59,23 @@ function SuperAdminPaymentAnalytics() {
                 {organizationError}
               </div>
             ) : isLoadingOrganization ? (
-              <div className="grid gap-4 md:grid-cols-4">
-                {[1, 2, 3, 4].map((item) => (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {[1, 2, 3, 4, 5, 6, 7].map((item) => (
                   <div key={item} className="h-28 animate-pulse rounded-2xl bg-white/5" />
                 ))}
               </div>
             ) : (
-              <div className="grid gap-4 md:grid-cols-4">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <AnalyticsStatCard label="Students" value={analytics?.totalStudents || 0} accent="slate" />
-                <AnalyticsStatCard label="Revenue" value={formatCurrency(analytics?.totalRevenue)} accent="emerald" />
+                <AnalyticsStatCard label="Gross revenue" value={formatCurrency(analytics?.grossRevenue)} accent="emerald" />
+                <AnalyticsStatCard label="GST (18% of gross)" value={formatCurrency(analytics?.gstDeduction)} accent="amber" />
+                <AnalyticsStatCard label="Razorpay fee (2% of gross)" value={formatCurrency(analytics?.razorpayFee)} accent="amber" />
+                <AnalyticsStatCard
+                  label="Payable amount"
+                  value={formatCurrency(analytics?.payableAmount)}
+                  subtitle="Calculated only; not transferred automatically."
+                  accent="sky"
+                />
                 <AnalyticsStatCard label="Transactions" value={analytics?.totalTransactions || 0} accent="amber" />
                 <AnalyticsStatCard label="Courses" value={analytics?.courses?.length || 0} accent="sky" />
               </div>
@@ -103,16 +112,36 @@ function SuperAdminPaymentAnalytics() {
         ) : null}
 
         {isLoading ? (
-          <div className="grid gap-4 md:grid-cols-4">
-            {[1, 2, 3, 4].map((item) => (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4, 5].map((item) => (
               <div key={item} className="h-28 animate-pulse rounded-2xl bg-white/5" />
             ))}
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <AnalyticsStatCard label="Total organizations" value={summary.totalOrganizations} accent="slate" />
             <AnalyticsStatCard label="Total students" value={summary.totalStudents} accent="sky" />
-            <AnalyticsStatCard label="Total revenue" value={formatCurrency(summary.totalRevenue)} accent="emerald" />
+            <AnalyticsStatCard
+              label="Gross revenue (all organizations)"
+              value={formatCurrency(summary.grossRevenue)}
+              accent="emerald"
+            />
+            <AnalyticsStatCard
+              label="GST (18% of gross)"
+              value={formatCurrency(summary.gstDeduction)}
+              accent="amber"
+            />
+            <AnalyticsStatCard
+              label="Razorpay fee (2% of gross)"
+              value={formatCurrency(summary.razorpayFee)}
+              accent="amber"
+            />
+            <AnalyticsStatCard
+              label="Total payable (all organizations)"
+              value={formatCurrency(summary.payableAmount)}
+              subtitle="Calculated estimate; not transferred automatically."
+              accent="sky"
+            />
             <AnalyticsStatCard label="Total transactions" value={summary.totalTransactions} accent="amber" />
           </div>
         )}

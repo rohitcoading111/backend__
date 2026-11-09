@@ -9,6 +9,11 @@ function useSuperAdminAnalytics() {
     totalOrganizations: 0,
     totalStudents: 0,
     totalRevenue: 0,
+    grossRevenue: 0,
+    gstDeduction: 0,
+    razorpayFee: 0,
+    totalDeductions: 0,
+    payableAmount: 0,
     totalTransactions: 0,
   });
   const [organizations, setOrganizations] = useState([]);
@@ -34,6 +39,14 @@ function useSuperAdminAnalytics() {
         totalOrganizations: normalizedSummary.totalOrganizations || 0,
         totalStudents: normalizedSummary.totalStudents || 0,
         totalRevenue: normalizedSummary.totalRevenue || 0,
+        grossRevenue:
+          normalizedSummary.grossRevenue ??
+          normalizedSummary.totalRevenue ??
+          0,
+        gstDeduction: normalizedSummary.gstDeduction ?? 0,
+        razorpayFee: normalizedSummary.razorpayFee ?? 0,
+        totalDeductions: normalizedSummary.totalDeductions ?? 0,
+        payableAmount: normalizedSummary.payableAmount ?? 0,
         totalTransactions: normalizedSummary.totalTransactions || 0,
       });
       setOrganizations(normalizedOrganizations);

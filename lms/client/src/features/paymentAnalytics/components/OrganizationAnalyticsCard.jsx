@@ -4,7 +4,8 @@ function formatCurrency(value) {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(Number(value || 0));
 }
 
@@ -32,7 +33,7 @@ function OrganizationAnalyticsCard({ organization, onViewDetails }) {
         </button>
       </div>
 
-      <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         <div className="rounded-xl border border-white/10 bg-white/3 p-3">
           <div className="flex items-center gap-2 text-slate-400">
             <Users size={14} />
@@ -44,9 +45,17 @@ function OrganizationAnalyticsCard({ organization, onViewDetails }) {
         <div className="rounded-xl border border-white/10 bg-white/3 p-3">
           <div className="flex items-center gap-2 text-slate-400">
             <CreditCard size={14} />
-            <span className="text-[10px] uppercase tracking-[0.18em]">Revenue</span>
+            <span className="text-[10px] uppercase tracking-[0.18em]">Gross revenue</span>
           </div>
-          <p className="mt-3 text-xl font-bold text-white">{formatCurrency(organization?.totalRevenue)}</p>
+          <p className="mt-3 text-xl font-bold text-white">{formatCurrency(organization?.grossRevenue)}</p>
+        </div>
+
+        <div className="rounded-xl border border-emerald-400/20 bg-emerald-500/5 p-3">
+          <div className="flex items-center gap-2 text-emerald-200">
+            <CreditCard size={14} />
+            <span className="text-[10px] uppercase tracking-[0.18em]">Payable amount</span>
+          </div>
+          <p className="mt-3 text-xl font-bold text-white">{formatCurrency(organization?.payableAmount)}</p>
         </div>
 
         <div className="rounded-xl border border-white/10 bg-white/3 p-3">
