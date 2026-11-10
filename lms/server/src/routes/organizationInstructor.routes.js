@@ -11,6 +11,7 @@ import {
 
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { organizationAdminMiddleware } from "../middleware/organizationAdmin.middleware.js";
+import { requireOrganizationPolicyAcceptance } from "../middleware/requireOrganizationPolicyAcceptance.middleware.js";
 
 const router = express.Router();
 
@@ -61,6 +62,7 @@ router.get(
   "/instructors/search",
   authMiddleware,
   organizationAdminMiddleware,
+  requireOrganizationPolicyAcceptance,
   searchIndependentInstructorController
 );
 
@@ -69,6 +71,7 @@ router.post(
   "/instructors/:userId/hire",
   authMiddleware,
   organizationAdminMiddleware,
+  requireOrganizationPolicyAcceptance,
   validateUserId,
   hireInstructorController
 );
@@ -78,6 +81,7 @@ router.patch(
   "/instructors/:instructorId/remove",
   authMiddleware,
   organizationAdminMiddleware,
+  requireOrganizationPolicyAcceptance,
   validateInstructorId,
   removeInstructorController
 );
@@ -88,6 +92,7 @@ router.get(
   "/instructors",
   authMiddleware,
   organizationAdminMiddleware,
+  requireOrganizationPolicyAcceptance,
   getOrganizationInstructorsController
 );
 export default router;

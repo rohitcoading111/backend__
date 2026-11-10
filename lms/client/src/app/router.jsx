@@ -32,6 +32,7 @@ import PaymentAnalyticsOverview from "../features/paymentAnalytics/pages/SuperAd
 import OrganizationPaymentAnalytics from "../features/paymentAnalytics/pages/OrganizationPaymentAnalytics.jsx";
 import OrganizationBankDetails from "../features/organizationBankDetails/pages/OrganizationBankDetails.jsx";
 import SuperAdminBankDetails from "../features/organizationBankDetails/pages/SuperAdminBankDetails.jsx";
+import OrganizationPolicyAcceptancePage from "../features/organizationPolicies/pages/OrganizationPolicyAcceptancePage.jsx";
 
 import IndependentInstructorDashboard from
   "../features/independentInstructor/pages/IndependentInstructorDashboard.jsx";
@@ -39,6 +40,7 @@ import IndependentInstructorDashboard from
   import OrganizationOverview from "../features/org-ins/pages/OrganizationOverview.jsx";
 // Route Guards
 import ProtectedRoute from "../routes/ProtectedRoute.jsx";
+import OrganizationPolicyGuard from "../routes/OrganizationPolicyGuard.jsx";
 import PublicOnlyRoute from "../routes/PublicOnlyRoute.jsx";
 
 import ForgotPassword from "../features/auth/components/ForgotPassword.jsx";
@@ -179,20 +181,29 @@ export const router = createBrowserRouter([
 
   children: [
     {
-      path: "/organization-admin-dashboard",
-      element: <OrganizationAdminDashboard />,
+      path: "/organization-policy-acceptance",
+      element: <OrganizationPolicyAcceptancePage />,
     },
     {
-      path: "/organization-details",
-      element: <OrganizationDetailsPage />,
-    },
-    {
-      path: "/organization-admin/payment-analytics",
-      element: <OrganizationPaymentAnalytics />,
-    },
-    {
-      path: "/organization-admin/bank-details",
-      element: <OrganizationBankDetails />,
+      element: <OrganizationPolicyGuard />,
+      children: [
+        {
+          path: "/organization-admin-dashboard",
+          element: <OrganizationAdminDashboard />,
+        },
+        {
+          path: "/organization-details",
+          element: <OrganizationDetailsPage />,
+        },
+        {
+          path: "/organization-admin/payment-analytics",
+          element: <OrganizationPaymentAnalytics />,
+        },
+        {
+          path: "/organization-admin/bank-details",
+          element: <OrganizationBankDetails />,
+        },
+      ],
     },
   ],
 },

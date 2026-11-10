@@ -21,6 +21,7 @@ import {
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { roleMiddleware } from "../middleware/role.middleware.js";
 import { organizationAdminMiddleware } from "../middleware/organizationAdmin.middleware.js";
+import { requireOrganizationPolicyAcceptance } from "../middleware/requireOrganizationPolicyAcceptance.middleware.js";
 import { uploadBankProof } from "../middleware/upload.middleware.js";
 
 const router = express.Router();
@@ -34,6 +35,7 @@ router.post(
   "/my-bank-details",
   authMiddleware,
   organizationAdminMiddleware,
+  requireOrganizationPolicyAcceptance,
   uploadBankProof,
   createBankDetailsValidator,
   handleBankDetailsValidationErrors,
@@ -45,6 +47,7 @@ router.patch(
   "/my-bank-details",
   authMiddleware,
   organizationAdminMiddleware,
+  requireOrganizationPolicyAcceptance,
   uploadBankProof,
   updateBankDetailsValidator,
   handleBankDetailsValidationErrors,
@@ -56,6 +59,7 @@ router.get(
   "/my-bank-details",
   authMiddleware,
   organizationAdminMiddleware,
+  requireOrganizationPolicyAcceptance,
   getMyBankDetailsController
 );
 
@@ -63,6 +67,7 @@ router.post(
   "/my-bank-details/bank-proof",
   authMiddleware,
   organizationAdminMiddleware,
+  requireOrganizationPolicyAcceptance,
   uploadBankProof,
   uploadBankProofController
 );

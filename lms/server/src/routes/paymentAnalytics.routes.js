@@ -10,6 +10,7 @@ import {
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { roleMiddleware } from "../middleware/role.middleware.js";
 import { organizationAdminMiddleware } from "../middleware/organizationAdmin.middleware.js";
+import { requireOrganizationPolicyAcceptance } from "../middleware/requireOrganizationPolicyAcceptance.middleware.js";
 
 const router = express.Router();
 
@@ -46,6 +47,7 @@ router.get(
   "/organization",
   authMiddleware,
   organizationAdminMiddleware,
+  requireOrganizationPolicyAcceptance,
   getMyOrganizationAnalyticsController
 );
 

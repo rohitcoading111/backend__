@@ -11,7 +11,19 @@ function ProtectedRoute({
   const location = useLocation();
 
   // Current authenticated user
-  const user = useSelector((state) => state.auth?.user);
+  const { user, isRestoring } = useSelector((state) => state.auth || {});
+
+  if (isRestoring) {
+    return (
+      <main
+        className="flex min-h-screen items-center justify-center bg-[#070707] text-white"
+        role="status"
+        aria-label="Restoring session"
+      >
+        <span className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-white/80" />
+      </main>
+    );
+  }
 
   // Not logged in
   if (!user || !user.role) {
