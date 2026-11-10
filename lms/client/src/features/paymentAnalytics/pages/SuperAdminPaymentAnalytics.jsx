@@ -70,6 +70,7 @@ function SuperAdminPaymentAnalytics() {
                 <AnalyticsStatCard label="Gross revenue" value={formatCurrency(analytics?.grossRevenue)} accent="emerald" />
                 <AnalyticsStatCard label="GST (18% of gross)" value={formatCurrency(analytics?.gstDeduction)} accent="amber" />
                 <AnalyticsStatCard label="Razorpay fee (2% of gross)" value={formatCurrency(analytics?.razorpayFee)} accent="amber" />
+                <AnalyticsStatCard label="Platform fee (10% of gross)" value={formatCurrency(analytics?.platformFee)} accent="amber" />
                 <AnalyticsStatCard
                   label="Payable amount"
                   value={formatCurrency(analytics?.payableAmount)}
@@ -134,6 +135,11 @@ function SuperAdminPaymentAnalytics() {
             <AnalyticsStatCard
               label="Razorpay fee (2% of gross)"
               value={formatCurrency(summary.razorpayFee)}
+              accent="amber"
+            />
+            <AnalyticsStatCard
+              label="Platform fee (10% of gross)"
+              value={formatCurrency(summary.platformFee)}
               accent="amber"
             />
             <AnalyticsStatCard

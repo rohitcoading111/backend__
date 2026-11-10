@@ -60,10 +60,11 @@ function OrganizationPaymentAnalytics() {
               <AnalyticsStatCard label="Gross revenue" value={formatCurrency(analytics?.grossRevenue)} accent="emerald" />
               <AnalyticsStatCard label="GST (18% of gross)" value={formatCurrency(analytics?.gstDeduction)} accent="amber" />
               <AnalyticsStatCard label="Razorpay fee (2% of gross)" value={formatCurrency(analytics?.razorpayFee)} accent="amber" />
+              <AnalyticsStatCard label="Platform fee (10% of gross)" value={formatCurrency(analytics?.platformFee)} accent="amber" />
               <AnalyticsStatCard
                 label="Payable amount"
                 value={formatCurrency(analytics?.payableAmount)}
-                subtitle="Gross less GST and Razorpay fee. Display only; no automatic transfer."
+                subtitle="Gross less GST, Razorpay fee, and platform fee. Display only; no automatic transfer."
                 accent="sky"
               />
               <AnalyticsStatCard label="Transactions" value={analytics?.totalTransactions || 0} accent="amber" />
@@ -77,7 +78,7 @@ function OrganizationPaymentAnalytics() {
             <div>
               <h2 className="text-xl font-semibold text-white">Course-wise performance</h2>
               <p className="mt-1 text-xs text-slate-400">
-                Payable estimate = gross course revenue − 18% GST − 2% Razorpay fee. No platform fee is deducted.
+                Payable estimate = gross course revenue − 18% GST − 2% Razorpay fee − 10% platform fee.
               </p>
             </div>
           </div>

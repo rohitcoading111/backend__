@@ -27,6 +27,7 @@ function CourseAnalyticsTable({ courses = [] }) {
               <th className="px-5 py-4 font-medium">Gross revenue</th>
               <th className="px-5 py-4 font-medium">GST (18%)</th>
               <th className="px-5 py-4 font-medium">Razorpay (2%)</th>
+              <th className="px-5 py-4 font-medium">Platform fee (10%)</th>
               <th className="px-5 py-4 font-medium">Payable amount</th>
               <th className="px-5 py-4 font-medium">Transactions</th>
             </tr>
@@ -39,6 +40,7 @@ function CourseAnalyticsTable({ courses = [] }) {
                 <td className="px-5 py-4">{formatCurrency(course?.totalRevenue)}</td>
                 <td className="px-5 py-4">{formatCurrency(course?.gstDeduction)}</td>
                 <td className="px-5 py-4">{formatCurrency(course?.razorpayFee)}</td>
+                <td className="px-5 py-4">{formatCurrency(course?.platformFee)}</td>
                 <td className="px-5 py-4 font-semibold text-emerald-200">{formatCurrency(course?.payableAmount)}</td>
                 <td className="px-5 py-4">{course?.totalTransactions || 0}</td>
               </tr>

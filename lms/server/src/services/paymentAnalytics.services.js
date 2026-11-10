@@ -5,6 +5,7 @@ import Payment from "../models/payment.models.js";
 
 const GST_RATE = 0.18;
 const RAZORPAY_FEE_RATE = 0.02;
+const PLATFORM_FEE_RATE = 0.1;
 
 const paiseToRupees = (paise) => Number((paise / 100).toFixed(2));
 
@@ -24,6 +25,9 @@ const getPaymentAmountStages = () => [
       razorpayFeePaise: {
         $round: [{ $multiply: ["$grossAmountPaise", RAZORPAY_FEE_RATE] }, 0],
       },
+      platformFeePaise: {
+        $round: [{ $multiply: ["$grossAmountPaise", PLATFORM_FEE_RATE] }, 0],
+      },
     },
   },
   {
@@ -31,7 +35,13 @@ const getPaymentAmountStages = () => [
       payableAmountPaise: {
         $subtract: [
           "$grossAmountPaise",
-          { $add: ["$gstDeductionPaise", "$razorpayFeePaise"] },
+          {
+            $add: [
+              "$gstDeductionPaise",
+              "$razorpayFeePaise",
+              "$platformFeePaise",
+            ],
+          },
         ],
       },
     },
@@ -69,8 +79,11 @@ const buildOrganizationAnalytics = (organization, paymentGroups) => {
       grossRevenue: paiseToRupees(group.grossRevenuePaise),
       gstDeduction: paiseToRupees(group.gstDeductionPaise),
       razorpayFee: paiseToRupees(group.razorpayFeePaise),
+      platformFee: paiseToRupees(group.platformFeePaise),
       totalDeductions: paiseToRupees(
-        group.gstDeductionPaise + group.razorpayFeePaise
+        group.gstDeductionPaise +
+          group.razorpayFeePaise +
+          group.platformFeePaise
       ),
       payableAmount: paiseToRupees(group.payableAmountPaise),
       totalTransactions: group.totalTransactions,
@@ -89,6 +102,10 @@ const buildOrganizationAnalytics = (organization, paymentGroups) => {
     paymentGroups,
     "razorpayFeePaise"
   );
+  const platformFeePaise = sumGroupAmountPaise(
+    paymentGroups,
+    "platformFeePaise"
+  );
   const payableAmountPaise = sumGroupAmountPaise(
     paymentGroups,
     "payableAmountPaise"
@@ -103,8 +120,9 @@ const buildOrganizationAnalytics = (organization, paymentGroups) => {
     grossRevenue: paiseToRupees(grossRevenuePaise),
     gstDeduction: paiseToRupees(gstDeductionPaise),
     razorpayFee: paiseToRupees(razorpayFeePaise),
+    platformFee: paiseToRupees(platformFeePaise),
     totalDeductions: paiseToRupees(
-      gstDeductionPaise + razorpayFeePaise
+      gstDeductionPaise + razorpayFeePaise + platformFeePaise
     ),
     payableAmount: paiseToRupees(payableAmountPaise),
     totalTransactions,
@@ -149,6 +167,10 @@ export const getAllOrganizationsPaymentAnalytics = async () => {
           $sum: "$razorpayFeePaise",
         },
 
+        platformFeePaise: {
+          $sum: "$platformFeePaise",
+        },
+
         payableAmountPaise: {
           $sum: "$payableAmountPaise",
         },
@@ -168,6 +190,7 @@ export const getAllOrganizationsPaymentAnalytics = async () => {
         grossRevenuePaise: 1,
         gstDeductionPaise: 1,
         razorpayFeePaise: 1,
+        platformFeePaise: 1,
         payableAmountPaise: 1,
         totalTransactions: 1,
       },
@@ -245,6 +268,11 @@ export const getAllOrganizationsPaymentAnalytics = async () => {
       total + Math.round(organization.razorpayFee * 100),
     0
   );
+  const totalPlatformFeePaise = organizationAnalytics.reduce(
+    (total, organization) =>
+      total + Math.round(organization.platformFee * 100),
+    0
+  );
   const totalPayablePaise = organizationAnalytics.reduce(
     (total, organization) =>
       total + Math.round(organization.payableAmount * 100),
@@ -259,8 +287,11 @@ export const getAllOrganizationsPaymentAnalytics = async () => {
       grossRevenue: paiseToRupees(totalGrossRevenuePaise),
       gstDeduction: paiseToRupees(totalGstDeductionPaise),
       razorpayFee: paiseToRupees(totalRazorpayFeePaise),
+      platformFee: paiseToRupees(totalPlatformFeePaise),
       totalDeductions: paiseToRupees(
-        totalGstDeductionPaise + totalRazorpayFeePaise
+        totalGstDeductionPaise +
+          totalRazorpayFeePaise +
+          totalPlatformFeePaise
       ),
       payableAmount: paiseToRupees(totalPayablePaise),
       totalTransactions,
@@ -315,6 +346,10 @@ export const getOrganizationPaymentAnalytics = async (organizationId) => {
           $sum: "$razorpayFeePaise",
         },
 
+        platformFeePaise: {
+          $sum: "$platformFeePaise",
+        },
+
         payableAmountPaise: {
           $sum: "$payableAmountPaise",
         },
@@ -333,6 +368,7 @@ export const getOrganizationPaymentAnalytics = async (organizationId) => {
         grossRevenuePaise: 1,
         gstDeductionPaise: 1,
         razorpayFeePaise: 1,
+        platformFeePaise: 1,
         payableAmountPaise: 1,
         totalTransactions: 1,
       },
