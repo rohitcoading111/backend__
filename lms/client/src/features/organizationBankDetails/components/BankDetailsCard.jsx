@@ -6,10 +6,11 @@ function BankDetailsCard({ details, onEdit }) {
   if (!details) return null;
 
   return (
-    <div className="rounded-[28px] border border-white/10 bg-[#111111] p-6 shadow-[0_0_40px_rgba(255,255,255,0.02)]">
+    <div className="group relative isolate overflow-hidden rounded-[28px] border border-white/15 bg-gradient-to-br from-white/[0.08] via-[#111111] to-[#080808] p-6 shadow-[0_0_48px_rgba(255,255,255,0.07)] transition duration-300 hover:border-white/25 hover:shadow-[0_0_58px_rgba(255,255,255,0.11)]">
+      <div className="pointer-events-none absolute -right-10 -top-12 -z-10 h-40 w-40 rounded-full bg-white/10 blur-3xl transition duration-300 group-hover:scale-125" />
       <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/5">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/20 bg-white/[0.08] shadow-[0_0_24px_rgba(255,255,255,0.08)]">
             <Building2 size={20} className="text-white" />
           </div>
           <div>
@@ -22,26 +23,26 @@ function BankDetailsCard({ details, onEdit }) {
       </div>
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+        <div className="rounded-2xl border border-white/15 bg-white/[0.04] p-4 shadow-[0_0_22px_rgba(255,255,255,0.035)]">
           <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">Bank name</p>
           <p className="mt-2 text-lg font-semibold text-white">{details.bankName}</p>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+        <div className="rounded-2xl border border-white/15 bg-white/[0.04] p-4 shadow-[0_0_22px_rgba(255,255,255,0.035)]">
           <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">Account number</p>
           <p className="mt-2 text-lg font-semibold text-white">{details.accountNumber || "XXXX XXXX 0000"}</p>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+        <div className="rounded-2xl border border-white/15 bg-white/[0.04] p-4 shadow-[0_0_22px_rgba(255,255,255,0.035)]">
           <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">IFSC</p>
           <p className="mt-2 text-lg font-semibold text-white">{details.ifscCode}</p>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+        <div className="rounded-2xl border border-white/15 bg-white/[0.04] p-4 shadow-[0_0_22px_rgba(255,255,255,0.035)]">
           <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">Account type</p>
           <p className="mt-2 text-lg font-semibold text-white">{details.accountType}</p>
         </div>
       </div>
 
       {details.bankProof?.url ? (
-        <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4">
+        <div className="mt-6 rounded-2xl border border-white/15 bg-white/[0.04] p-4 shadow-[0_0_22px_rgba(255,255,255,0.035)]">
           <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">Bank proof</p>
           <a href={details.bankProof.url} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 text-sm text-white underline decoration-white/30">
             {details.bankProof.url}
@@ -67,7 +68,7 @@ function BankDetailsCard({ details, onEdit }) {
         <button
           type="button"
           onClick={onEdit}
-          className="rounded-xl border border-white/10 bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
+          className="rounded-xl border border-white/25 bg-white px-4 py-2 text-sm font-semibold text-black shadow-[0_0_22px_rgba(255,255,255,0.12)] transition hover:bg-slate-200"
         >
           Update details
         </button>

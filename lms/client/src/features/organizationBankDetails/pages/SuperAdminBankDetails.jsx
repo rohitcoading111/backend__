@@ -21,7 +21,10 @@ function SuperAdminBankDetails() {
   const [selectedOrganizationId, setSelectedOrganizationId] = useState(null);
 
   return (
-    <main className="min-h-screen bg-[#070707] px-4 py-6 text-white sm:px-6 lg:px-8">
+    <main
+      className="min-h-screen bg-[#070707] px-4 py-6 text-white sm:px-6 lg:px-8"
+      style={{ backgroundImage: "radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.09), transparent 38%), radial-gradient(ellipse at 5% 55%, rgba(255,255,255,0.035), transparent 28%), #070707" }}
+    >
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex items-center justify-between gap-4">
           <div>
@@ -36,7 +39,7 @@ function SuperAdminBankDetails() {
           </Link>
         </div>
 
-        <section className="rounded-[28px] border border-white/10 bg-[#111111] p-6">
+        <section className="rounded-[28px] border border-white/15 bg-gradient-to-br from-white/[0.07] via-[#111111]/95 to-[#080808] p-6 shadow-[0_0_50px_rgba(255,255,255,0.07)] backdrop-blur-xl">
           <div className="mb-5 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5">
               <Building2 size={18} />
@@ -55,7 +58,7 @@ function SuperAdminBankDetails() {
               ))}
             </div>
           ) : (
-            <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0d0d0d]">
+            <div className="overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-br from-white/[0.035] to-[#090909] shadow-[0_0_28px_rgba(255,255,255,0.04)]">
               <div className="overflow-x-auto">
                 <table className="min-w-full text-left text-sm text-white">
                   <thead className="bg-white/5 text-[10px] uppercase tracking-[0.18em] text-slate-400">
@@ -80,7 +83,7 @@ function SuperAdminBankDetails() {
                       </tr>
                     ) : (
                       bankDetailsList.map((record) => (
-                        <tr key={record?.id || record?.organization?._id} className="hover:bg-white/5">
+                        <tr key={record?.id || record?.organization?._id} className="transition-colors hover:bg-white/[0.08]">
                           <td className="px-5 py-4 font-medium">{record?.organization?.name || "—"}</td>
                           <td className="px-5 py-4">{record?.accountHolderName || "—"}</td>
                           <td className="px-5 py-4">{record?.bankName || "—"}</td>
@@ -93,7 +96,7 @@ function SuperAdminBankDetails() {
                             <button
                               type="button"
                               onClick={() => setSelectedOrganizationId(record?.organization?._id || record?.organization)}
-                              className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-white transition hover:bg-white/10"
+                              className="rounded-xl border border-white/20 bg-white/[0.07] px-3 py-2 text-xs font-medium text-white transition hover:border-white/40 hover:bg-white/[0.14] hover:shadow-[0_0_20px_rgba(255,255,255,0.12)]"
                             >
                               View details
                             </button>

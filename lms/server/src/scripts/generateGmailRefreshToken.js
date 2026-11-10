@@ -1,10 +1,13 @@
 import crypto from "node:crypto";
 import http from "node:http";
+import { fileURLToPath } from "node:url";
 import { google } from "googleapis";
 import gmailConfig from "../config/gmail.config.js";
+import { updateEnvFile } from "../utils/updateEnvFile.js";
 
 const redirectUri =
   gmailConfig.GMAIL_API_REDIRECT_URI || "http://localhost:3001/oauth2callback";
+const envPath = fileURLToPath(new URL("../../.env", import.meta.url));
 const redirect = new URL(redirectUri);
 
 if (redirect.protocol !== "http:" || redirect.hostname !== "localhost" || redirect.port !== "3001") {
@@ -68,14 +71,19 @@ const server = http.createServer(async (request, response) => {
     if (!tokens.refresh_token) {
       throw new Error("Google did not issue a refresh token. Revoke this app's access and authorize again.");
     }
+    await updateEnvFile(
+      envPath,
+      "GMAIL_API_REFRESH_TOKEN",
+      tokens.refresh_token
+    );
     response.writeHead(200, { "Content-Type": "text/plain; charset=utf-8" });
-    response.end("Authorization complete. Check the terminal for the refresh token.");
-    console.log("Save this refresh token privately as GMAIL_API_REFRESH_TOKEN:");
-    console.log(tokens.refresh_token);
+    response.end("Gmail authorization complete. The refresh token was saved to the backend .env file. Restart the backend.");
+    console.log("Gmail authorization complete. Refresh token saved to the backend .env file.");
+    console.log("Restart the backend so it loads the updated credentials.");
     server.close();
   } catch (error) {
     response.writeHead(500).end("Could not complete authorization. Check the terminal.");
-    console.error("Gmail token exchange failed; check OAuth client and redirect configuration.");
+    console.error("Gmail authorization failed; token was not saved. Check OAuth client, consent, redirect URI, and .env file permissions.");
     server.close();
     process.exitCode = 1;
   }

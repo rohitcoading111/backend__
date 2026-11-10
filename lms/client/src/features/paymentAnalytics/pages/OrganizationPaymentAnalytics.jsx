@@ -18,7 +18,10 @@ function OrganizationPaymentAnalytics() {
   const { analytics, isLoading, error, fetchAnalytics } = useOrganizationAnalytics();
 
   return (
-    <main className="min-h-screen bg-[#070707] px-4 py-6 text-white sm:px-6 lg:px-8">
+    <main
+      className="min-h-screen bg-[#070707] px-4 py-6 text-white sm:px-6 lg:px-8"
+      style={{ backgroundImage: "radial-gradient(ellipse at 12% 0%, rgba(14,165,233,0.11), transparent 34%), radial-gradient(ellipse at 88% 18%, rgba(217,70,239,0.08), transparent 30%), #070707" }}
+    >
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex items-center justify-between gap-4">
           <Link to="/organization-admin-dashboard" className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white">
@@ -34,7 +37,7 @@ function OrganizationPaymentAnalytics() {
           </button>
         </div>
 
-        <section className="rounded-[28px] border border-white/10 bg-[#111111] p-6 shadow-[0_0_50px_rgba(255,255,255,0.02)]">
+        <section className="rounded-[28px] border border-sky-400/15 bg-gradient-to-br from-sky-500/[0.06] via-[#111111]/95 to-fuchsia-500/[0.04] p-6 shadow-[0_0_50px_rgba(14,165,233,0.06)] backdrop-blur-xl">
           <div className="mb-6 flex items-center justify-between gap-4">
             <div>
               <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Organization analytics</p>
@@ -73,7 +76,7 @@ function OrganizationPaymentAnalytics() {
           )}
         </section>
 
-        <section className="mt-8 rounded-[28px] border border-white/10 bg-[#111111] p-6">
+        <section className="mt-8 rounded-[28px] border border-violet-400/15 bg-gradient-to-br from-violet-500/[0.05] via-[#111111]/95 to-[#111111] p-6 shadow-[0_0_42px_rgba(139,92,246,0.05)] backdrop-blur-xl">
           <div className="mb-5 flex items-center justify-between gap-3">
             <div>
               <h2 className="text-xl font-semibold text-white">Course-wise performance</h2>

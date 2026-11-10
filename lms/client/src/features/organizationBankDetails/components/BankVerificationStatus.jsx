@@ -2,9 +2,9 @@ function BankVerificationStatus({ status }) {
   const normalizedStatus = String(status || "PENDING").toUpperCase();
 
   const styles = {
-    PENDING: "bg-amber-500/10 text-amber-200 border border-amber-400/30",
-    VERIFIED: "bg-emerald-500/10 text-emerald-200 border border-emerald-400/30",
-    REJECTED: "bg-red-500/10 text-red-200 border border-red-400/30",
+    PENDING: "bg-white/[0.06] text-white/80 border border-white/20",
+    VERIFIED: "bg-white/[0.14] text-white border border-white/40 shadow-[0_0_16px_rgba(255,255,255,0.12)]",
+    REJECTED: "bg-black/40 text-white/60 border border-white/15",
   };
 
   return (

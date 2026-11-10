@@ -137,7 +137,7 @@ function BankDetailsForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-[28px] border border-white/10 bg-[#111111] p-6">
+    <form onSubmit={handleSubmit} className="rounded-[28px] border border-white/15 bg-gradient-to-br from-white/[0.06] via-[#111111] to-[#080808] p-6 shadow-[0_0_42px_rgba(255,255,255,0.06)]">
       <div className="mb-6 flex items-center justify-between gap-4">
         <div>
           <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">Bank details</p>

@@ -10,14 +10,14 @@ function formatCurrency(value) {
 function CourseAnalyticsTable({ courses = [] }) {
   if (!courses.length) {
     return (
-      <div className="rounded-2xl border border-dashed border-white/10 bg-[#111111] p-8 text-center text-slate-400">
+      <div className="rounded-2xl border border-dashed border-violet-400/20 bg-gradient-to-br from-violet-500/[0.08] to-[#111111] p-8 text-center text-slate-400 shadow-[0_0_30px_rgba(139,92,246,0.05)]">
         No course analytics available yet.
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#111111]">
+    <div className="overflow-hidden rounded-2xl border border-violet-400/20 bg-gradient-to-br from-violet-500/[0.06] via-[#111111] to-[#09090b] shadow-[0_0_32px_rgba(139,92,246,0.06)]">
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-white/10 text-left">
           <thead className="bg-white/5 text-xs uppercase tracking-[0.18em] text-slate-400">
@@ -34,7 +34,7 @@ function CourseAnalyticsTable({ courses = [] }) {
           </thead>
           <tbody className="divide-y divide-white/10 text-sm text-white">
             {courses.map((course) => (
-              <tr key={course?.courseId || course?.courseTitle} className="hover:bg-white/5">
+              <tr key={course?.courseId || course?.courseTitle} className="transition-colors hover:bg-violet-400/[0.06]">
                 <td className="px-5 py-4 font-medium">{course?.courseTitle || "Course"}</td>
                 <td className="px-5 py-4">{course?.totalStudents || 0}</td>
                 <td className="px-5 py-4">{formatCurrency(course?.totalRevenue)}</td>

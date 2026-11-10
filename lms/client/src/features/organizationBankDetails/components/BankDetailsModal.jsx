@@ -81,12 +81,20 @@ function BankDetailsModal({ organizationId, onClose, onUpdated }) {
   }, [organizationId]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[28px] border border-white/10 bg-[#111111] p-6 text-white shadow-[0_0_60px_rgba(0,0,0,0.4)]">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm transition-[background-color,backdrop-filter] duration-300"
+      role="presentation"
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="bank-details-modal-title"
+        className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[28px] border border-white/20 bg-gradient-to-br from-white/[0.08] via-[#111111] to-[#080808] p-6 text-white shadow-[0_0_60px_rgba(255,255,255,0.09)]"
+      >
         <div className="mb-5 flex items-center justify-between">
           <div>
             <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">Organization bank details</p>
-            <h3 className="mt-2 text-2xl font-semibold text-white">{details?.organization?.name || "Bank details"}</h3>
+            <h3 id="bank-details-modal-title" className="mt-2 text-2xl font-semibold text-white">{details?.organization?.name || "Bank details"}</h3>
           </div>
 
           <button type="button" onClick={onClose} className="rounded-xl border border-white/10 bg-white/5 p-2 text-slate-200">

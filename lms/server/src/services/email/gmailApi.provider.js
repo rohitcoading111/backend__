@@ -137,18 +137,32 @@ export const createGmailApiProvider = ({
           rejected: [],
           response: "Gmail API accepted the email request.",
         };
-      } catch (error) {
-        if (error.code?.startsWith("GMAIL_")) throw error;
-        const [code, message] = mapGoogleError(error);
-        const statusCode = Number(error?.response?.status || error?.status) || undefined;
-        logger.error("[email] Gmail API rejected the send request.", {
-          statusCode,
-          errorCode: code,
-        });
-        const mappedError = createEmailError(message, code);
-        if (statusCode) mappedError.statusCode = statusCode;
-        throw mappedError;
-      }
+      } 
+catch (error) {
+  if (
+    typeof error.code === "string" &&
+    error.code.startsWith("GMAIL_")
+  ) {
+    throw error;
+  }
+
+  const [code, message] = mapGoogleError(error);
+
+  const statusCode =
+    Number(error?.response?.status || error?.status) || undefined;
+
+  logger.error("[email] Gmail API rejected the send request.", {
+    statusCode,
+    errorCode: code,
+  });
+
+  const mappedError = createEmailError(message, code);
+
+  if (statusCode) mappedError.statusCode = statusCode;
+
+  throw mappedError;
+}
+
     },
   };
 };

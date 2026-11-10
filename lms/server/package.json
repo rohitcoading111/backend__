@@ -9,7 +9,8 @@
     "start": "node src/server.js",
     "create-admin": "node src/scripts/create-admin.js",
     "create-instructors": "node src/scripts/create-instructor.js",
-    "generate:gmail-token": "node src/scripts/generateGmailRefreshToken.js"
+    "generate:gmail-token": "node src/scripts/generateGmailRefreshToken.js",
+    "gmail:authorize": "node src/scripts/generateGmailRefreshToken.js"
   },
   "keywords": [],
   "author": "",
