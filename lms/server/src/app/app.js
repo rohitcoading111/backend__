@@ -32,6 +32,7 @@ const configuredOrigins = (process.env.FRONTEND_URL || "")
 const allowedOrigins = [
   "http://localhost:5173",
   "https://learnhub-in.onrender.com",
+  "https://learnhubcloud.in",
   ...configuredOrigins,
 ].filter(Boolean);
 
