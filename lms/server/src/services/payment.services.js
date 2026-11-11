@@ -42,16 +42,37 @@ export const createPaymentRequest = async (studentId, courseId) => {
   }).sort({ createdAt: -1 });
 
   if (existingPayment) {
-    const existingOrder = await razorpay.orders.fetch(
-      existingPayment.orderId
-    );
+    try {
+      const existingOrder = await razorpay.orders.fetch(
+        existingPayment.orderId
+      );
 
-    if (existingOrder.status === "created") {
-      return {
-        payment: existingPayment,
-        order: existingOrder,
-      };
+      if (existingOrder.status === "created") {
+        return {
+          payment: existingPayment,
+          order: existingOrder,
+        };
+      }
+    } catch (error) {
+      const orderDoesNotExist =
+        error?.statusCode === 400 &&
+        error?.error?.code === "BAD_REQUEST_ERROR" &&
+        /id provided does not exist/i.test(
+          error?.error?.description || ""
+        );
+
+      if (!orderDoesNotExist) {
+        throw error;
+      }
+
+      console.warn(
+        "Saved Razorpay order is unavailable; creating a replacement order.",
+        { paymentId: existingPayment._id.toString() }
+      );
     }
+
+    existingPayment.status = "FAILED";
+    await existingPayment.save();
   }
 
   // Razorpay accepts amount in paise

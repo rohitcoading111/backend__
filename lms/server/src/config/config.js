@@ -1,6 +1,10 @@
 
 import dotenv from "dotenv";
-dotenv.config();
+import { fileURLToPath } from "node:url";
+
+dotenv.config({
+    path: fileURLToPath(new URL("../../.env", import.meta.url)),
+});
 
 const config = {
     MONGO_URI: process.env.MONGO_URI,
