@@ -15,7 +15,7 @@ VITE_SOCKET_URL=http://localhost:3000
 Set `VITE_API_URL` and `VITE_SOCKET_URL` as build environment variables on the
 frontend host if you need to override these defaults.
 
-On the backend host, set `FRONTEND_URL=https://learnhub-in.onrender.com`,
+On the backend host, set `FRONTEND_URL=https://learnhubcloud.in`,
 `API_BASE_URL=https://learnhub-com.onrender.com/api`, and
 `GOOGLE_CALLBACK_URL=https://learnhub-com.onrender.com/api/auth/google/callback`.
 Organization request verification emails link to the backend API configured by
