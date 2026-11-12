@@ -80,6 +80,14 @@
       content="LearnHub - Online Learning Platform featuring live classes, expert courses and learning progress tracking."
     />
 
+    <script>
+      if (window.location.hostname === "learnhub-in.onrender.com") {
+        window.location.replace(
+          `https://learnhubcloud.in${window.location.pathname}${window.location.search}${window.location.hash}`
+        );
+      }
+    </script>
+
     <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image" data-rh="true" />
 
