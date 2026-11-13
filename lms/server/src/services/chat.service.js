@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 import LiveSession from "../models/liveSession.models.js";
 import Enrollment from "../models/enrollment.models.js";
