@@ -1,5 +1,6 @@
 
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import {
   ArrowLeft,
   BookOpen,
@@ -14,6 +15,7 @@ import {
   AlertCircle,
   GraduationCap,
   Wifi,
+  MessageCircle,
 } from "lucide-react";
 
 import { useState, useRef, useEffect } from "react";
@@ -29,12 +31,21 @@ import "./LiveClassesPage.css";
 import StudentClassroomLayout from "../components/LiveClassesPage.jsx";
 import useLiveClasses from "../hooks/useLiveClasses.js";
 
+import useLiveChat from "../../liveChat/hooks/useLiveChat";
+import ChatWindow from "../../liveChat/components/ChatWindow";
+
 function LiveClassesPage() {
   const navigate = useNavigate();
+
+  const user = useSelector((state) => state.auth.user);
+
+  const currentUserId = user?._id;
+  const userRole = user?.role;
 
   const [isMaximized, setIsMaximized] = useState(false);
   const [roomCredentials, setRoomCredentials] = useState(null);
   const [joinError, setJoinError] = useState("");
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const classroomRef = useRef(null);
 
@@ -48,6 +59,22 @@ function LiveClassesPage() {
     joinCourseLiveSession,
   } = useLiveClasses();
 
+  // LIVE CHAT HOOK
+  const {
+    messages,
+    isConnected,
+    isJoined,
+    isChatEnabled,
+    isLoading: isChatLoading,
+    isLoadingMore,
+    hasMore,
+    error: chatError,
+    sendMessage,
+    pauseChat,
+    resumeChat,
+    loadMoreMessages,
+  } = useLiveChat(roomCredentials?.sessionId);
+
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsMaximized(
@@ -55,7 +82,10 @@ function LiveClassesPage() {
       );
     };
 
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener(
+      "fullscreenchange",
+      handleFullscreenChange
+    );
 
     return () => {
       document.removeEventListener(
@@ -103,6 +133,7 @@ function LiveClassesPage() {
     } catch (err) {
       console.error("Exit fullscreen error:", err);
     } finally {
+      setIsChatOpen(false);
       setRoomCredentials(null);
     }
   };
@@ -112,13 +143,17 @@ function LiveClassesPage() {
     return thumbnail?.url || "";
   };
 
+  // =====================================
   // LIVE CLASSROOM
+  // =====================================
+
   if (roomCredentials) {
     return (
       <main
         ref={classroomRef}
         className="flex h-screen min-h-0 w-full flex-col overflow-hidden bg-black text-white supports-[height:100dvh]:h-[100dvh]"
       >
+        {/* CLASSROOM HEADER */}
         <header className="flex shrink-0 items-center justify-between border-b border-white/10 bg-[#080808] px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-black">
@@ -129,6 +164,7 @@ function LiveClassesPage() {
               <h1 className="text-sm font-semibold">
                 LearnHub Live
               </h1>
+
               <p className="mt-0.5 text-[10px] uppercase tracking-widest text-neutral-500">
                 Virtual classroom
               </p>
@@ -136,6 +172,7 @@ function LiveClassesPage() {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* FULLSCREEN */}
             <button
               type="button"
               onClick={handleToggleFullscreen}
@@ -154,6 +191,24 @@ function LiveClassesPage() {
               )}
             </button>
 
+            {/* CHAT TOGGLE */}
+            <button
+              type="button"
+              onClick={() => setIsChatOpen((prev) => !prev)}
+              className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs transition ${
+                isChatOpen
+                  ? "border-white bg-white text-black"
+                  : "border-white/10 text-neutral-300 hover:bg-white/10"
+              }`}
+            >
+              <MessageCircle size={16} />
+
+              <span className="hidden sm:inline">
+                {isChatOpen ? "Hide Chat" : "Live Chat"}
+              </span>
+            </button>
+
+            {/* LEAVE CLASSROOM */}
             <button
               type="button"
               onClick={handleLeaveClassroom}
@@ -164,26 +219,61 @@ function LiveClassesPage() {
           </div>
         </header>
 
-        <div className="min-h-0 flex-1 overflow-hidden">
-          <LiveKitRoom
-            key={roomCredentials.sessionId}
-            serverUrl={roomCredentials.liveKitUrl}
-            token={roomCredentials.token}
-            connect={true}
-            audio={false}
-            video={false}
-            onDisconnected={() => setRoomCredentials(null)}
-            style={{ width: "100%", height: "100%" }}
-          >
-            <RoomAudioRenderer />
-            <StudentClassroomLayout />
-          </LiveKitRoom>
+        {/* CLASSROOM + CHAT */}
+        <div className="flex min-h-0 flex-1 overflow-hidden">
+          {/* LIVEKIT CLASSROOM */}
+          <div className="min-h-0 min-w-0 flex-1 overflow-hidden">
+            <LiveKitRoom
+              key={roomCredentials.sessionId}
+              serverUrl={roomCredentials.liveKitUrl}
+              token={roomCredentials.token}
+              connect={true}
+              audio={false}
+              video={false}
+              onDisconnected={() => {
+                setIsChatOpen(false);
+                setRoomCredentials(null);
+              }}
+              style={{
+                width: "100%",
+                height: "100%",
+              }}
+            >
+              <RoomAudioRenderer />
+              <StudentClassroomLayout />
+            </LiveKitRoom>
+          </div>
+
+          {/* LIVE CHAT WINDOW */}
+          {isChatOpen && (
+            <ChatWindow
+              embedded
+              messages={messages}
+              currentUserId={currentUserId}
+              userRole={userRole}
+              isConnected={isConnected}
+              isJoined={isJoined}
+              isChatEnabled={isChatEnabled}
+              isLoading={isChatLoading}
+              isLoadingMore={isLoadingMore}
+              hasMore={hasMore}
+              error={chatError}
+              onSendMessage={sendMessage}
+              onPauseChat={pauseChat}
+              onResumeChat={resumeChat}
+              onLoadMore={loadMoreMessages}
+              onClose={() => setIsChatOpen(false)}
+            />
+          )}
         </div>
       </main>
     );
   }
 
+  // =====================================
   // LIVE CLASSES PAGE
+  // =====================================
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#050505] text-white">
 
@@ -223,6 +313,7 @@ function LiveClassesPage() {
               <h1 className="text-sm font-bold tracking-tight">
                 LearnHub Live
               </h1>
+
               <p className="hidden text-[9px] uppercase tracking-[0.18em] text-neutral-500 sm:block">
                 Virtual learning
               </p>
@@ -239,6 +330,7 @@ function LiveClassesPage() {
               size={15}
               className={isRefreshing ? "animate-spin" : ""}
             />
+
             <span className="hidden sm:inline">
               {isRefreshing ? "Refreshing..." : "Refresh"}
             </span>
@@ -254,6 +346,7 @@ function LiveClassesPage() {
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-white" />
+
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-400">
                 Learn together
               </p>
@@ -280,6 +373,7 @@ function LiveClassesPage() {
                 <p className="text-xl font-semibold tabular-nums">
                   {liveCourses.length}
                 </p>
+
                 <p className="text-[10px] uppercase tracking-wider text-neutral-500">
                   Enrolled courses
                 </p>
@@ -307,7 +401,9 @@ function LiveClassesPage() {
                   Unable to load live classes
                 </h2>
 
-                <p className="mt-2 text-sm text-neutral-500">{error}</p>
+                <p className="mt-2 text-sm text-neutral-500">
+                  {error}
+                </p>
 
                 <button
                   type="button"
@@ -389,7 +485,6 @@ function LiveClassesPage() {
 
                   {/* THUMBNAIL */}
                   <div className="relative h-52 overflow-hidden bg-neutral-900 sm:h-56">
-
                     <div className="absolute inset-0 flex items-center justify-center text-neutral-700">
                       <BookOpen size={42} />
                     </div>
@@ -406,7 +501,7 @@ function LiveClassesPage() {
                       />
                     )}
 
-                    {/* IMAGE BOTTOM DARK GRADIENT */}
+                    {/* IMAGE GRADIENT */}
                     <div className="pointer-events-none absolute inset-0 z-[2] bg-linear-to-t from-[#050505] via-black/15 to-transparent" />
 
                     {/* IMAGE SIDE LIGHT */}
@@ -428,7 +523,6 @@ function LiveClassesPage() {
 
                   {/* CARD CONTENT */}
                   <div className="relative z-[3] -mt-1 bg-[#050505] px-7 pb-7 pt-3">
-
                     <div className="flex items-start justify-between gap-3">
                       <h2 className="line-clamp-2 text-xl font-semibold tracking-tight text-white">
                         {course.title || "Untitled course"}
