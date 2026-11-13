@@ -1,22 +1,19 @@
 import { rateLimit, ipKeyGenerator } from "express-rate-limit";
 import { isIP } from "node:net";
 
-// Identify the client IP coming through Render
+// Get client IP from Render's forwarded header
 const getClientIp = (req) => {
-  // Render forwards the original client IP in this header
   const forwardedFor = req.get("x-forwarded-for");
 
-  // If multiple IPs exist, take the first one
+  // First IP represents the original client in the observed Render chain
   const forwardedIp = forwardedFor?.split(",")[0]?.trim();
 
-  // Validate the IP before using it
-  const clientIp =
-    forwardedIp && isIP(forwardedIp)
-      ? forwardedIp
-      : req.ip;
+  if (forwardedIp && isIP(forwardedIp)) {
+    return ipKeyGenerator(forwardedIp);
+  }
 
-  // Handle IPv6 clients safely
-  return ipKeyGenerator(clientIp);
+  // Fallback if forwarded IP is unavailable
+  return ipKeyGenerator(req.ip);
 };
 
 // Common rate limiter configuration

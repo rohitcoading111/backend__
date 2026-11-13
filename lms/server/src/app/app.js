@@ -54,25 +54,6 @@ app.use(
 
 app.use(passport.initialize()); 
 
-// Temporary IP check - remove after testing
-app.get("/api/debug/ip-check", (req, res) => {
-  const forwardedFor = req.get("x-forwarded-for");
-
-  // IP details will appear only in Render server logs
-  console.log("IP CHECK:", {
-    expressIp: req.ip,
-    socketIp: req.socket.remoteAddress,
-    forwardedFor: forwardedFor || "Not received",
-  });
-
-  // Do not expose actual IP addresses in the browser response
-  res.json({
-    success: true,
-    message: "IP diagnostic completed. Check Render logs.",
-    forwardedForReceived: Boolean(forwardedFor),
-    expressIpReceived: Boolean(req.ip),
-  });
-});
 // auth apis 
 app.use('/api/auth', authRoutes);
 
