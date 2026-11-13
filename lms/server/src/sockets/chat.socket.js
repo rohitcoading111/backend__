@@ -164,4 +164,119 @@ export const registerChatHandlers = (io, socket) => {
       });
     }
   });
+
+  // Instructor: Pause chat
+  socket.on("chat:pause", async ({ liveSessionId } = {}) => {
+    try {
+      if (!mongoose.Types.ObjectId.isValid(liveSessionId)) {
+        return socket.emit("chat:error", {
+          message: "Invalid live session ID",
+        });
+      }
+
+      // Only instructor can control chat
+      if (socket.user.role !== "INSTRUCTOR") {
+        return socket.emit("chat:error", {
+          message: "Only instructor can pause the chat",
+        });
+      }
+
+      const liveSession = await LiveSession.findById(liveSessionId);
+
+      if (!liveSession || liveSession.status !== "LIVE") {
+        return socket.emit("chat:error", {
+          message: "Live session not available",
+        });
+      }
+
+      // Verify instructor ownership
+      if (liveSession.instructor.toString() !== socket.user.id) {
+        return socket.emit("chat:error", {
+          message: "You are not authorized to control this chat",
+        });
+      }
+
+      // Instructor must have joined this chat room
+      const roomName = `live:${liveSession._id}`;
+
+      if (!socket.rooms.has(roomName)) {
+        return socket.emit("chat:error", {
+          message: "Join the live chat first",
+        });
+      }
+
+      liveSession.isChatEnabled = false;
+      await liveSession.save();
+
+      // Notify everyone in this live class
+      io.to(roomName).emit("chat:status", {
+        liveSessionId: liveSession._id,
+        isChatEnabled: false,
+        message: "Chat paused by instructor",
+      });
+
+    } catch (error) {
+      console.error("Chat pause error:", error);
+
+      socket.emit("chat:error", {
+        message: "Unable to pause chat",
+      });
+    }
+  });
+
+  // Instructor: Resume chat
+  socket.on("chat:resume", async ({ liveSessionId } = {}) => {
+    try {
+      if (!mongoose.Types.ObjectId.isValid(liveSessionId)) {
+        return socket.emit("chat:error", {
+          message: "Invalid live session ID",
+        });
+      }
+
+      if (socket.user.role !== "INSTRUCTOR") {
+        return socket.emit("chat:error", {
+          message: "Only instructor can resume the chat",
+        });
+      }
+
+      const liveSession = await LiveSession.findById(liveSessionId);
+
+      if (!liveSession || liveSession.status !== "LIVE") {
+        return socket.emit("chat:error", {
+          message: "Live session not available",
+        });
+      }
+
+      if (liveSession.instructor.toString() !== socket.user.id) {
+        return socket.emit("chat:error", {
+          message: "You are not authorized to control this chat",
+        });
+      }
+
+      const roomName = `live:${liveSession._id}`;
+
+      if (!socket.rooms.has(roomName)) {
+        return socket.emit("chat:error", {
+          message: "Join the live chat first",
+        });
+      }
+
+      liveSession.isChatEnabled = true;
+      await liveSession.save();
+
+      io.to(roomName).emit("chat:status", {
+        liveSessionId: liveSession._id,
+        isChatEnabled: true,
+        message: "Chat resumed by instructor",
+      });
+
+    } catch (error) {
+      console.error("Chat resume error:", error);
+
+      socket.emit("chat:error", {
+        message: "Unable to resume chat",
+      });
+    }
+  });
+
 };
