@@ -1,6 +1,7 @@
+
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Track } from "livekit-client";
 import {
   Mic,
@@ -10,10 +11,14 @@ import {
   PhoneOff,
   Video,
   VideoOff,
+  MessageCircle,
 } from "lucide-react";
 
 import { endLiveSessionThunk } from "../thunks/liveSessionThunk";
 import useLiveRoom from "../hooks/useLiveRoom";
+
+import useLiveChat from "../../liveChat/hooks/useLiveChat";
+import ChatWindow from "../../liveChat/components/ChatWindow";
 
 const focusRing =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black";
@@ -69,7 +74,11 @@ function LiveRoom() {
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const user = useSelector((state) => state.auth.user);
+
   const [isEnding, setIsEnding] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const { session, token, liveKitUrl } = location.state || {};
 
@@ -84,6 +93,25 @@ function LiveRoom() {
     toggleScreenShare,
     error,
   } = useLiveRoom(token, liveKitUrl);
+
+  // Live chat
+  const {
+    messages,
+    isConnected: isChatConnected,
+    isJoined,
+    isChatEnabled,
+    isLoading: isChatLoading,
+    isLoadingMore,
+    hasMore,
+    error: chatError,
+    sendMessage,
+    pauseChat,
+    resumeChat,
+    loadMoreMessages,
+  } = useLiveChat(session?._id);
+
+  const currentUserId = user?._id || user?.id;
+  const userRole = user?.role;
 
   const videoRef = useRef(null);
   const screenRef = useRef(null);
@@ -132,6 +160,7 @@ function LiveRoom() {
         <span className="rounded-full border border-white/15 p-4 text-white/60">
           <VideoOff size={26} />
         </span>
+
         <div>
           <h1 className="text-xl font-semibold tracking-tight">
             Live session details missing
@@ -140,6 +169,7 @@ function LiveRoom() {
             Start the session again from your dashboard.
           </p>
         </div>
+
         <button
           type="button"
           onClick={() => navigate("/instructor-dashboard")}
@@ -163,13 +193,10 @@ function LiveRoom() {
     try {
       setIsEnding(true);
 
-      // Backend API call
       await dispatch(endLiveSessionThunk(session._id)).unwrap();
 
-      // Disconnect instructor from LiveKit
       room?.disconnect();
 
-      // Redirect to instructor dashboard
       navigate("/instructor-dashboard");
     } catch (error) {
       console.error("End live error:", error);
@@ -192,16 +219,33 @@ function LiveRoom() {
             </p>
           </div>
 
-          <span className="inline-flex shrink-0 items-center gap-2 rounded-full border border-white/20 bg-white/[0.04] px-4 py-2 text-xs font-medium">
-            <span
-              className={`h-1.5 w-1.5 rounded-full ${
-                isConnected
-                  ? "animate-pulse bg-white motion-reduce:animate-none"
-                  : "border border-white"
+          <div className="flex shrink-0 items-center gap-2">
+            {/* Chat button */}
+            <button
+              type="button"
+              onClick={() => setIsChatOpen((previous) => !previous)}
+              className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-medium transition ${
+                isChatOpen
+                  ? "border-white bg-white text-black"
+                  : "border-white/20 bg-white/[0.04] text-white hover:border-white hover:bg-white/10"
               }`}
-            />
-            {isConnected ? "Connected" : "Connecting"}
-          </span>
+            >
+              <MessageCircle size={16} />
+              <span>Chat</span>
+            </button>
+
+            {/* LiveKit connection status */}
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/[0.04] px-4 py-2 text-xs font-medium">
+              <span
+                className={`h-1.5 w-1.5 rounded-full ${
+                  isConnected
+                    ? "animate-pulse bg-white motion-reduce:animate-none"
+                    : "border border-white"
+                }`}
+              />
+              {isConnected ? "Connected" : "Connecting"}
+            </span>
+          </div>
         </header>
 
         {/* Error */}
@@ -261,6 +305,27 @@ function LiveRoom() {
           </StreamCard>
         </div>
       </div>
+
+      {/* Instructor Chat Panel */}
+      {isChatOpen && (
+        <ChatWindow
+          messages={messages}
+          currentUserId={currentUserId}
+          userRole={userRole}
+          isConnected={isChatConnected}
+          isJoined={isJoined}
+          isChatEnabled={isChatEnabled}
+          isLoading={isChatLoading}
+          isLoadingMore={isLoadingMore}
+          hasMore={hasMore}
+          error={chatError}
+          onSendMessage={sendMessage}
+          onPauseChat={pauseChat}
+          onResumeChat={resumeChat}
+          onLoadMore={loadMoreMessages}
+          onClose={() => setIsChatOpen(false)}
+        />
+      )}
 
       {/* Floating controls */}
       <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30 flex justify-center px-2 sm:bottom-6 sm:px-4">

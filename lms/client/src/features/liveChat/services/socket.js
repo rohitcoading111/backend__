@@ -1,34 +1,42 @@
 
 import { io } from "socket.io-client";
+import api from "../../../services/api";
 
 let socket = null;
 
-// Connect to backend Socket.IO server
+const getSocketUrl = () => {
+  const apiBaseURL = api.defaults.baseURL;
+
+  if (!apiBaseURL) {
+    throw new Error("API base URL is not configured");
+  }
+
+  return new URL(apiBaseURL, window.location.origin).origin;
+};
+
 export const connectLiveChat = (token) => {
   if (!token) {
     throw new Error("Authentication token is required");
   }
 
-  // Reuse existing connection
   if (socket?.connected) {
     return socket;
   }
 
-  // Disconnect old connection if token/session changes
   if (socket) {
     socket.disconnect();
     socket = null;
   }
 
-  socket = io(import.meta.env.VITE_SOCKET_URL, {
-    auth: {
-      token,
-    },
+  const socketUrl = getSocketUrl();
+
+  socket = io(socketUrl, {
+    auth: { token },
     transports: ["websocket"],
     reconnection: true,
     reconnectionAttempts: 5,
     reconnectionDelay: 1000,
-    autoConnect: true,
+    timeout: 20000,
   });
 
   socket.on("connect", () => {
@@ -46,12 +54,8 @@ export const connectLiveChat = (token) => {
   return socket;
 };
 
-// Get existing socket instance
-export const getLiveChatSocket = () => {
-  return socket;
-};
+export const getLiveChatSocket = () => socket;
 
-// Disconnect socket
 export const disconnectLiveChat = () => {
   if (socket) {
     socket.disconnect();
