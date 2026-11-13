@@ -64,7 +64,7 @@ export const resetPasswordLimiter = rateLimit({
 // Google OAuth login
 export const googleAuthLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 2,
+  limit: 10,
 
   standardHeaders: "draft-8",
   legacyHeaders: false,
