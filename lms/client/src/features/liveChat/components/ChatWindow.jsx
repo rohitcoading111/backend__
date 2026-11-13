@@ -37,7 +37,7 @@ const ChatWindow = ({
         isFullScreen
           ? "fixed inset-0"
           : embedded
-            ? "relative h-full w-[360px] max-w-[45%] shrink-0 border-l border-gray-200"
+              ? "relative h-[500px] w-full min-h-0 shrink-0 border-t border-gray-200 lg:h-auto lg:w-[360px] lg:max-w-[40%] lg:border-l lg:border-t-0"
             : "fixed bottom-5 right-5 h-[500px] w-[360px] max-h-[80vh] max-w-[calc(100vw-24px)] rounded-2xl border border-gray-200"
       }`}
     >

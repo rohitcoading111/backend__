@@ -8,6 +8,7 @@ import {
   MicOff,
   MonitorOff,
   MonitorUp,
+  LogOut,
   PhoneOff,
   Video,
   VideoOff,
@@ -78,7 +79,7 @@ function LiveRoom() {
   const user = useSelector((state) => state.auth.user);
 
   const [isEnding, setIsEnding] = useState(false);
-  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(true);
 
   const { session, token, liveKitUrl } = location.state || {};
 
@@ -205,6 +206,19 @@ function LiveRoom() {
     }
   };
 
+  const handleLeaveRoom = () => {
+    const confirmed = window.confirm(
+      "Leave the live room without ending the session? Your camera and microphone will disconnect, but the live session will remain active."
+    );
+
+    if (!confirmed) return;
+
+    room?.disconnect();
+    navigate("/organization-instructor-dashboard", {
+      state: { activeSection: "live-classes" },
+    });
+  };
+
   return (
     <div className="min-h-screen bg-black px-5 pb-36 pt-6 text-white antialiased sm:px-8">
       <div className="mx-auto max-w-7xl">
@@ -224,14 +238,16 @@ function LiveRoom() {
             <button
               type="button"
               onClick={() => setIsChatOpen((previous) => !previous)}
+              aria-label={isChatOpen ? "Close live chat" : "Open live chat"}
+              aria-expanded={isChatOpen}
               className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-medium transition ${
                 isChatOpen
                   ? "border-white bg-white text-black"
-                  : "border-white/20 bg-white/[0.04] text-white hover:border-white hover:bg-white/10"
+                  : "border-white/40 bg-white/10 text-white hover:border-white hover:bg-white/20"
               }`}
             >
               <MessageCircle size={16} />
-              <span>Chat</span>
+              <span>{isChatOpen ? "Hide Chat" : "Live Chat"}</span>
             </button>
 
             {/* LiveKit connection status */}
@@ -259,73 +275,77 @@ function LiveRoom() {
         )}
 
         {/* Stage */}
-        <div
-          className={`grid gap-6 ${
-            isScreenShareEnabled
-              ? "lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start"
-              : "mx-auto max-w-4xl"
-          }`}
-        >
-          {isScreenShareEnabled && (
-            <StreamCard title="Screen sharing" live>
-              <div className="aspect-video bg-white/[0.03]">
-                <video
-                  ref={screenRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="h-full w-full object-contain"
-                />
+        <div className="flex min-w-0 flex-col gap-6 lg:flex-row">
+          <div
+            className={`grid min-w-0 flex-1 gap-6 ${
+              isScreenShareEnabled
+                ? "lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start"
+                : isChatOpen
+                  ? ""
+                  : "mx-auto max-w-4xl"
+            }`}
+          >
+            {isScreenShareEnabled && (
+              <StreamCard title="Screen sharing" live>
+                <div className="aspect-video bg-white/[0.03]">
+                  <video
+                    ref={screenRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="h-full w-full object-contain"
+                  />
+                </div>
+              </StreamCard>
+            )}
+
+            <StreamCard
+              title="Instructor camera"
+              live={isCameraEnabled && isConnected}
+            >
+              <div className="flex aspect-video items-center justify-center bg-white/[0.03]">
+                {isCameraEnabled && isConnected ? (
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center gap-3 text-white/40">
+                    <span className="rounded-full border border-white/15 p-3">
+                      <VideoOff size={22} />
+                    </span>
+                    <p className="text-sm">Camera is off</p>
+                  </div>
+                )}
               </div>
             </StreamCard>
-          )}
+          </div>
 
-          <StreamCard
-            title="Instructor camera"
-            live={isCameraEnabled && isConnected}
-          >
-            <div className="flex aspect-video items-center justify-center bg-white/[0.03]">
-              {isCameraEnabled && isConnected ? (
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex flex-col items-center gap-3 text-white/40">
-                  <span className="rounded-full border border-white/15 p-3">
-                    <VideoOff size={22} />
-                  </span>
-                  <p className="text-sm">Camera is off</p>
-                </div>
-              )}
-            </div>
-          </StreamCard>
+          {isChatOpen && (
+            <ChatWindow
+              embedded
+              messages={messages}
+              currentUserId={currentUserId}
+              userRole={userRole}
+              isConnected={isChatConnected}
+              isJoined={isJoined}
+              isChatEnabled={isChatEnabled}
+              isLoading={isChatLoading}
+              isLoadingMore={isLoadingMore}
+              hasMore={hasMore}
+              error={chatError}
+              onSendMessage={sendMessage}
+              onPauseChat={pauseChat}
+              onResumeChat={resumeChat}
+              onLoadMore={loadMoreMessages}
+              onClose={() => setIsChatOpen(false)}
+            />
+          )}
         </div>
       </div>
-
-      {/* Instructor Chat Panel */}
-      {isChatOpen && (
-        <ChatWindow
-          messages={messages}
-          currentUserId={currentUserId}
-          userRole={userRole}
-          isConnected={isChatConnected}
-          isJoined={isJoined}
-          isChatEnabled={isChatEnabled}
-          isLoading={isChatLoading}
-          isLoadingMore={isLoadingMore}
-          hasMore={hasMore}
-          error={chatError}
-          onSendMessage={sendMessage}
-          onPauseChat={pauseChat}
-          onResumeChat={resumeChat}
-          onLoadMore={loadMoreMessages}
-          onClose={() => setIsChatOpen(false)}
-        />
-      )}
 
       {/* Floating controls */}
       <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30 flex justify-center px-2 sm:bottom-6 sm:px-4">
@@ -360,6 +380,18 @@ function LiveRoom() {
           />
 
           <span className="mx-1 hidden h-6 w-px bg-white/15 sm:block" />
+
+          <button
+            type="button"
+            onClick={handleLeaveRoom}
+            disabled={isEnding}
+            aria-label="Leave live room without ending the session"
+            title="Leave room without ending the live session"
+            className={`inline-flex items-center justify-center gap-2 rounded-full border border-white/30 px-3 py-2.5 text-sm font-medium text-white transition-all duration-300 hover:bg-white/10 active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:active:scale-100 sm:px-5 sm:py-3 ${focusRing}`}
+          >
+            <LogOut size={18} />
+            <span className="hidden sm:inline">Leave room</span>
+          </button>
 
           <button
             type="button"
