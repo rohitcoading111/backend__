@@ -4,13 +4,18 @@ import { socketAuthMiddleware } from "./socketAuth.middleware.js";
 let io;
 
 export const initializeSocket = (httpServer) => {
-  io = new Server(httpServer, {
-    cors: {
-      origin: process.env.CLIENT_URL,
-      methods: ["GET", "POST"],
-      credentials: true,
-    },
-  });
+  const allowedOrigins = [
+  "http://localhost:5173",
+  "https://learnhubcloud.in",
+];
+
+      io = new Server(httpServer, {
+                cors: {
+                origin: allowedOrigins,
+                methods: ["GET", "POST"],
+                credentials: true,
+              },
+      });
 
   // Authenticate every socket connection
   io.use(socketAuthMiddleware);
