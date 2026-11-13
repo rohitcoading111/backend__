@@ -20,6 +20,10 @@ const liveSessionSchema = new mongoose.Schema(
       enum: ["LIVE", "ENDED"],
       default: "LIVE",
     },
+    isChatEnabled: {
+     type: Boolean,
+     default: true,
+  },
 
     roomId: {
       type: String,
