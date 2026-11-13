@@ -16,7 +16,7 @@ import organizationInstructorRoutes from "../routes/organizationInstructor.route
 import paymentAnalyticsRoutes from "../routes/paymentAnalytics.routes.js";
 import organizationBankDetailsRoutes from "../routes/organizationBankDetails.routes.js";
 import organizationPolicyAcceptanceRoutes from "../routes/organizationPolicyAcceptance.routes.js";
-
+import chatRoutes from "../routes/chat.routes.js";
 
 import cors from "cors";
 
@@ -88,9 +88,8 @@ app.use("/api/organizations", organizationRoutes);
 
 app.use("/api/payment-analytics", paymentAnalyticsRoutes);
 
-app.use(
-  "/api/organization-bank-details",
-  organizationBankDetailsRoutes
-);
+app.use("/api/organization-bank-details", organizationBankDetailsRoutes);
 app.use("/api/organization-policies", organizationPolicyAcceptanceRoutes);
+
+app.use("/api/chat", chatRoutes);
 export default app;
