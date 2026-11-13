@@ -15,11 +15,21 @@ function LiveSessionWorkspace() {
     selectedCourseId,
     setSelectedCourseId,
     handleStartLive,
+    activeSession,
+    activeSessionCourseId,
+    resumeError,
     loading,
     error,
   } = useLiveSession();
 
   const selectedCourse = courses.find((course) => course._id === selectedCourseId);
+  const isActiveSession = Boolean(
+    activeSession && activeSessionCourseId === selectedCourseId
+  );
+  const isCheckingActiveSession = Boolean(
+    selectedCourseId &&
+      (activeSessionCourseId !== selectedCourseId || loading)
+  );
 
   const courseOptions = courses.map((course) => ({
     value: course._id,
@@ -37,7 +47,9 @@ function LiveSessionWorkspace() {
         <div>
           <h3 className="text-xl font-semibold tracking-tight">Live classes</h3>
           <p className="mt-1 text-sm text-white/40">
-            Select a course and start your live session.
+            {isActiveSession
+              ? "Your live session is still running."
+              : "Select a course and start your live session."}
           </p>
         </div>
       </div>
@@ -77,7 +89,9 @@ function LiveSessionWorkspace() {
             )}
 
             <div className="min-w-0">
-              <p className="text-xs text-white/40">You will go live in</p>
+              <p className="text-xs text-white/40">
+                {isActiveSession ? "Live session in progress" : "You will go live in"}
+              </p>
               <p className="mt-0.5 truncate font-medium">
                 {selectedCourse.title}
               </p>
@@ -85,19 +99,31 @@ function LiveSessionWorkspace() {
           </div>
         )}
 
-        {error && (
+        {isActiveSession && (
+          <p className="mt-5 rounded-xl border border-white/20 bg-white/[0.04] px-4 py-3 text-sm text-white/80">
+            This course already has a live session. Continue it instead of
+            starting another one.
+          </p>
+        )}
+
+        {(error || resumeError) && (
           <p
             role="alert"
             className="mt-5 rounded-xl border border-white/20 bg-white/[0.04] px-4 py-3 text-sm text-white/80"
           >
-            {error}
+            {error || resumeError}
           </p>
         )}
 
         <button
           type="button"
           onClick={handleStartLive}
-          disabled={!selectedCourseId || loading}
+          disabled={
+            !selectedCourseId ||
+            loading ||
+            isCheckingActiveSession ||
+            Boolean(error || resumeError)
+          }
           className={`mt-8 inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-semibold text-black transition-all hover:bg-white/85 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:active:scale-100 ${focusRing}`}
         >
           {loading ? (
@@ -125,7 +151,13 @@ function LiveSessionWorkspace() {
           ) : (
             <Radio size={17} />
           )}
-          {loading ? "Starting" : "Start live session"}
+          {loading
+            ? "Please wait"
+            : isCheckingActiveSession
+              ? "Checking live session"
+              : isActiveSession
+                ? "Continue live"
+                : "Start live session"}
         </button>
       </div>
     </div>

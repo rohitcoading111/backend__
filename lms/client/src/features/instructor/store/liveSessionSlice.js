@@ -14,6 +14,7 @@ const initialState = {
   token: null,
   liveKitUrl: null,
   room: null,
+  activeSessionCourseId: null,
   loading: false,
   error: null,
 };
@@ -32,6 +33,7 @@ const liveSessionSlice = createSlice({
       state.token = null;
       state.liveKitUrl = null;
       state.room = null;
+      state.activeSessionCourseId = null;
       state.error = null;
     },
   },
@@ -52,6 +54,9 @@ const liveSessionSlice = createSlice({
         state.liveKitUrl = action.payload.liveKitUrl;
 
         state.activeSession = action.payload.session;
+        state.activeSessionCourseId =
+          action.payload.session.course?._id ||
+          action.payload.session.course;
       })
       .addCase(createLiveSessionThunk.rejected, (state, action) => {
         state.loading = false;
@@ -59,15 +64,27 @@ const liveSessionSlice = createSlice({
       })
 
       // Get active session
-      .addCase(getActiveLiveSessionThunk.pending, (state) => {
+      .addCase(getActiveLiveSessionThunk.pending, (state, action) => {
         state.loading = true;
         state.error = null;
+        state.activeSessionCourseId = action.meta.arg;
+        state.activeSession = null;
+        state.session = null;
+        state.token = null;
+        state.liveKitUrl = null;
       })
       .addCase(getActiveLiveSessionThunk.fulfilled, (state, action) => {
+        if (state.activeSessionCourseId !== action.meta.arg) return;
+
         state.loading = false;
-        state.activeSession = action.payload;
+        state.activeSession = action.payload?.session || action.payload;
+        state.session = action.payload?.session || null;
+        state.token = action.payload?.token || null;
+        state.liveKitUrl = action.payload?.liveKitUrl || null;
       })
       .addCase(getActiveLiveSessionThunk.rejected, (state, action) => {
+        if (state.activeSessionCourseId !== action.meta.arg) return;
+
         state.loading = false;
         state.error = action.payload;
       })
@@ -85,6 +102,7 @@ const liveSessionSlice = createSlice({
         state.token = null;
         state.liveKitUrl = null;
         state.room = null;
+        state.activeSessionCourseId = null;
       })
       .addCase(endLiveSessionThunk.rejected, (state, action) => {
         state.loading = false;

@@ -29,6 +29,10 @@ export const getActiveLiveSessionThunk = createAsyncThunk(
     try {
       return await getActiveLiveSessionService(courseId);
     } catch (error) {
+      if (error.response?.status === 404) {
+        return null;
+      }
+
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Failed to fetch active session"
       );

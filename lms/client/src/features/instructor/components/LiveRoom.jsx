@@ -1,6 +1,6 @@
 
 import { useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useBlocker, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Track } from "livekit-client";
 import {
@@ -82,6 +82,11 @@ function LiveRoom() {
   const [isChatOpen, setIsChatOpen] = useState(true);
 
   const { session, token, liveKitUrl } = location.state || {};
+  const isSessionActive = session?.status === "LIVE" && !isEnding;
+  const blocker = useBlocker(
+    ({ historyAction }) =>
+      isSessionActive && historyAction === "POP"
+  );
 
   const {
     room,
@@ -116,6 +121,21 @@ function LiveRoom() {
 
   const videoRef = useRef(null);
   const screenRef = useRef(null);
+
+  useEffect(() => {
+    if (!isSessionActive) return undefined;
+
+    const warnBeforeLeaving = (event) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", warnBeforeLeaving);
+
+    return () => {
+      window.removeEventListener("beforeunload", warnBeforeLeaving);
+    };
+  }, [isSessionActive]);
 
   // Attach instructor camera track
   useEffect(() => {
@@ -198,7 +218,17 @@ function LiveRoom() {
 
       room?.disconnect();
 
-      navigate("/instructor-dashboard");
+      const courseId = session.course?._id || session.course;
+      navigate(
+        "/organization-instructor-dashboard",
+        {
+          replace: true,
+          state: {
+            activeSection: "live-classes",
+            liveSessionCourseId: courseId,
+          },
+        }
+      );
     } catch (error) {
       console.error("End live error:", error);
       alert(error || "Failed to end live session");
@@ -215,7 +245,10 @@ function LiveRoom() {
 
     room?.disconnect();
     navigate("/organization-instructor-dashboard", {
-      state: { activeSection: "live-classes" },
+      state: {
+        activeSection: "live-classes",
+        liveSessionCourseId: session.course?._id || session.course,
+      },
     });
   };
 
@@ -346,6 +379,48 @@ function LiveRoom() {
           )}
         </div>
       </div>
+
+      {blocker.state === "blocked" && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-5 backdrop-blur-sm"
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="active-live-session-title"
+          aria-describedby="active-live-session-description"
+        >
+          <div className="w-full max-w-md rounded-3xl border border-white/15 bg-[#111] p-6 text-center shadow-2xl">
+            <h2
+              id="active-live-session-title"
+              className="text-lg font-semibold"
+            >
+              Live session is still running
+            </h2>
+            <p
+              id="active-live-session-description"
+              className="mt-2 text-sm leading-relaxed text-white/60"
+            >
+              You can&apos;t leave this room with the browser Back or Forward
+              buttons. End the live session first, or stay in the room.
+            </p>
+            <div className="mt-6 flex justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => blocker.reset()}
+                className={`rounded-full border border-white/25 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-white/10 ${focusRing}`}
+              >
+                Stay in room
+              </button>
+              <button
+                type="button"
+                onClick={handleEndLive}
+                className={`rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-white/85 ${focusRing}`}
+              >
+                End live
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Floating controls */}
       <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30 flex justify-center px-2 sm:bottom-6 sm:px-4">

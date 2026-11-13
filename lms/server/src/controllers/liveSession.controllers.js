@@ -52,13 +52,13 @@ export const getActiveLiveSessionController = async (req, res) => {
   try {
     const { courseId } = req.params;
 
-    const session = await getActiveLiveSession(
+    const activeSession = await getActiveLiveSession(
       courseId,
       req.user.id,
       req.user.role
     );
 
-    if (!session) {
+    if (!activeSession) {
       return res.status(404).json({
         success: false,
         message: "No active live session found",
@@ -68,7 +68,7 @@ export const getActiveLiveSessionController = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Active live session fetched successfully",
-      data: session,
+      data: activeSession,
     });
   } catch (error) {
     console.error("Get Active Live Session Error:", error);

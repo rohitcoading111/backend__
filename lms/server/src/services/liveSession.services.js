@@ -298,10 +298,27 @@ export const getActiveLiveSession = async (
     throw createError("Access denied", 403);
   }
 
-  return LiveSession.findOne({
+  const session = await LiveSession.findOne({
     course: course._id,
     status: "LIVE",
   });
+
+  if (!session || userRole !== "INSTRUCTOR") {
+    return session;
+  }
+
+  const token = await generateLiveKitToken({
+    roomId: session.roomId,
+    participantId: userId,
+    participantName: "Instructor",
+    canPublish: true,
+  });
+
+  return {
+    session,
+    token,
+    liveKitUrl: config.LIVEKIT_URL,
+  };
 };
 
 

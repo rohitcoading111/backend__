@@ -13,7 +13,7 @@ export const createLiveSessionService = async (courseId) => {
 // 2. Get active session of a course
 export const getActiveLiveSessionService = async (courseId) => {
   const response = await api.get(
-    `/course/${courseId}/active`
+    `/live-sessions/course/${courseId}/active`
   );
 
   return response.data.data;
