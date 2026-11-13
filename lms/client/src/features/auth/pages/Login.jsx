@@ -1,13 +1,30 @@
-
-import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { ArrowRight, AlertCircle, X } from "lucide-react";
 
 import LoginForm from "../components/LoginForm";
 import AuthLayout from "../components/AuthLayout";
 import authService from "../services/authService";
 
 function Login() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [googleError, setGoogleError] = useState("");
+
+  useEffect(() => {
+    const error = searchParams.get("error");
+
+    if (error === "google_rate_limit") {
+      setGoogleError(
+        "Too many Google login attempts. Please try again after some time."
+      );
+      // URL se error param clean karne ke liye (optional)
+      searchParams.delete("error");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
   const handleGoogleLogin = () => {
+    setGoogleError("");
     window.location.href = authService.getGoogleAuthUrl();
   };
 
@@ -18,6 +35,7 @@ function Login() {
       title="Login to your account"
       description="Enter your credentials to continue learning."
     >
+      {/* Single LoginForm (Duplicate removed) */}
       <LoginForm />
 
       {/* Divider */}
@@ -28,6 +46,27 @@ function Login() {
         </span>
         <div className="h-px flex-1 bg-white/10" />
       </div>
+
+      {/* Google Error Alert (Placed right above Google button for better UX) */}
+      {googleError && (
+        <div
+          role="alert"
+          className="mb-3 flex items-start justify-between gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-xs leading-relaxed text-red-400"
+        >
+          <div className="flex items-start gap-2">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
+            <span>{googleError}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setGoogleError("")}
+            className="text-red-400/70 transition hover:text-red-300"
+            aria-label="Dismiss error"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
 
       {/* Google Login */}
       <button
@@ -65,7 +104,7 @@ function Login() {
 
       {/* Register Link */}
       <p className="mt-7 text-center text-sm text-neutral-400">
-        Don't have an account?{" "}
+        Don&apos;t have an account?{" "}
         <Link
           to="/register"
           className="font-semibold text-white underline-offset-4 hover:underline"

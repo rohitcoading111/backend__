@@ -61,3 +61,46 @@ export const resetPasswordLimiter = rateLimit({
 });
 
 
+// Google OAuth login
+export const googleAuthLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 2,
+
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+
+  handler: (req, res) => {
+    return res.redirect(
+      `${process.env.FRONTEND_URL}/login?error=google_rate_limit`
+    );
+  },
+});
+
+// Google OAuth callback
+export const googleCallbackLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 30,
+
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+
+  message: {
+    success: false,
+    message: "Too many Google authentication callbacks. Please try again later.",
+  },
+});
+
+// Google account registration
+export const googleRegisterLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 5,
+
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+
+  message: {
+    success: false,
+    message: "Too many Google registration attempts. Please try again later.",
+  },
+});
+

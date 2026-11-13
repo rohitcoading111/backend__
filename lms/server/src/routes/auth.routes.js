@@ -2,9 +2,9 @@ import express from "express";
 import registerUser from "../controllers/auth.controllers.js";
 import userValidation from "../validators/auth.validator.js";
 import { LoginValidation } from "../validators/auth.validator.js";
-import {Login} from "../controllers/auth.controllers.js";
-import {RefreshToken} from "../controllers/auth.controllers.js";
-import {Logout} from "../controllers/auth.controllers.js";
+import { Login } from "../controllers/auth.controllers.js";
+import { RefreshToken } from "../controllers/auth.controllers.js";
+import { Logout } from "../controllers/auth.controllers.js";
 import { getMe } from "../controllers/auth.controllers.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { adminTest } from "../controllers/auth.controllers.js";
@@ -21,36 +21,27 @@ import {
 } from "../validators/mobileRegistration.validator.js";
 import { verifyLoginOTPController } from "../controllers/loginOTP.controllers.js";
 
-import {
-  verifyEmailRegistrationController,
-} from "../controllers/emailRegistration.controllers.js";
+import { verifyEmailRegistrationController } from "../controllers/emailRegistration.controllers.js";
 import {
   verifyEmailOTPValidator,
   checkEmailOTPValidation,
 } from "../validators/emailRegistration.validator.js";
 
-
 import passport from "../config/googleStrategy.js";
 import { googleAuthCallback } from "../controllers/googleAuthControllers.js";
 
-
-
-import {
-  verifyEmailLoginOTPController,
-} from "../controllers/emailLoginOTP.controllers.js";
+import { verifyEmailLoginOTPController } from "../controllers/emailLoginOTP.controllers.js";
 
 import {
   verifyEmailLoginOTPValidator,
   checkEmailLoginOTPValidation,
 } from "../validators/emailLoginOTP.validator.js";
 
-
 import {
   forgotPasswordController,
   verifyPasswordResetOTPController,
   resetPasswordController,
 } from "../controllers/auth.controllers.js";
-
 
 import {
   forgotPasswordValidator,
@@ -61,41 +52,39 @@ import {
   validateResetPassword,
 } from "../validators/forgotPassword.validator.js";
 
-
 import {
   loginLimiter,
   registerLimiter,
   otpVerificationLimiter,
   forgotPasswordLimiter,
   resetPasswordLimiter,
+  googleAuthLimiter,
+  googleCallbackLimiter,
+  googleRegisterLimiter,
 } from "../middleware/authRateLimit.middleware.js";
 
-
-
 const router = express.Router();
-
 
 router.post(
   "/register",
   registerLimiter,
   upload.single("avatar"),
   userValidation,
-  registerUser
+  registerUser,
 );
 router.post("/login", loginLimiter, LoginValidation, Login);
 router.post("/refresh", RefreshToken);
 router.post("/logout", Logout);
 router.get("/me", authMiddleware, getMe);
-router.get( "/admin-test",authMiddleware, roleMiddleware("ADMIN"),adminTest);
+router.get("/admin-test", authMiddleware, roleMiddleware("ADMIN"), adminTest);
 
-
-// register otp ko verify krega mobile ki 
+// register otp ko verify krega mobile ki
 router.post(
   "/verify-otp",
   otpVerificationLimiter,
   verifyMobileOTPValidator,
   checkMobileRegistrationValidation,
-  verifyMobileRegistrationController
+  verifyMobileRegistrationController,
 );
 
 // login otp ko verify krega mobile ki
@@ -104,32 +93,31 @@ router.post(
   otpVerificationLimiter,
   verifyMobileOTPValidator,
   checkMobileRegistrationValidation,
-  verifyLoginOTPController
+  verifyLoginOTPController,
 );
-// register otp ko verify krega email ki 
+// register otp ko verify krega email ki
 router.post(
   "/verify-email-otp",
   otpVerificationLimiter,
   verifyEmailOTPValidator,
   checkEmailOTPValidation,
-  verifyEmailRegistrationController
+  verifyEmailRegistrationController,
 );
-// login otp ko varify  krega email ki 
+// login otp ko varify  krega email ki
 router.post(
   "/verify-email-login-otp",
   otpVerificationLimiter,
   verifyEmailLoginOTPValidator,
   checkEmailLoginOTPValidation,
-  verifyEmailLoginOTPController
+  verifyEmailLoginOTPController,
 );
-
 
 router.post(
   "/forgot-password",
   forgotPasswordLimiter,
   forgotPasswordValidator,
   validateForgotPassword,
-  forgotPasswordController
+  forgotPasswordController,
 );
 
 router.post(
@@ -137,7 +125,7 @@ router.post(
   otpVerificationLimiter,
   verifyResetOTPValidator,
   validateVerifyResetOTP,
-  verifyPasswordResetOTPController
+  verifyPasswordResetOTPController,
 );
 
 router.post(
@@ -145,28 +133,28 @@ router.post(
   resetPasswordLimiter,
   resetPasswordValidator,
   validateResetPassword,
-  resetPasswordController
+  resetPasswordController,
 );
-
-
 
 // Start Google OAuth
 router.get(
   "/google",
+  googleAuthLimiter,
   passport.authenticate("google", {
     scope: ["profile", "email"],
     session: false,
-  })
+  }),
 );
 
 // Google OAuth callback
 router.get(
   "/google/callback",
+  googleCallbackLimiter,
   passport.authenticate("google", {
     session: false,
     failureRedirect: "/api/auth/google/failure",
   }),
-  googleAuthCallback
+  googleAuthCallback,
 );
 
 // Google login failure
@@ -177,7 +165,14 @@ router.get("/google/failure", (req, res) => {
   });
 });
 
-router.post("/google/exchange", exchangeGoogleAuthCode);
-router.post("/google/register", completeGoogleRegistration);
+// Exchange Google authorization code
+router.post("/google/exchange", googleAuthLimiter, exchangeGoogleAuthCode);
+
+// Google registration
+router.post(
+  "/google/register",
+  googleRegisterLimiter,
+  completeGoogleRegistration,
+);
 
 export default router;
