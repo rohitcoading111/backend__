@@ -62,12 +62,27 @@ import {
 } from "../validators/forgotPassword.validator.js";
 
 
+import {
+  loginLimiter,
+  registerLimiter,
+  otpVerificationLimiter,
+  forgotPasswordLimiter,
+  resetPasswordLimiter,
+} from "../middleware/authRateLimit.middleware.js";
+
+
 
 const router = express.Router();
 
 
-router.post("/register", upload.single("avatar"), userValidation, registerUser);
-router.post("/login", LoginValidation, Login);
+router.post(
+  "/register",
+  registerLimiter,
+  upload.single("avatar"),
+  userValidation,
+  registerUser
+);
+router.post("/login", loginLimiter, LoginValidation, Login);
 router.post("/refresh", RefreshToken);
 router.post("/logout", Logout);
 router.get("/me", authMiddleware, getMe);
@@ -77,22 +92,24 @@ router.get( "/admin-test",authMiddleware, roleMiddleware("ADMIN"),adminTest);
 // register otp ko verify krega mobile ki 
 router.post(
   "/verify-otp",
+  otpVerificationLimiter,
   verifyMobileOTPValidator,
   checkMobileRegistrationValidation,
   verifyMobileRegistrationController
 );
 
-// login otp ko verify krega login ki
+// login otp ko verify krega mobile ki
 router.post(
   "/verify-login-otp",
+  otpVerificationLimiter,
   verifyMobileOTPValidator,
   checkMobileRegistrationValidation,
   verifyLoginOTPController
 );
-
 // register otp ko verify krega email ki 
 router.post(
   "/verify-email-otp",
+  otpVerificationLimiter,
   verifyEmailOTPValidator,
   checkEmailOTPValidation,
   verifyEmailRegistrationController
@@ -100,6 +117,7 @@ router.post(
 // login otp ko varify  krega email ki 
 router.post(
   "/verify-email-login-otp",
+  otpVerificationLimiter,
   verifyEmailLoginOTPValidator,
   checkEmailLoginOTPValidation,
   verifyEmailLoginOTPController
@@ -108,6 +126,7 @@ router.post(
 
 router.post(
   "/forgot-password",
+  forgotPasswordLimiter,
   forgotPasswordValidator,
   validateForgotPassword,
   forgotPasswordController
@@ -115,6 +134,7 @@ router.post(
 
 router.post(
   "/verify-reset-otp",
+  otpVerificationLimiter,
   verifyResetOTPValidator,
   validateVerifyResetOTP,
   verifyPasswordResetOTPController
@@ -122,6 +142,7 @@ router.post(
 
 router.post(
   "/reset-password",
+  resetPasswordLimiter,
   resetPasswordValidator,
   validateResetPassword,
   resetPasswordController
