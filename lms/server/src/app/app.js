@@ -54,22 +54,6 @@ app.use(
 
 app.use(passport.initialize()); 
 
-// Temporary IP check - remove after testing
-app.get("/api/debug/ip-check", (req, res) => {
-  console.log("PROXY CHECK:", {
-    forwardedFor: req.get("x-forwarded-for") || "Not received",
-    cfConnectingIp: req.get("cf-connecting-ip") || "Not received",
-    cfRay: req.get("cf-ray") || "Not received",
-    expressIp: req.ip,
-  });
-
-  res.json({
-    success: true,
-    forwardedForReceived: Boolean(req.get("x-forwarded-for")),
-    cfConnectingIpReceived: Boolean(req.get("cf-connecting-ip")),
-    cfRayReceived: Boolean(req.get("cf-ray")),
-  });
-});
 // auth apis 
 app.use('/api/auth', authRoutes);
 

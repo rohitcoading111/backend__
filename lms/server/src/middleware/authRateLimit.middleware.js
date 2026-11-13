@@ -1,18 +1,16 @@
 import { rateLimit, ipKeyGenerator } from "express-rate-limit";
 import { isIP } from "node:net";
 
-// Get client IP from Render's forwarded header
+// Identify client IP from Cloudflare header
 const getClientIp = (req) => {
-  const forwardedFor = req.get("x-forwarded-for");
+  const cfClientIp = req.get("cf-connecting-ip")?.trim();
 
-  // First IP represents the original client in the observed Render chain
-  const forwardedIp = forwardedFor?.split(",")[0]?.trim();
-
-  if (forwardedIp && isIP(forwardedIp)) {
-    return ipKeyGenerator(forwardedIp);
+  // Validate Cloudflare client IP
+  if (cfClientIp && isIP(cfClientIp)) {
+    return ipKeyGenerator(cfClientIp);
   }
 
-  // Fallback if forwarded IP is unavailable
+  // Fallback
   return ipKeyGenerator(req.ip);
 };
 
