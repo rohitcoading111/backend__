@@ -19,6 +19,11 @@ import { instructorAccessMiddleware } from "../middleware/instructorAccess.middl
 import upload from "../middleware/upload.middleware.js";
 import { courseValidation } from "../validators/course.validator.js";
 
+import {
+  courseCreateLimiter,
+  courseMutationLimiter,
+} from "../middleware/courseRateLimit.middleware.js";
+
 const router = express.Router();
 
 // Public: Published Courses
@@ -34,6 +39,7 @@ router.use(
 // Create Course
 router.post(
   "/",
+  courseCreateLimiter,
   upload.single("thumbnail"),
   courseValidation,
   createCourseController
@@ -48,17 +54,30 @@ router.get("/:courseId", getSingleCourseController);
 // Update Course
 router.patch(
   "/:courseId",
+  courseMutationLimiter,
   upload.single("thumbnail"),
   updateCourseController
 );
 
 // Delete Course
-router.delete("/:courseId", deleteCourseController);
+router.delete(
+  "/:courseId",
+  courseMutationLimiter,
+  deleteCourseController
+);
 
 // Publish Course
-router.patch("/:courseId/publish", publishCourseController);
+router.patch(
+  "/:courseId/publish",
+  courseMutationLimiter,
+  publishCourseController
+);
 
 // Unpublish Course
-router.patch("/:courseId/unpublish", unpublishCourseController);
+router.patch(
+  "/:courseId/unpublish",
+  courseMutationLimiter,
+  unpublishCourseController
+);
 
 export default router;
