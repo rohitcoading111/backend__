@@ -1,3 +1,4 @@
+
 import express from "express";
 
 import {
@@ -17,6 +18,10 @@ import { organizationAdminMiddleware } from "../middleware/organizationAdmin.mid
 import { instructorAccessMiddleware } from "../middleware/instructorAccess.middleware.js";
 import { requireOrganizationPolicyAcceptance } from "../middleware/requireOrganizationPolicyAcceptance.middleware.js";
 
+import {
+  organizationCreateLimiter,
+} from "../middleware/organizationRateLimit.middleware.js";
+
 const router = express.Router();
 
 // Create Organization
@@ -24,6 +29,7 @@ router.post(
   "/",
   authMiddleware,
   roleMiddleware("ADMIN"),
+  organizationCreateLimiter,
   createOrganizationValidator,
   createOrganizationController
 );
@@ -45,7 +51,7 @@ router.get(
   getAvailableOrganizationsController
 );
 
-
+// Instructor organization overview
 router.get(
   "/instructor-overview",
   authMiddleware,
