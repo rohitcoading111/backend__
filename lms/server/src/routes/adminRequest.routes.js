@@ -7,7 +7,7 @@ import {
   rejectAdminRequestController,
   verifyAdminRequestController,
   verifyAdminRequestEmailController,
-  approveAdminRequestByEmailController, // ADD THIS
+  approveAdminRequestByEmailController,
 } from "../controllers/adminRequest.controllers.js";
 
 import {
@@ -16,16 +16,22 @@ import {
   rejectAdminRequestValidator,
 } from "../validators/adminRequest.validator.js";
 
-import { validationResult } from "express-validator";
-
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { superAdminMiddleware } from "../middleware/superAdmin.middleware.js";
 
+import {
+  createAdminRequestLimiter,
+  verifyAdminEmailLimiter,
+  adminRequestActionLimiter,
+  approveAdminEmailLimiter,
+} from "../middleware/adminRequestRateLimit.middleware.js";
+
 const router = express.Router();
 
-// Public: Submit an organization Admin request
+// Public: Submit organization Admin request
 router.post(
   "/",
+  createAdminRequestLimiter,
   createAdminRequestValidator,
   createAdminRequestController
 );
@@ -43,6 +49,7 @@ router.patch(
   "/:requestId/approve",
   authMiddleware,
   superAdminMiddleware,
+  adminRequestActionLimiter,
   adminRequestIdValidator,
   approveAdminRequestController
 );
@@ -52,34 +59,32 @@ router.patch(
   "/:requestId/reject",
   authMiddleware,
   superAdminMiddleware,
+  adminRequestActionLimiter,
   rejectAdminRequestValidator,
   rejectAdminRequestController
 );
 
-// Public: verification through email button
+// Public: Verify through email button
 router.get(
   "/verify-email/:token",
+  verifyAdminEmailLimiter,
   verifyAdminRequestEmailController
 );
 
-// Super Admin: verification through dashboard
+// Super Admin: Verify through dashboard
 router.patch(
   "/:requestId/verify",
   authMiddleware,
   superAdminMiddleware,
+  adminRequestActionLimiter,
   adminRequestIdValidator,
   verifyAdminRequestController
 );
 
-// Email button: open confirmation page
-router.get(
-  "/verify-email/:token",
-  verifyAdminRequestEmailController
-);
-
-// Confirmation button: actually approve
+// Email button: Actually approve
 router.post(
   "/approve-email/:token",
+  approveAdminEmailLimiter,
   approveAdminRequestByEmailController
 );
 
