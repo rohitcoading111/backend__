@@ -27,6 +27,13 @@ import {
 
 import { uploadVideo } from "../middleware/upload.middleware.js";
 
+import {
+  lectureCreateLimiter,
+  lectureUpdateLimiter,
+  lectureDeleteLimiter,
+  lectureCompletionLimiter,
+} from "../middleware/lectureRateLimit.middleware.js";
+
 const router = express.Router();
 
 // Create Lecture
@@ -35,6 +42,7 @@ router.post(
   authMiddleware,
   roleMiddleware("INSTRUCTOR"),
   instructorAccessMiddleware,
+  lectureCreateLimiter,
   validateModuleId,
   uploadVideo.single("video"),
   validateLecture,
@@ -57,6 +65,7 @@ router.patch(
   authMiddleware,
   roleMiddleware("INSTRUCTOR"),
   instructorAccessMiddleware,
+  lectureUpdateLimiter,
   validateLectureId,
   uploadVideo.single("video"),
   validateUpdateLecture,
@@ -70,6 +79,7 @@ router.delete(
   authMiddleware,
   roleMiddleware("INSTRUCTOR"),
   instructorAccessMiddleware,
+  lectureDeleteLimiter,
   validateLectureId,
   checkValidation,
   deleteLectureController
@@ -87,6 +97,7 @@ router.patch(
   "/lectures/:lectureId/complete",
   authMiddleware,
   roleMiddleware("STUDENT"),
+  lectureCompletionLimiter,
   validateLectureId,
   checkValidation,
   markLectureCompletedController
