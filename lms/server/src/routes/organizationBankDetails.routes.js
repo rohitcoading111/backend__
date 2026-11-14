@@ -8,7 +8,7 @@ import {
   getAllBankDetailsController,
   getOrganizationBankDetailsController,
   verifyBankDetailsController,
-rejectBankDetailsController,
+  rejectBankDetailsController,
   uploadBankProofController,
 } from "../controllers/organizationBankDetails.controllers.js";
 
@@ -24,6 +24,13 @@ import { organizationAdminMiddleware } from "../middleware/organizationAdmin.mid
 import { requireOrganizationPolicyAcceptance } from "../middleware/requireOrganizationPolicyAcceptance.middleware.js";
 import { uploadBankProof } from "../middleware/upload.middleware.js";
 
+import {
+  bankDetailsCreateLimiter,
+  bankDetailsUpdateLimiter,
+  bankProofUploadLimiter,
+  bankDetailsAdminActionLimiter,
+} from "../middleware/organizationBankDetailsRateLimit.middleware.js";
+
 const router = express.Router();
 
 // ==========================================
@@ -36,6 +43,7 @@ router.post(
   authMiddleware,
   organizationAdminMiddleware,
   requireOrganizationPolicyAcceptance,
+  bankDetailsCreateLimiter,
   uploadBankProof,
   createBankDetailsValidator,
   handleBankDetailsValidationErrors,
@@ -48,6 +56,7 @@ router.patch(
   authMiddleware,
   organizationAdminMiddleware,
   requireOrganizationPolicyAcceptance,
+  bankDetailsUpdateLimiter,
   uploadBankProof,
   updateBankDetailsValidator,
   handleBankDetailsValidationErrors,
@@ -63,11 +72,13 @@ router.get(
   getMyBankDetailsController
 );
 
+// Upload bank proof
 router.post(
   "/my-bank-details/bank-proof",
   authMiddleware,
   organizationAdminMiddleware,
   requireOrganizationPolicyAcceptance,
+  bankProofUploadLimiter,
   uploadBankProof,
   uploadBankProofController
 );
@@ -84,7 +95,7 @@ router.get(
   getAllBankDetailsController
 );
 
-// Get a particular organization's bank details
+// Get particular organization's bank details
 router.get(
   "/super-admin/:organizationId",
   authMiddleware,
@@ -92,12 +103,12 @@ router.get(
   getOrganizationBankDetailsController
 );
 
-
 // Verify Organization Bank Details
 router.patch(
   "/super-admin/:organizationId/verify",
   authMiddleware,
   roleMiddleware("SUPER_ADMIN"),
+  bankDetailsAdminActionLimiter,
   verifyBankDetailsController
 );
 
@@ -106,6 +117,7 @@ router.patch(
   "/super-admin/:organizationId/reject",
   authMiddleware,
   roleMiddleware("SUPER_ADMIN"),
+  bankDetailsAdminActionLimiter,
   rejectBankDetailsController
 );
 
