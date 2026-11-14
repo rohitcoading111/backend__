@@ -1,4 +1,3 @@
-
 import { Router } from "express";
 
 import {
@@ -8,6 +7,10 @@ import {
 } from "../controllers/progress.controllers.js";
 
 import { authMiddleware } from "../middleware/auth.middleware.js";
+
+import {
+  lectureProgressLimiter,
+} from "../middleware/progressRateLimit.middleware.js";
 
 const router = Router();
 
@@ -29,6 +32,7 @@ router.get(
 router.patch(
   "/lecture/:lectureId/complete",
   authMiddleware,
+  lectureProgressLimiter,
   completeLecture
 );
 
