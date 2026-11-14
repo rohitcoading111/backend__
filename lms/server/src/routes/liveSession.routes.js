@@ -24,8 +24,13 @@ import {
   handleValidationErrors,
 } from "../validators/liveSession.validators.js";
 
-const router = express.Router();
+import {
+  liveSessionCreateLimiter,
+  liveSessionJoinLimiter,
+  liveSessionEndLimiter,
+} from "../middleware/liveSessionRateLimit.middleware.js";
 
+const router = express.Router();
 
 // CREATE LIVE SESSION
 router.post(
@@ -33,11 +38,11 @@ router.post(
   authMiddleware,
   roleMiddleware("INSTRUCTOR"),
   instructorAccessMiddleware,
+  liveSessionCreateLimiter,
   createLiveSessionValidator,
   handleValidationErrors,
   createLiveSessionController
 );
-
 
 // GET ACTIVE LIVE SESSION
 router.get(
@@ -48,17 +53,16 @@ router.get(
   getActiveLiveSessionController
 );
 
-
 // JOIN LIVE SESSION
 router.post(
   "/:sessionId/join",
   authMiddleware,
   roleMiddleware("STUDENT"),
+  liveSessionJoinLimiter,
   sessionIdParamValidator,
   handleValidationErrors,
   joinLiveSessionController
 );
-
 
 // END LIVE SESSION
 router.patch(
@@ -66,11 +70,11 @@ router.patch(
   authMiddleware,
   roleMiddleware("INSTRUCTOR"),
   instructorAccessMiddleware,
+  liveSessionEndLimiter,
   sessionIdParamValidator,
   handleValidationErrors,
   endLiveSessionController
 );
-
 
 // GET LIVEKIT ROOM
 router.get(
