@@ -4,7 +4,7 @@ import { getClientIp } from "./clientIp.js";
 // Global API Rate Limiter
 export const globalApiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 100,
+  limit: 500,
   standardHeaders: "draft-8",
   legacyHeaders: false,
 
