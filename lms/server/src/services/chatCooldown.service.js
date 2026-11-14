@@ -15,7 +15,7 @@ export const createChatCooldownService = ({
         _id: getCooldownId(liveSessionId, userId),
       })
       .select("expiresAt")
-      .lean();
+      .lean();live
 
     return Math.max(
       0,
