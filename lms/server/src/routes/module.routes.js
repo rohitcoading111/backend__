@@ -10,9 +10,15 @@ import {
 
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { roleMiddleware } from "../middleware/role.middleware.js";
+
 import {
   instructorAccessMiddleware,
 } from "../middleware/instructorAccess.middleware.js";
+
+import {
+  moduleCreateLimiter,
+  moduleMutationLimiter,
+} from "../middleware/moduleRateLimit.middleware.js";
 
 const router = express.Router();
 
@@ -22,6 +28,7 @@ router.post(
   authMiddleware,
   roleMiddleware("INSTRUCTOR"),
   instructorAccessMiddleware,
+  moduleCreateLimiter,
   createModuleController
 );
 
@@ -31,6 +38,7 @@ router.patch(
   authMiddleware,
   roleMiddleware("INSTRUCTOR"),
   instructorAccessMiddleware,
+  moduleMutationLimiter,
   updateModuleController
 );
 
@@ -40,6 +48,7 @@ router.delete(
   authMiddleware,
   roleMiddleware("INSTRUCTOR"),
   instructorAccessMiddleware,
+  moduleMutationLimiter,
   deleteModuleController
 );
 
