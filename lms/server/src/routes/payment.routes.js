@@ -1,3 +1,4 @@
+
 import express from "express";
 
 import {
@@ -5,6 +6,7 @@ import {
   getMyPaymentController,
   verifyPaymentController
 } from "../controllers/payment.controllers.js";
+
 import {
   createPaymentValidator,
   verifyPaymentValidator,
@@ -14,12 +16,18 @@ import {
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { roleMiddleware } from "../middleware/role.middleware.js";
 
+import {
+  paymentCreateLimiter,
+  paymentVerifyLimiter,
+} from "../middleware/paymentRateLimit.middleware.js";
+
 const router = express.Router();
 
 router.post(
   "/create",
   authMiddleware,
   roleMiddleware("STUDENT"),
+  paymentCreateLimiter,
   createPaymentValidator,
   handleValidationErrors,
   createPaymentRequestController
@@ -29,6 +37,7 @@ router.post(
   "/verify",
   authMiddleware,
   roleMiddleware("STUDENT"),
+  paymentVerifyLimiter,
   verifyPaymentValidator,
   handleValidationErrors,
   verifyPaymentController
