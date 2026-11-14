@@ -69,7 +69,11 @@ function LiveClassesPage() {
     isLoadingMore,
     hasMore,
     error: chatError,
+    chatCooldownSeconds,
+    remainingCooldownMs,
+    isSending,
     sendMessage,
+    setChatCooldown,
     pauseChat,
     resumeChat,
     loadMoreMessages,
@@ -220,7 +224,7 @@ function LiveClassesPage() {
         </header>
 
         {/* CLASSROOM + CHAT */}
-        <div className="flex min-h-0 flex-1 overflow-hidden">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
           {/* LIVEKIT CLASSROOM */}
           <div className="min-h-0 min-w-0 flex-1 overflow-hidden">
             <LiveKitRoom
@@ -258,7 +262,11 @@ function LiveClassesPage() {
               isLoadingMore={isLoadingMore}
               hasMore={hasMore}
               error={chatError}
+              chatCooldownSeconds={chatCooldownSeconds}
+              remainingCooldownMs={remainingCooldownMs}
+              isSending={isSending}
               onSendMessage={sendMessage}
+              onSetCooldown={setChatCooldown}
               onPauseChat={pauseChat}
               onResumeChat={resumeChat}
               onLoadMore={loadMoreMessages}

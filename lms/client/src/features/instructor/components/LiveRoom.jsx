@@ -110,7 +110,11 @@ function LiveRoom() {
     isLoadingMore,
     hasMore,
     error: chatError,
+    chatCooldownSeconds,
+    remainingCooldownMs,
+    isSending,
     sendMessage,
+    setChatCooldown,
     pauseChat,
     resumeChat,
     loadMoreMessages,
@@ -370,7 +374,11 @@ function LiveRoom() {
               isLoadingMore={isLoadingMore}
               hasMore={hasMore}
               error={chatError}
+              chatCooldownSeconds={chatCooldownSeconds}
+              remainingCooldownMs={remainingCooldownMs}
+              isSending={isSending}
               onSendMessage={sendMessage}
+              onSetCooldown={setChatCooldown}
               onPauseChat={pauseChat}
               onResumeChat={resumeChat}
               onLoadMore={loadMoreMessages}

@@ -17,7 +17,11 @@ const ChatWindow = ({
   isLoadingMore,
   hasMore,
   error,
+  chatCooldownSeconds = 0,
+  remainingCooldownMs = 0,
+  isSending = false,
   onSendMessage,
+  onSetCooldown,
   onPauseChat,
   onResumeChat,
   onLoadMore,
@@ -37,30 +41,33 @@ const ChatWindow = ({
         isFullScreen
           ? "fixed inset-0"
           : embedded
-              ? "relative h-[500px] w-full min-h-0 shrink-0 border-t border-gray-200 lg:h-auto lg:w-[360px] lg:max-w-[40%] lg:border-l lg:border-t-0"
+            ? "relative h-[42vh] min-h-[260px] max-h-[360px] w-full min-w-0 shrink-0 border-t border-gray-200 lg:h-auto lg:min-h-0 lg:max-h-none lg:w-[360px] lg:max-w-[40%] lg:border-l lg:border-t-0"
             : "fixed bottom-5 right-5 h-[500px] w-[360px] max-h-[80vh] max-w-[calc(100vw-24px)] rounded-2xl border border-gray-200"
       }`}
     >
       {/* HEADER */}
-      <div className="flex shrink-0 items-center gap-2 border-b border-gray-200">
-        <div className="min-w-0 flex-1">
+      <div className="relative shrink-0 border-b border-gray-200">
+        <div className="min-w-0">
           <ChatHeader
             isConnected={isConnected}
             isJoined={isJoined}
             isChatEnabled={isChatEnabled}
             userRole={userRole}
+            chatCooldownSeconds={chatCooldownSeconds}
+            onSetCooldown={onSetCooldown}
             onPauseChat={onPauseChat}
             onResumeChat={onResumeChat}
           />
         </div>
 
-        <div className="flex shrink-0 items-center gap-1 pr-3">
+        <div className="absolute right-3 top-2 flex items-center gap-1">
           {/* FULLSCREEN BUTTON */}
           <button
             type="button"
             onClick={() => setIsFullScreen((prev) => !prev)}
             title={isFullScreen ? "Exit full screen" : "Full screen"}
-            className="rounded-lg p-2 text-gray-500 transition hover:bg-gray-100 hover:text-black"
+            aria-label={isFullScreen ? "Exit full screen" : "Full screen"}
+            className="rounded-lg p-2 text-gray-500 transition hover:bg-gray-100 hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           >
             {isFullScreen ? (
               <Minimize2 size={18} />
@@ -74,7 +81,8 @@ const ChatWindow = ({
             type="button"
             onClick={handleClose}
             title="Close chat"
-            className="rounded-lg p-2 text-gray-500 transition hover:bg-red-50 hover:text-red-600"
+            aria-label="Close chat"
+            className="rounded-lg p-2 text-gray-500 transition hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
           >
             <X size={18} />
           </button>
@@ -104,6 +112,8 @@ const ChatWindow = ({
         isChatEnabled={isChatEnabled}
         isJoined={isJoined}
         isConnected={isConnected}
+        remainingCooldownMs={remainingCooldownMs}
+        isSending={isSending}
       />
     </div>
   );

@@ -1,5 +1,10 @@
 
-import { useCallback, useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useSelector } from "react-redux";
 
 import {
@@ -36,6 +41,9 @@ const useLiveChat = (liveSessionId) => {
   const accessToken = useSelector(
     (state) => state.auth.accessToken
   );
+  const currentUserId = useSelector(
+    (state) => state.auth.user?._id || state.auth.user?.id
+  );
 
   // Chat states
   const [messages, setMessages] = useState([]);
@@ -47,6 +55,52 @@ const useLiveChat = (liveSessionId) => {
   const [hasMore, setHasMore] = useState(false);
   const [nextCursor, setNextCursor] = useState(null);
   const [error, setError] = useState(null);
+  const [chatCooldownSeconds, setChatCooldownSeconds] =
+    useState(0);
+  const [cooldownDeadline, setCooldownDeadline] =
+    useState(null);
+  const [remainingCooldownMs, setRemainingCooldownMs] =
+    useState(0);
+  const [isSending, setIsSending] = useState(false);
+  const cooldownSecondsRef = useRef(chatCooldownSeconds);
+  const currentUserIdRef = useRef(currentUserId);
+
+  useEffect(() => {
+    cooldownSecondsRef.current = chatCooldownSeconds;
+    currentUserIdRef.current = currentUserId;
+  }, [chatCooldownSeconds, currentUserId]);
+
+  const applyCooldown = useCallback((remainingMs) => {
+    const safeRemainingMs = Math.max(
+      0,
+      Number(remainingMs) || 0
+    );
+    setRemainingCooldownMs(safeRemainingMs);
+    setCooldownDeadline(
+      safeRemainingMs > 0
+        ? Date.now() + safeRemainingMs
+        : null
+    );
+  }, []);
+
+  useEffect(() => {
+    if (!cooldownDeadline) return undefined;
+
+    const updateRemaining = () => {
+      const remaining = Math.max(
+        0,
+        cooldownDeadline - Date.now()
+      );
+      setRemainingCooldownMs(remaining);
+
+      if (remaining === 0) {
+        setCooldownDeadline(null);
+      }
+    };
+
+    const intervalId = setInterval(updateRemaining, 250);
+    return () => clearInterval(intervalId);
+  }, [cooldownDeadline]);
 
   // Load initial chat history
   const loadChatHistory = useCallback(async () => {
@@ -139,11 +193,14 @@ const useLiveChat = (liveSessionId) => {
     const handleDisconnect = () => {
       setIsConnected(false);
       setIsJoined(false);
+      setIsSending(false);
     };
 
     const handleJoined = (data) => {
       setIsJoined(true);
       setIsChatEnabled(data.isChatEnabled);
+      setChatCooldownSeconds(data.chatCooldownSeconds || 0);
+      applyCooldown(data.remainingCooldownMs || 0);
       setError(null);
     };
 
@@ -151,13 +208,41 @@ const useLiveChat = (liveSessionId) => {
       setMessages((current) =>
         mergeMessages(current, [normalizeMessage(message)])
       );
+
+      if (
+        String(message.senderId) ===
+        String(currentUserIdRef.current)
+      ) {
+        const messageTime = new Date(message.createdAt).getTime();
+        const cooldownMs =
+          cooldownSecondsRef.current * 1000;
+        applyCooldown(
+          Math.max(0, messageTime + cooldownMs - Date.now())
+        );
+      }
     };
 
     const handleChatStatus = (data) => {
       setIsChatEnabled(data.isChatEnabled);
     };
 
+    const handleCooldown = (data) => {
+      if (String(data.liveSessionId) !== String(liveSessionId)) {
+        return;
+      }
+
+      const cooldownSeconds = data.chatCooldownSeconds || 0;
+      setChatCooldownSeconds(cooldownSeconds);
+      if (!cooldownSeconds) {
+        applyCooldown(0);
+      }
+    };
+
     const handleChatError = (data) => {
+      setIsSending(false);
+      if (data.code === "CHAT_COOLDOWN") {
+        applyCooldown(data.remainingMs);
+      }
       setError(data.message || "Chat error occurred");
     };
 
@@ -166,6 +251,7 @@ const useLiveChat = (liveSessionId) => {
     socket.on("chat:joined", handleJoined);
     socket.on("chat:new-message", handleNewMessage);
     socket.on("chat:status", handleChatStatus);
+    socket.on("chat:cooldown", handleCooldown);
     socket.on("chat:error", handleChatError);
 
     // Handle an already-connected socket
@@ -179,22 +265,26 @@ const useLiveChat = (liveSessionId) => {
       socket.off("chat:joined", handleJoined);
       socket.off("chat:new-message", handleNewMessage);
       socket.off("chat:status", handleChatStatus);
+      socket.off("chat:cooldown", handleCooldown);
       socket.off("chat:error", handleChatError);
 
       disconnectLiveChat();
     };
-  }, [accessToken, liveSessionId]);
+  }, [accessToken, liveSessionId, applyCooldown]);
 
   // Load history when session changes
   useEffect(() => {
     setMessages([]);
     setIsJoined(false);
     setIsChatEnabled(true);
+    setChatCooldownSeconds(0);
+    applyCooldown(0);
+    setIsSending(false);
     setHasMore(false);
     setNextCursor(null);
 
     loadChatHistory();
-  }, [loadChatHistory]);
+  }, [applyCooldown, loadChatHistory]);
 
   // Send message
   const sendMessage = useCallback(
@@ -211,20 +301,67 @@ const useLiveChat = (liveSessionId) => {
         return false;
       }
 
+      if (remainingCooldownMs > 0 || isSending) {
+        return false;
+      }
+
       if (typeof message !== "string" || !message.trim()) {
         setError("Message cannot be empty");
         return false;
       }
 
-      socket.emit("chat:send", {
-        liveSessionId,
-        message: message.trim(),
-      });
-
+      setIsSending(true);
       setError(null);
+      socket.timeout(10000).emit(
+        "chat:send",
+        {
+          liveSessionId,
+          message: message.trim(),
+        },
+        (timeoutError, response) => {
+          setIsSending(false);
+
+          if (timeoutError || !response?.success) {
+            if (response?.code === "CHAT_COOLDOWN") {
+              applyCooldown(response.remainingMs);
+            }
+            setError(
+              response?.message ||
+                "Unable to confirm that your message was sent"
+            );
+            return;
+          }
+
+          setError(null);
+          applyCooldown(response.remainingMs);
+        }
+      );
+
       return true;
     },
-    [accessToken, liveSessionId, isJoined, isChatEnabled]
+    [
+      accessToken,
+      liveSessionId,
+      isJoined,
+      isChatEnabled,
+      remainingCooldownMs,
+      isSending,
+      applyCooldown,
+    ]
+  );
+
+  const setChatCooldown = useCallback(
+    (cooldownSeconds) => {
+      const socket = connectLiveChat(accessToken);
+
+      if (!socket.connected || !isJoined) return;
+
+      socket.emit("chat:cooldown:set", {
+        liveSessionId,
+        cooldownSeconds,
+      });
+    },
+    [accessToken, liveSessionId, isJoined]
   );
 
   // Pause chat (instructor only - backend verifies permission)
@@ -254,7 +391,11 @@ const useLiveChat = (liveSessionId) => {
     isLoadingMore,
     hasMore,
     error,
+    chatCooldownSeconds,
+    remainingCooldownMs,
+    isSending,
     sendMessage,
+    setChatCooldown,
     pauseChat,
     resumeChat,
     loadMoreMessages,

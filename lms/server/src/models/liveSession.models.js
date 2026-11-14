@@ -24,6 +24,11 @@ const liveSessionSchema = new mongoose.Schema(
      type: Boolean,
      default: true,
   },
+    chatCooldownSeconds: {
+      type: Number,
+      enum: [0, 5, 10, 15, 30, 60, 300],
+      default: 0,
+    },
 
     roomId: {
       type: String,
