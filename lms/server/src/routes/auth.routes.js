@@ -59,7 +59,7 @@ import {
   googleRegisterLimiter,
 } from "../middleware/authRateLimit.middleware.js";
 
-import { Login as verifyLoginOTPController } from "../controllers/loginOTP.controllers.js";
+import { verifyLoginOTPController } from "../controllers/loginOTP.controllers.js";
 import { verifyMobileRegistrationController } from "../controllers/mobileRegistration.controllers.js";
 import { verifyEmailRegistrationController } from "../controllers/emailRegistration.controllers.js";
 import { verifyEmailLoginOTPController } from "../controllers/emailLoginOTP.controllers.js";
