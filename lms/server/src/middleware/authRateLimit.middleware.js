@@ -1,18 +1,5 @@
-import { rateLimit, ipKeyGenerator } from "express-rate-limit";
-import { isIP } from "node:net";
-
-// Identify client IP from Cloudflare header
-const getClientIp = (req) => {
-  const cfClientIp = req.get("cf-connecting-ip")?.trim();
-
-  // Validate Cloudflare client IP
-  if (cfClientIp && isIP(cfClientIp)) {
-    return ipKeyGenerator(cfClientIp);
-  }
-
-  // Fallback
-  return ipKeyGenerator(req.ip);
-};
+import { rateLimit } from "express-rate-limit";
+import { getClientIp } from "./clientIp.js";
 
 // Common rate limiter configuration
 const createAuthLimiter = (options) => {
@@ -34,7 +21,7 @@ export const loginLimiter = createAuthLimiter({
   },
 });
 
-// New account registration
+// Registration
 export const registerLimiter = createAuthLimiter({
   windowMs: 60 * 60 * 1000,
   limit: 5,
@@ -46,7 +33,7 @@ export const registerLimiter = createAuthLimiter({
   },
 });
 
-// OTP verification requests
+// OTP verification
 export const otpVerificationLimiter = createAuthLimiter({
   windowMs: 15 * 60 * 1000,
   limit: 10,
@@ -58,7 +45,7 @@ export const otpVerificationLimiter = createAuthLimiter({
   },
 });
 
-// Forgot password requests
+// Forgot password
 export const forgotPasswordLimiter = createAuthLimiter({
   windowMs: 60 * 60 * 1000,
   limit: 5,
@@ -70,7 +57,7 @@ export const forgotPasswordLimiter = createAuthLimiter({
   },
 });
 
-// Password reset requests
+// Reset password
 export const resetPasswordLimiter = createAuthLimiter({
   windowMs: 15 * 60 * 1000,
   limit: 5,
@@ -107,7 +94,7 @@ export const googleCallbackLimiter = createAuthLimiter({
   },
 });
 
-// Google account registration
+// Google registration
 export const googleRegisterLimiter = createAuthLimiter({
   windowMs: 60 * 60 * 1000,
   limit: 5,
