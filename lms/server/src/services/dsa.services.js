@@ -20,4 +20,23 @@ export const getAllDsaQuestions = async (filters) => {
     const page = Number(filters.page) || 1;
     const limit = Number(filters.limit) || 10;
     const skip = (page-1)*limit;
+    const filterQuery = {
+    isActive: true
+    };
+
+    const fetchedQuestions = await DsaQuestion.find(filterQuery)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
+    const totalQuestions = await DsaQuestion.countDocuments(filterQuery);
+    const totalPages = Math.ceil(totalQuestions / limit);
+    return {
+    questions: fetchedQuestions,
+    pagination: {
+        totalQuestions,
+        currentPage: page,
+        totalPages,
+        limit
+    }
+};
 }
