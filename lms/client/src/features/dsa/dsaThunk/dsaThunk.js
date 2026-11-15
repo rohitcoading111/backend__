@@ -1,26 +1,24 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import dsaService from "../services/dsaService";
-import { getRequestErrorMessage } from "../../../utils/errorHandler";
 
 // Get All DSA Questions
 export const getAllDsaQuestions = createAsyncThunk(
-    "dsa/getAllQuestions",
-    async (params, { rejectWithValue }) => {
-        try {
-            const response = await dsaService.getAllDsaQuestions(params);
-            return response;
-        } catch (error) {
-            return rejectWithValue(
-                getRequestErrorMessage(
-                    error,
-                    "Failed to fetch DSA questions. Please try again."
-                )
-            );
-        }
+  "dsa/getAllQuestions",
+  async (params, { rejectWithValue }) => {
+    try {
+      const response = await dsaService.getAllDsaQuestions(params);
+      return response;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to fetch DSA questions. Please try again."
+      );
     }
+  }
 );
 
-
+// Get Single DSA Question
 export const getSingleDsaQuestion = createAsyncThunk(
   "dsa/getSingleQuestion",
   async (questionId, { rejectWithValue }) => {
@@ -28,12 +26,15 @@ export const getSingleDsaQuestion = createAsyncThunk(
       return await dsaService.getSingleDsaQuestion(questionId);
     } catch (error) {
       return rejectWithValue(
-        getRequestErrorMessage(error, "Failed to fetch question.")
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to fetch question."
       );
     }
   }
 );
 
+// Create DSA Question
 export const createDsaQuestion = createAsyncThunk(
   "dsa/createQuestion",
   async (questionData, { rejectWithValue }) => {
@@ -41,12 +42,15 @@ export const createDsaQuestion = createAsyncThunk(
       return await dsaService.createDsaQuestion(questionData);
     } catch (error) {
       return rejectWithValue(
-        getRequestErrorMessage(error, "Failed to create question.")
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to create question."
       );
     }
   }
 );
 
+// Update DSA Question
 export const updateDsaQuestion = createAsyncThunk(
   "dsa/updateQuestion",
   async ({ questionId, updateData }, { rejectWithValue }) => {
@@ -54,12 +58,15 @@ export const updateDsaQuestion = createAsyncThunk(
       return await dsaService.updateDsaQuestion(questionId, updateData);
     } catch (error) {
       return rejectWithValue(
-        getRequestErrorMessage(error, "Failed to update question.")
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to update question."
       );
     }
   }
 );
 
+// Delete DSA Question
 export const deleteDsaQuestion = createAsyncThunk(
   "dsa/deleteQuestion",
   async (questionId, { rejectWithValue }) => {
@@ -67,12 +74,15 @@ export const deleteDsaQuestion = createAsyncThunk(
       return await dsaService.deleteDsaQuestion(questionId);
     } catch (error) {
       return rejectWithValue(
-        getRequestErrorMessage(error, "Failed to delete question.")
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to delete question."
       );
     }
   }
 );
 
+// Mark Question Solved
 export const markQuestionSolved = createAsyncThunk(
   "dsa/markSolved",
   async (questionId, { rejectWithValue }) => {
@@ -80,12 +90,15 @@ export const markQuestionSolved = createAsyncThunk(
       return await dsaService.markQuestionSolved(questionId);
     } catch (error) {
       return rejectWithValue(
-        getRequestErrorMessage(error, "Failed to mark question solved.")
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to mark question solved."
       );
     }
   }
 );
 
+// Get Student DSA Progress
 export const getStudentDsaProgress = createAsyncThunk(
   "dsa/getStudentProgress",
   async (_, { rejectWithValue }) => {
@@ -93,12 +106,15 @@ export const getStudentDsaProgress = createAsyncThunk(
       return await dsaService.getStudentDsaProgress();
     } catch (error) {
       return rejectWithValue(
-        getRequestErrorMessage(error, "Failed to fetch progress.")
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to fetch progress."
       );
     }
   }
 );
 
+// Get Due Revisions
 export const getDueRevisions = createAsyncThunk(
   "dsa/getDueRevisions",
   async (_, { rejectWithValue }) => {
@@ -106,12 +122,15 @@ export const getDueRevisions = createAsyncThunk(
       return await dsaService.getDueRevisions();
     } catch (error) {
       return rejectWithValue(
-        getRequestErrorMessage(error, "Failed to fetch due revisions.")
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to fetch due revisions."
       );
     }
   }
 );
 
+// Mark Question Revised
 export const markQuestionRevised = createAsyncThunk(
   "dsa/markRevised",
   async (questionId, { rejectWithValue }) => {
@@ -119,12 +138,15 @@ export const markQuestionRevised = createAsyncThunk(
       return await dsaService.markQuestionRevised(questionId);
     } catch (error) {
       return rejectWithValue(
-        getRequestErrorMessage(error, "Failed to mark revision.")
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to mark revision."
       );
     }
   }
 );
 
+// Get Student DSA Revision History
 export const getStudentDsaRevisionHistory = createAsyncThunk(
   "dsa/getRevisionHistory",
   async (_, { rejectWithValue }) => {
@@ -132,7 +154,9 @@ export const getStudentDsaRevisionHistory = createAsyncThunk(
       return await dsaService.getStudentDsaRevisionHistory();
     } catch (error) {
       return rejectWithValue(
-        getRequestErrorMessage(error, "Failed to fetch revision history.")
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to fetch revision history."
       );
     }
   }
