@@ -65,3 +65,17 @@ const updateQuestion = await DsaQuestion.findByIdAndUpdate(
 return updateQuestion;
 
 }
+
+export const deleteDsaQuestion = async (questionId) => {
+    const existQuestion = await DsaQuestion.findById(questionId);
+
+    if (!existQuestion) {
+        throw new Error("Question not found");
+    }
+
+    existQuestion.isActive = false;
+
+    await existQuestion.save();
+
+    return existQuestion;
+};
