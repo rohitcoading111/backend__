@@ -1,4 +1,13 @@
 import DsaQuestion from "../models/dsaQuestion.models.js";
+import DsaProgress from "../models/dsaProgress.models.js";
+import DsaRevisionHistory from "../models/dsaRevisionHistory.models.js";
+
+
+const getNextRevisionDate = () => {
+    const nextDate = new Date();
+    nextDate.setDate(nextDate.getDate() + 7);
+    return nextDate;
+};
 
 export const createDsaQuestion = async (questionData) => {
 
@@ -78,4 +87,108 @@ export const deleteDsaQuestion = async (questionId) => {
     await existQuestion.save();
 
     return existQuestion;
+};
+
+export const markQuestionSolved = async (studentId, questionId) => {
+    const question = await DsaQuestion.findOne({
+        _id: questionId,
+        isActive: true
+    });
+
+    if (!question) {
+        throw new Error("Question not found");
+    }
+
+    const now = new Date();
+    const nextRevisionAt = getNextRevisionDate();
+
+    const progress = await DsaProgress.findOneAndUpdate(
+        { studentId, questionId },
+        {
+            $set: {
+                lastSolvedAt: now,
+                nextRevisionAt,
+                isSolved: true
+            },
+            $setOnInsert: {
+                studentId,
+                questionId,
+                firstSolvedAt: now
+            },
+            $inc: {
+                solveCount: 1
+            }
+        },
+        {
+            new: true,
+            upsert: true,
+            runValidators: true
+        }
+    );
+
+    await DsaRevisionHistory.create({
+        studentId,
+        questionId,
+        progressId: progress._id,
+        activityType: "SOLVED",
+        activityAt: now
+    });
+
+    return progress;
+};
+
+
+export const getStudentDsaProgress = async (studentId) => {
+    const progress = await DsaProgress.find({ studentId })
+        .populate("questionId")
+        .sort({ updatedAt: -1 });
+
+    const totalSolvedQuestions = progress.filter(
+        (item) => item.isSolved
+    ).length;
+
+    return {
+        totalSolvedQuestions,
+        progress
+    };
+};
+
+
+export const markQuestionRevised = async (studentId, questionId) => {
+    const progress = await DsaProgress.findOne({
+        studentId,
+        questionId,
+        isSolved: true
+    });
+
+    if (!progress) {
+        throw new Error("Solved question progress not found");
+    }
+
+    const now = new Date();
+    const nextRevisionAt = getNextRevisionDate();
+
+    progress.lastRevisedAt = now;
+    progress.nextRevisionAt = nextRevisionAt;
+
+    await progress.save();
+
+    await DsaRevisionHistory.create({
+        studentId,
+        questionId,
+        progressId: progress._id,
+        activityType: "REVISED",
+        activityAt: now
+    });
+
+    return progress;
+};
+
+
+export const getStudentDsaRevisionHistory = async (studentId) => {
+    const history = await DsaRevisionHistory.find({ studentId })
+        .populate("questionId", "title difficulty topics")
+        .sort({ activityAt: -1 });
+
+    return history;
 };
