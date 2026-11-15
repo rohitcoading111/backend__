@@ -51,3 +51,17 @@ export const getSingleDsaQuestion = async (questionId) => {
 
     return fetchedQuestion;
 };
+
+export const updateDsaQuestion = async (questionId,updateData) => {
+ const existingQuestion = await DsaQuestion.findById(questionId);
+ if (!existingQuestion) {
+    throw new Error("Question not found");
+}
+const updateQuestion = await DsaQuestion.findByIdAndUpdate(
+    questionId,
+    updateData,
+    {new:true,runValidators:true}
+);
+return updateQuestion;
+
+}
