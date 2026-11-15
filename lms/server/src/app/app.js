@@ -20,6 +20,7 @@ import paymentAnalyticsRoutes from "../routes/paymentAnalytics.routes.js";
 import organizationBankDetailsRoutes from "../routes/organizationBankDetails.routes.js";
 import organizationPolicyAcceptanceRoutes from "../routes/organizationPolicyAcceptance.routes.js";
 import chatRoutes from "../routes/chat.routes.js";
+import dsaRoutes from "../routes/dsa.routes.js";
 
 // Global rate limiter
 import { globalApiLimiter } from "../middleware/globalRateLimit.middleware.js";
@@ -99,5 +100,7 @@ app.use("/api/organization-bank-details", organizationBankDetailsRoutes);
 app.use("/api/organization-policies", organizationPolicyAcceptanceRoutes);
 
 app.use("/api/chat", chatRoutes);
+
+app.use("/api/dsa",dsaRoutes)
 
 export default app;
