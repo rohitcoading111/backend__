@@ -21,38 +21,15 @@ const dsaRevisionHistorySchema = new mongoose.Schema(
       required: true,
     },
 
-    revisedAt: {
+    activityType: {
+      type: String,
+      enum: ["SOLVED", "REVISED"],
+      required: true,
+    },
+
+    activityAt: {
       type: Date,
       default: Date.now,
-    },
-
-    confidenceBefore: {
-      type: String,
-      enum: ["LOW", "MEDIUM", "HIGH"],
-      required: true,
-    },
-
-    confidenceAfter: {
-      type: String,
-      enum: ["LOW", "MEDIUM", "HIGH"],
-      required: true,
-    },
-
-    outcome: {
-      type: String,
-      enum: ["EASY", "MODERATE", "DIFFICULT"],
-      required: true,
-    },
-
-    nextRevisionAt: {
-      type: Date,
-      default: null,
-    },
-
-    notes: {
-      type: String,
-      trim: true,
-      default: "",
     },
   },
   {
@@ -60,17 +37,17 @@ const dsaRevisionHistorySchema = new mongoose.Schema(
   }
 );
 
-// Student-wise revision history
+// Student activity timeline
 dsaRevisionHistorySchema.index({
   studentId: 1,
-  revisedAt: -1,
+  activityAt: -1,
 });
 
-// Question-wise revision history
+// Question-wise activity history
 dsaRevisionHistorySchema.index({
   studentId: 1,
   questionId: 1,
-  revisedAt: -1,
+  activityAt: -1,
 });
 
 const DsaRevisionHistory = mongoose.model(

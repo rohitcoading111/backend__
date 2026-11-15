@@ -1,3 +1,4 @@
+
 import mongoose from "mongoose";
 
 const dsaProgressSchema = new mongoose.Schema(
@@ -14,13 +15,7 @@ const dsaProgressSchema = new mongoose.Schema(
       required: true,
     },
 
-    status: {
-      type: String,
-      enum: ["ATTEMPTED", "SOLVED", "NEEDS_REVISION"],
-      default: "ATTEMPTED",
-    },
-
-    attempts: {
+    solveCount: {
       type: Number,
       default: 0,
       min: 0,
@@ -31,7 +26,7 @@ const dsaProgressSchema = new mongoose.Schema(
       default: null,
     },
 
-    lastAttemptedAt: {
+    lastSolvedAt: {
       type: Date,
       default: null,
     },
@@ -41,30 +36,12 @@ const dsaProgressSchema = new mongoose.Schema(
       default: null,
     },
 
-    revisionCount: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
-
     nextRevisionAt: {
       type: Date,
       default: null,
     },
 
-    confidence: {
-      type: String,
-      enum: ["LOW", "MEDIUM", "HIGH"],
-      default: "LOW",
-    },
-
-    notes: {
-      type: String,
-      trim: true,
-      default: "",
-    },
-
-    isBookmarked: {
+    isSolved: {
       type: Boolean,
       default: false,
     },
@@ -80,7 +57,7 @@ dsaProgressSchema.index(
   { unique: true }
 );
 
-// Find upcoming revision questions
+// Find questions due for revision
 dsaProgressSchema.index({
   studentId: 1,
   nextRevisionAt: 1,

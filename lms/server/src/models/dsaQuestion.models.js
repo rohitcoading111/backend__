@@ -8,13 +8,11 @@ const exampleSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-
     output: {
       type: String,
       required: true,
       trim: true,
     },
-
     explanation: {
       type: String,
       trim: true,
@@ -54,10 +52,6 @@ const dsaQuestionSchema = new mongoose.Schema(
     topics: {
       type: [String],
       required: true,
-      validate: {
-        validator: (value) => value.length > 0,
-        message: "At least one topic is required",
-      },
     },
 
     platform: {
@@ -107,6 +101,12 @@ const dsaQuestionSchema = new mongoose.Schema(
   }
 );
 
-const DsaQuestion = mongoose.model( "DsaQuestion",dsaQuestionSchema);
+dsaQuestionSchema.index({ difficulty: 1, isActive: 1 });
+dsaQuestionSchema.index({ topics: 1, isActive: 1 });
+
+const DsaQuestion = mongoose.model(
+  "DsaQuestion",
+  dsaQuestionSchema
+);
 
 export default DsaQuestion;

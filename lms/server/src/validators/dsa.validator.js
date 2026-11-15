@@ -1,3 +1,4 @@
+
 import {
   body,
   param,
@@ -5,28 +6,23 @@ import {
   validationResult
 } from "express-validator";
 
-// 1. Create DSA Question Validator
+// 1. Create DSA Question
 export const questionValidator = [
   body("title")
     .trim()
-    .exists().withMessage("Title is required").bail()
-    .isString().withMessage("Title must be a string").bail()
+    .notEmpty().withMessage("Title is required").bail()
     .isLength({ min: 3, max: 100 })
     .withMessage("Title must be between 3 and 100 characters"),
 
   body("slug")
     .trim()
-    .exists().withMessage("Slug is required").bail()
-    .isString().withMessage("Slug must be a string").bail()
+    .notEmpty().withMessage("Slug is required").bail()
     .matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
     .withMessage("Invalid slug format"),
 
   body("description")
     .trim()
-    .exists().withMessage("Description is required").bail()
-    .isString().withMessage("Description must be a string").bail()
-    .isLength({ min: 5 })
-    .withMessage("Description must be at least 5 characters"),
+    .notEmpty().withMessage("Description is required"),
 
   body("difficulty")
     .isIn(["EASY", "MEDIUM", "HARD"])
@@ -59,16 +55,14 @@ export const questionValidator = [
     .withMessage("Examples must be an array"),
 
   body("examples.*.input")
-    .if(body("examples").exists())
-    .trim()
-    .notEmpty()
-    .withMessage("Example input is required"),
+    .optional()
+    .isString()
+    .withMessage("Example input must be a string"),
 
   body("examples.*.output")
-    .if(body("examples").exists())
-    .trim()
-    .notEmpty()
-    .withMessage("Example output is required"),
+    .optional()
+    .isString()
+    .withMessage("Example output must be a string"),
 
   body("examples.*.explanation")
     .optional()
@@ -91,14 +85,16 @@ export const questionValidator = [
     .withMessage("Companies must be an array"),
 ];
 
-// 2. Get Single Question Validator
+
+// 2. Get Single Question
 export const questionIdValidator = [
   param("questionId")
     .isMongoId()
     .withMessage("Invalid question ID"),
 ];
 
-// 3. Get Questions Validator
+
+// 3. Get All Questions
 export const getQuestionsValidator = [
   query("page")
     .optional()
@@ -128,53 +124,24 @@ export const getQuestionsValidator = [
     .withMessage("Invalid topic"),
 ];
 
-// 4. Update DSA Progress Validator
-export const updateDsaProgressValidator = [
+
+// 4. Mark Question as Solved
+export const markQuestionSolvedValidator = [
   body("questionId")
     .isMongoId()
     .withMessage("Invalid question ID"),
-
-  body("status")
-    .optional()
-    .isIn(["ATTEMPTED", "SOLVED", "NEEDS_REVISION"])
-    .withMessage("Invalid progress status"),
-
-  body("confidence")
-    .optional()
-    .isIn(["LOW", "MEDIUM", "HIGH"])
-    .withMessage("Invalid confidence level"),
-
-  body("notes")
-    .optional()
-    .isString()
-    .withMessage("Notes must be a string"),
 ];
 
-// 5. Submit DSA Revision Validator
-export const submitRevisionValidator = [
+
+// 5. Submit Question Revision
+export const reviseQuestionValidator = [
   body("questionId")
     .isMongoId()
     .withMessage("Invalid question ID"),
-
-  body("confidenceBefore")
-    .isIn(["LOW", "MEDIUM", "HIGH"])
-    .withMessage("Invalid previous confidence"),
-
-  body("confidenceAfter")
-    .isIn(["LOW", "MEDIUM", "HIGH"])
-    .withMessage("Invalid updated confidence"),
-
-  body("outcome")
-    .isIn(["EASY", "MODERATE", "DIFFICULT"])
-    .withMessage("Invalid revision outcome"),
-
-  body("notes")
-    .optional()
-    .isString()
-    .withMessage("Notes must be a string"),
 ];
 
 
+// 6. Validate Request Middleware
 export const validateRequest = (req, res, next) => {
   const errors = validationResult(req);
 
