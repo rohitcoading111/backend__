@@ -40,3 +40,14 @@ export const getAllDsaQuestions = async (filters) => {
     }
 };
 }
+
+
+export const getSingleDsaQuestion = async (questionId) => {
+    const fetchedQuestion = await DsaQuestion.findById(questionId);
+
+    if (!fetchedQuestion) {
+        throw new Error("Question not found");
+    }
+
+    return fetchedQuestion;
+};
