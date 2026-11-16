@@ -76,20 +76,47 @@ return updateQuestion;
 }
 
 export const deleteDsaQuestion = async (questionId) => {
-    const existQuestion = await DsaQuestion.findById(questionId);
+  const session = await mongoose.startSession();
 
-    if (!existQuestion) {
+  try {
+    let deletedQuestion;
+
+    await session.withTransaction(async () => {
+      deletedQuestion = await DsaQuestion.findById(questionId)
+        .session(session);
+
+      if (!deletedQuestion) {
         throw new Error("Question not found");
-    }
+      }
 
-    existQuestion.isActive = false;
+      // Remove all students' progress
+      await DsaProgress.deleteMany(
+        { questionId: deletedQuestion._id },
+        { session }
+      );
 
-    await existQuestion.save();
+      // Remove revision history
+      await DsaRevisionHistory.deleteMany(
+        { questionId: deletedQuestion._id },
+        { session }
+      );
 
-    return existQuestion;
+      // Permanently delete question
+      await DsaQuestion.deleteOne(
+        { _id: deletedQuestion._id },
+        { session }
+      );
+    });
+
+    return deletedQuestion;
+  } finally {
+    await session.endSession();
+  }
 };
 
 export const markQuestionSolved = async (studentId, questionId) => {
+    console.log("studentId:", studentId);
+   console.log("questionId:", questionId);
     const question = await DsaQuestion.findOne({
         _id: questionId,
         isActive: true
@@ -139,20 +166,26 @@ export const markQuestionSolved = async (studentId, questionId) => {
 
 
 export const getStudentDsaProgress = async (studentId) => {
-    const progress = await DsaProgress.find({ studentId })
-        .populate("questionId")
-        .sort({ updatedAt: -1 });
+  const progress = await DsaProgress.find({ studentId })
+    .populate({
+      path: "questionId",
+      match: { isActive: true },
+    })
+    .sort({ updatedAt: -1 });
 
-    const totalSolvedQuestions = progress.filter(
-        (item) => item.isSolved
-    ).length;
+  const activeProgress = progress.filter(
+    (item) => item.questionId !== null
+  );
 
-    return {
-        totalSolvedQuestions,
-        progress
-    };
+  const totalSolvedQuestions = activeProgress.filter(
+    (item) => item.isSolved
+  ).length;
+
+  return {
+    totalSolvedQuestions,
+    progress: activeProgress,
+  };
 };
-
 
 export const markQuestionRevised = async (studentId, questionId) => {
     const progress = await DsaProgress.findOne({

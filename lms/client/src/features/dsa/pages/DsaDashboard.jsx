@@ -116,14 +116,6 @@ const DsaFormModal = ({ question, onClose, onSuccess }) => {
   );
 };
 
-const handleFormSuccess = useCallback(() => {
-  console.log("4. Parent success callback triggered");
-
-  setShowForm(false);
-  setEditingQuestion(null);
-
-  refreshQuestions();
-}, [refreshQuestions]);
 
 /* ---------------------------------
    Dashboard

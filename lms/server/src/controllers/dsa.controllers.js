@@ -90,7 +90,9 @@ export const deleteDsaQuestionController = async (req, res, next) => {
 // Mark Question as Solved
 export const markQuestionSolvedController = async (req, res, next) => {
     try {
-        const studentId = req.user._id;
+        const studentId = req.user.id ;
+        console.log("CONTROLLER USER:", req.user);
+        console.log("CONTROLLER STUDENT ID:", studentId);
 
         const progress = await markQuestionSolved(
             studentId,
@@ -110,7 +112,7 @@ export const markQuestionSolvedController = async (req, res, next) => {
 // Get Student DSA Progress
 export const getStudentDsaProgressController = async (req, res, next) => {
     try {
-        const studentId = req.user._id;
+        const studentId = req.user.id;
 
         const progress = await getStudentDsaProgress(studentId);
 
@@ -126,7 +128,7 @@ export const getStudentDsaProgressController = async (req, res, next) => {
 // Get Due Revisions
 export const getDueRevisionsController = async (req, res, next) => {
     try {
-        const studentId = req.user._id;
+        const studentId = req.user.id;
 
         const revisions = await getDueRevisions(studentId);
 
@@ -142,7 +144,7 @@ export const getDueRevisionsController = async (req, res, next) => {
 // Mark Question as Revised
 export const markQuestionRevisedController = async (req, res, next) => {
     try {
-        const studentId = req.user._id;
+        const studentId = req.user.id;
 
         const progress = await markQuestionRevised(
             studentId,
@@ -162,7 +164,7 @@ export const markQuestionRevisedController = async (req, res, next) => {
 // Get Student Revision History
 export const getStudentDsaRevisionHistoryController = async (req, res, next) => {
     try {
-        const studentId = req.user._id;
+        const studentId = req.user.id;
 
         const history = await getStudentDsaRevisionHistory(studentId);
 
