@@ -1,7 +1,7 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import { logoutUser } from "../../auth/authThunk/authThunks.js";
 import { logout } from "../../auth/authSlices/authSlice.js";
@@ -15,10 +15,26 @@ function StudentLayout() {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [activeSection, setActiveSection] = useState("overview");
+
+  // Sync navigation state from other components
+  useEffect(() => {
+    const requestedSection = location.state?.section;
+
+    if (requestedSection) {
+      setActiveSection(requestedSection);
+
+      // Clear navigation state after consuming it
+      navigate(location.pathname, {
+        replace: true,
+        state: null,
+      });
+    }
+  }, [location.key]);
 
   // User initials
   const initials = user?.name

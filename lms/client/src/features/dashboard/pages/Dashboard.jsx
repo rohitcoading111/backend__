@@ -89,33 +89,31 @@ function Dashboard({ activeSection = "overview" }) {
                 </h1>
 
                 <p className="mt-3 max-w-xl text-sm leading-6 text-neutral-400 sm:text-base">
-                  Your next breakthrough starts with one lesson.
-                  Let&apos;s make today count.
+                  Your next breakthrough starts with one lesson. Let&apos;s make
+                  today count.
                 </p>
               </div>
 
-             <div className="flex flex-wrap items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleBrowseCourses}
+                  className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3.5 text-sm font-medium text-black transition hover:bg-neutral-200 active:scale-95"
+                >
+                  Explore learning
+                  <ArrowUpRight size={17} />
+                </button>
 
-  <button
-    type="button"
-    onClick={handleBrowseCourses}
-    className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3.5 text-sm font-medium text-black transition hover:bg-neutral-200 active:scale-95"
-  >
-    Explore learning
-    <ArrowUpRight size={17} />
-  </button>
-
-  <button
-    type="button"
-    onClick={() => navigate("/dsa")}
-    className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-[#151515] px-5 py-3.5 text-sm font-medium text-white transition hover:bg-[#222] active:scale-95"
-  >
-    <Code2 size={17} />
-    DSA Practice
-    <ArrowUpRight size={16} />
-  </button>
-
-</div>
+                <button
+                  type="button"
+                  onClick={() => navigate("/dsa")}
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-[#151515] px-5 py-3.5 text-sm font-medium text-white transition hover:bg-[#222] active:scale-95"
+                >
+                  <Code2 size={17} />
+                  DSA Practice
+                  <ArrowUpRight size={16} />
+                </button>
+              </div>
             </section>
 
             {/* Stats */}
@@ -148,13 +146,18 @@ function Dashboard({ activeSection = "overview" }) {
                   </h2>
 
                   <p className="mt-3 max-w-sm text-sm leading-6 text-neutral-400">
-                    Continue exploring your enrolled courses and make
-                    progress one lesson at a time.
+                    Continue exploring your enrolled courses and make progress
+                    one lesson at a time.
                   </p>
 
                   <button
                     type="button"
-                    onClick={() => navigate("/dashboard", { replace: true, state: { section: "my-courses" } })}
+                    onClick={() =>
+                      navigate("/dashboard", {
+                        replace: true,
+                        state: { section: "my-courses" },
+                      })
+                    }
                     className="mt-6 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-medium text-black transition hover:bg-neutral-200 active:scale-95"
                   >
                     <Play size={15} fill="currentColor" />
