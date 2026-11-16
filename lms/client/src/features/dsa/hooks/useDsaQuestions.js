@@ -3,50 +3,68 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { getAllDsaQuestions } from "../dsaThunk/dsaThunk";
 
+const useDsaQuestions = () => {
 
-const dispatch = useDispatch();
-const {questions,pagination,loadding,error} = useSelector((state) => state.dsa);
+  // Redux hooks
+  const dispatch = useDispatch();
 
-const fetchQuestions = useCallback(
-  (page, limit) => {
-   dispatch(getAllDsaQuestions({page,limit}))
-  },
-  [dispatch]
-);
+  const {
+    questions,
+    pagination,
+    loading,
+    error
+  } = useSelector((state) => state.dsa);
 
-useEffect(()=>{
-    fetchQuestions(1,10);
-},[fetchQuestions])
+  // Fetch all questions
+  const fetchQuestions = useCallback(
+    (page, limit) => {
+      dispatch(getAllDsaQuestions({ page, limit }));
+    },
+    [dispatch]
+  );
 
+  // Initial API call
+  useEffect(() => {
+    fetchQuestions(1, 10);
+  }, [fetchQuestions]);
 
-const nextPage = ()=> {
-     if(!pagination){
-        return;
-       }
-       let currentPage = pagination.currentPage;
-       let totalPages = pagination.totalPages;
-       const limit = pagination.limit;
-       if(currentPage>=totalPages){
-        return;
-       }
-       currentPage++;
-       fetchQuestions(currentPage,limit);
-}
+  // Next page
+  const nextPage = () => {
+    if (!pagination) {
+      return;
+    }
 
-const previousPage = () => {
-    if(!pagination){
-        return;
-       }
-       let currentPage = pagination.currentPage;
-       const limit = pagination.limit;
-       if(currentPage===1){
-        return;
-       }
-       currentPage--;
-       fetchQuestions(currentPage,limit);
-}
+    let currentPage = pagination.currentPage;
+    const totalPages = pagination.totalPages;
+    const limit = pagination.limit;
 
-return {
+    if (currentPage >= totalPages) {
+      return;
+    }
+
+    currentPage++;
+    fetchQuestions(currentPage, limit);
+  };
+
+  // Previous page
+  const previousPage = () => {
+    if (!pagination) {
+      return;
+    }
+
+    let currentPage = pagination.currentPage;
+    const limit = pagination.limit;
+
+    if (currentPage === 1) {
+      return;
+    }
+
+    currentPage--;
+    fetchQuestions(currentPage, limit);
+  };
+
+  // Return data and functions
+  return {
     questions,
     pagination,
     loading,
@@ -54,4 +72,7 @@ return {
     fetchQuestions,
     nextPage,
     previousPage
-}
+  };
+};
+
+export default useDsaQuestions;
