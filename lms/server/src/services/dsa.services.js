@@ -192,3 +192,19 @@ export const getStudentDsaRevisionHistory = async (studentId) => {
 
     return history;
 };
+
+
+export const getDueRevisions = async (studentId) => {
+
+    const dueRevisions = await DsaProgress.find({
+        studentId,
+        isSolved: true,
+        nextRevisionAt: {
+            $lte: new Date()
+        }
+    })
+        .populate("questionId", "title description difficulty topics platform externalUrl")
+        .sort({ nextRevisionAt: 1 });
+
+    return dueRevisions;
+};

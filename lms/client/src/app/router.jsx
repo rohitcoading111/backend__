@@ -48,6 +48,9 @@ import ForgotPassword from "../features/auth/components/ForgotPassword.jsx";
 import HomePage from "../features/allPages/HomePage.jsx";
 import AboutPage from "../features/allPages/AboutPage.jsx";
 import ContactPage from "../features/allPages/ContactPage.jsx";
+
+
+import dsaDashboard from "../features/dsa/pages/DsaDashboard.jsx"
 export const router = createBrowserRouter([
 
   // Root
@@ -65,6 +68,10 @@ export const router = createBrowserRouter([
   element: <ContactPage />,
 },
 
+{
+  path:"/dsa",
+  element:<dsaDashboard/>
+},
 
   // Public Authentication Routes
   {

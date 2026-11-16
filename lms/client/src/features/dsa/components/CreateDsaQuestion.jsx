@@ -1,27 +1,125 @@
 
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useCreateDsaQuestion } from "../hooks/useCreateDsaQuestion";
 
-const CreateDsaQuestion = () => {
+import { useCreateDsaQuestion } from "../hooks/useCreateDsaQuestion";
+import { useUpdateDsaQuestion } from "../hooks/useUpdateDsaQuestion";
+
+const CreateDsaQuestion = ({ question = null, onSuccess }) => {
+
+  // Question available hai to Edit mode, otherwise Create mode
+  const isEditMode = Boolean(question);
+
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors }
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      title: "",
+      description: "",
+      difficulty: "",
+      platform: "",
+      externalUrl: "",
+      topics: "",
+      companies: "",
+      constraints: "",
+      hints: ""
+    }
+  });
 
   const {
-    mutationError,
-    mutationLoading,
+    mutationError: createError,
+    mutationLoading: createLoading,
     createQuestion
   } = useCreateDsaQuestion();
 
-  const onSubmit = async (questionData) => {
+  const {
+    mutationError: updateError,
+    mutationLoading: updateLoading,
+    updateQuestion
+  } = useUpdateDsaQuestion();
+
+  // Current operation ke according loading aur error
+  const mutationLoading = isEditMode ? updateLoading : createLoading;
+  const mutationError = isEditMode ? updateError : createError;
+
+  // Edit mode mein existing question ka data form mein fill karna
+  useEffect(() => {
+    if (question) {
+      reset({
+        title: question.title || "",
+        description: question.description || "",
+        difficulty: question.difficulty || "",
+        platform: question.platform || "",
+        externalUrl: question.externalUrl || "",
+        topics: question.topics?.join(", ") || "",
+        companies: question.companies?.join(", ") || "",
+        constraints: question.constraints || "",
+        hints: question.hints?.join("\n") || ""
+      });
+    } else {
+      reset({
+        title: "",
+        description: "",
+        difficulty: "",
+        platform: "",
+        externalUrl: "",
+        topics: "",
+        companies: "",
+        constraints: "",
+        hints: ""
+      });
+    }
+  }, [question, reset]);
+
+  // Form submit logic
+  const onSubmit = async (formData) => {
     try {
-      await createQuestion(questionData).unwrap();
+
+      // Form data ko backend ke required format mein convert karna
+      const questionData = {
+        ...formData,
+
+        topics: formData.topics
+          .split(",")
+          .map(item => item.trim())
+          .filter(Boolean),
+
+        companies: formData.companies
+          .split(",")
+          .map(item => item.trim())
+          .filter(Boolean),
+
+        hints: formData.hints
+          .split("\n")
+          .map(item => item.trim())
+          .filter(Boolean)
+      };
+
+      // IF-ELSE: Create ya Update API
+      if (isEditMode) {
+
+        await updateQuestion({
+          questionId: question._id,
+          updateData: questionData
+        }).unwrap();
+
+        console.log("Question updated successfully");
+
+      } else {
+
+        await createQuestion(questionData).unwrap();
+
+        console.log("Question created successfully");
+      }
+
       reset();
+      onSuccess?.();
+
     } catch (error) {
-      console.error("Question creation failed:", error);
+      console.error("DSA question operation failed:", error);
     }
   };
 
@@ -41,15 +139,19 @@ const CreateDsaQuestion = () => {
           <div className="mb-3 flex items-center gap-2 text-sm text-indigo-400">
             <span>DSA Management</span>
             <span>/</span>
-            <span className="text-slate-400">Create Question</span>
+            <span className="text-slate-400">
+              {isEditMode ? "Update Question" : "Create Question"}
+            </span>
           </div>
 
           <h1 className="text-3xl font-bold tracking-tight">
-            Create DSA Question
+            {isEditMode ? "Update DSA Question" : "Create DSA Question"}
           </h1>
 
           <p className="mt-2 text-sm text-slate-400">
-            Add a new coding problem to the LearnHub question bank.
+            {isEditMode
+              ? "Update the existing coding problem."
+              : "Add a new coding problem to the LearnHub question bank."}
           </p>
         </div>
 
@@ -189,9 +291,7 @@ const CreateDsaQuestion = () => {
 
                   <input
                     {...register("topics", {
-                      required: "Add at least one topic",
-                      setValueAs: (value) =>
-                        value.split(",").map((item) => item.trim()).filter(Boolean)
+                      required: "Add at least one topic"
                     })}
                     placeholder="Arrays, Hashing, Two Pointers"
                     className={inputStyle}
@@ -214,10 +314,7 @@ const CreateDsaQuestion = () => {
                   </label>
 
                   <input
-                    {...register("companies", {
-                      setValueAs: (value) =>
-                        value.split(",").map((item) => item.trim()).filter(Boolean)
-                    })}
+                    {...register("companies")}
                     placeholder="Google, Amazon, Microsoft"
                     className={inputStyle}
                   />
@@ -243,10 +340,7 @@ const CreateDsaQuestion = () => {
 
                   <textarea
                     rows={3}
-                    {...register("hints", {
-                      setValueAs: (value) =>
-                        value.split("\n").map((item) => item.trim()).filter(Boolean)
-                    })}
+                    {...register("hints")}
                     placeholder="Write one hint per line..."
                     className={inputStyle}
                   />
@@ -283,8 +377,12 @@ const CreateDsaQuestion = () => {
                 className="rounded-xl bg-indigo-600 px-7 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {mutationLoading
-                  ? "Creating Question..."
-                  : "Create Question"}
+                  ? isEditMode
+                    ? "Updating Question..."
+                    : "Creating Question..."
+                  : isEditMode
+                    ? "Update Question"
+                    : "Create Question"}
               </button>
 
             </div>
