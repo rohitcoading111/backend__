@@ -1,88 +1,122 @@
+
 const DsaQuestionDetails = ({ question, loading, error }) => {
 
-  // Loading state
   if (loading) {
-    return <p className="text-slate-400">Loading question...</p>;
+    return (
+      <div className="animate-pulse space-y-3">
+        <div className="h-5 w-1/3 rounded bg-white/10" />
+        <div className="h-24 rounded bg-white/5" />
+      </div>
+    );
   }
 
-  // Error state
   if (error) {
-    return <p className="text-red-400">{error}</p>;
+    return <p className="text-sm text-neutral-400">{error}</p>;
   }
 
-  // Question available nahi hai
   if (!question) {
-    return <p className="text-slate-400">Question not found.</p>;
+    return <p className="text-sm text-neutral-500">Question not found.</p>;
   }
 
   return (
-    <div className="space-y-6 rounded-2xl border border-slate-800 bg-slate-900 p-6 text-white">
+    <article className="space-y-5">
+
+      <div className="flex flex-wrap items-center gap-2">
+
+        <span className="text-lg font-bold text-white">
+          {question.title}
+        </span>
+
+        <span className="rounded-full border border-white/20 px-3 py-1 text-[10px] text-neutral-300">
+          {question.difficulty}
+        </span>
+
+        <span className="rounded-full border border-white/10 px-3 py-1 text-[10px] text-neutral-500">
+          {question.platform}
+        </span>
+
+      </div>
+
 
       <div>
-        <h1 className="text-2xl font-bold">{question.title}</h1>
-        <p className="mt-2 text-sm text-indigo-400">
-          {question.difficulty} · {question.platform}
+        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-400">
+          Description
+        </h3>
+
+        <p className="whitespace-pre-wrap text-sm leading-7 text-neutral-300">
+          {question.description}
         </p>
       </div>
 
-      <section>
-        <h2 className="mb-2 font-semibold">Description</h2>
-        <p className="whitespace-pre-wrap text-sm leading-7 text-slate-300">
-          {question.description}
-        </p>
-      </section>
 
-      {/* Examples display */}
-      <section>
-        <h2 className="mb-3 font-semibold">Examples</h2>
+      {!!question.topics?.length && (
+        <div>
+          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-400">
+            Topics
+          </h3>
 
-        {question.examples?.map((example, index) => (
-          <div key={index} className="mb-4 rounded-xl bg-slate-800 p-4">
-            <p className="text-sm text-slate-400">Example {index + 1}</p>
-            <p className="mt-2 text-sm">Input: {example.input}</p>
-            <p className="mt-1 text-sm">Output: {example.output}</p>
-
-            {example.explanation && (
-              <p className="mt-2 text-sm text-slate-400">
-                {example.explanation}
-              </p>
-            )}
+          <div className="flex flex-wrap gap-2">
+            {question.topics.map((topic, index) => (
+              <span
+                key={`${topic}-${index}`}
+                className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs text-neutral-300"
+              >
+                {topic}
+              </span>
+            ))}
           </div>
-        ))}
-      </section>
+        </div>
+      )}
 
-      {/* Constraints */}
-      <section>
-        <h2 className="mb-2 font-semibold">Constraints</h2>
-        <p className="whitespace-pre-wrap text-sm text-slate-300">
-          {question.constraints || "No constraints provided."}
-        </p>
-      </section>
 
-      {/* Hints */}
-      <section>
-        <h2 className="mb-2 font-semibold">Hints</h2>
+      {question.constraints && (
+        <div>
+          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-400">
+            Constraints
+          </h3>
 
-        <ul className="list-inside list-disc space-y-2 text-sm text-slate-300">
-          {question.hints?.map((hint, index) => (
-            <li key={index}>{hint}</li>
-          ))}
-        </ul>
-      </section>
+          <div className="rounded-xl border border-white/10 bg-black/40 p-4">
+            <p className="whitespace-pre-wrap text-xs leading-6 text-neutral-400">
+              {question.constraints}
+            </p>
+          </div>
+        </div>
+      )}
 
-      {/* External platform link */}
+
+      {!!question.hints?.length && (
+        <div>
+          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-400">
+            Hints
+          </h3>
+
+          <ol className="space-y-2">
+            {question.hints.map((hint, index) => (
+              <li
+                key={index}
+                className="rounded-lg border border-white/10 bg-white/[0.02] p-3 text-xs leading-5 text-neutral-400"
+              >
+                <span className="mr-2 text-white">{index + 1}.</span>
+                {hint}
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+
+
       {question.externalUrl && (
         <a
           href={question.externalUrl}
           target="_blank"
-          rel="noopener noreferrer"
-          className="inline-block rounded-lg bg-indigo-600 px-5 py-3 text-sm text-white hover:bg-indigo-500"
+          rel="noreferrer"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-white underline decoration-white/30 underline-offset-4 hover:decoration-white"
         >
-          Solve on {question.platform}
+          Open coding question ↗
         </a>
       )}
 
-    </div>
+    </article>
   );
 };
 

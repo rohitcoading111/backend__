@@ -1,87 +1,111 @@
+
 import DsaQuestionCard from "./DsaQuestionCard";
 
 const DsaQuestionList = ({
-  questions,
+  questions = [],
   loading,
   error,
   pagination,
   onView,
   onEdit,
   onDelete,
+  onMarkSolved,
   onNextPage,
   onPreviousPage
 }) => {
 
-  // API request chal rahi ho toh loader show karo
   if (loading) {
     return (
-      <div className="py-16 text-center text-slate-400">
-        Loading DSA questions...
+      <div className="grid gap-4 md:grid-cols-2">
+        {[1, 2, 3, 4].map(item => (
+          <div
+            key={item}
+            className="h-40 animate-pulse rounded-xl border border-white/10 bg-white/[0.03]"
+          />
+        ))}
       </div>
     );
   }
 
-  // API error handle karna
   if (error) {
     return (
-      <div className="rounded-xl bg-red-500/10 p-5 text-center text-red-400">
+      <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5 text-sm text-neutral-400">
         {error}
       </div>
     );
   }
 
-  // Empty questions state
-  if (!questions?.length) {
+  if (!questions.length) {
     return (
-      <div className="py-16 text-center text-slate-400">
-        No DSA questions found.
+      <div className="rounded-xl border border-dashed border-white/15 px-5 py-12 text-center">
+
+        <div className="mb-3 text-3xl text-neutral-600">∅</div>
+
+        <h3 className="text-sm font-semibold text-white">
+          No questions found
+        </h3>
+
+        <p className="mt-2 text-xs text-neutral-500">
+          Add your first DSA question to get started.
+        </p>
+
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="space-y-5">
 
-      {/* Questions grid */}
-      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
 
-        {questions.map((question) => (
+        {questions.map(question => (
           <DsaQuestionCard
             key={question._id}
             question={question}
             onView={onView}
             onEdit={onEdit}
             onDelete={onDelete}
+            onMarkSolved={onMarkSolved}
           />
         ))}
 
       </div>
 
-      {/* Pagination */}
-      {pagination && (
-        <div className="mt-8 flex items-center justify-between">
 
-          <button
-            onClick={onPreviousPage}
-            disabled={pagination.currentPage <= 1}
-            className="rounded-lg border border-slate-700 px-4 py-2 text-sm text-white disabled:opacity-40"
-          >
-            Previous
-          </button>
+      {/* PAGINATION */}
 
-          <span className="text-sm text-slate-400">
+      {pagination && pagination.totalPages > 1 && (
+
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4">
+
+          <p className="text-xs text-neutral-500">
             Page {pagination.currentPage} of {pagination.totalPages}
-          </span>
+          </p>
 
-          <button
-            onClick={onNextPage}
-            disabled={pagination.currentPage >= pagination.totalPages}
-            className="rounded-lg border border-slate-700 px-4 py-2 text-sm text-white disabled:opacity-40"
-          >
-            Next
-          </button>
+          <div className="flex gap-2">
+
+            <button
+              type="button"
+              onClick={onPreviousPage}
+              disabled={pagination.currentPage <= 1}
+              className="lh-button-secondary !rounded-lg !px-4 !py-2 disabled:opacity-30"
+            >
+              Previous
+            </button>
+
+            <button
+              type="button"
+              onClick={onNextPage}
+              disabled={pagination.currentPage >= pagination.totalPages}
+              className="lh-button-secondary !rounded-lg !px-4 !py-2 disabled:opacity-30"
+            >
+              Next
+            </button>
+
+          </div>
 
         </div>
+
       )}
 
     </div>

@@ -1,13 +1,13 @@
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { createPortal } from "react-dom";
 
-// Custom Hooks
 import useDsaQuestions from "../hooks/useDsaQuestions";
 import useDsaProgress from "../hooks/useDsaProgress";
 import useDueRevisions from "../hooks/useDueRevisions";
 import useDsaRevisionHistory from "../hooks/useDsaRevisionHistory";
 import useSingleDsaQuestion from "../hooks/useSingleDsaQuestion";
+import useDeleteDsaQuestion from "../hooks/useDeleteDsaQuestion";
 
-// Components
 import DsaQuestionList from "../components/DsaQuestionList";
 import DsaQuestionDetails from "../components/DsaQuestionDetails";
 import DsaProgressCard from "../components/DsaProgressCard";
@@ -15,26 +15,124 @@ import DueRevisionList from "../components/DueRevisionList";
 import RevisionHistory from "../components/RevisionHistory";
 import CreateDsaQuestion from "../components/CreateDsaQuestion";
 
+/* ---------------------------------
+   Reusable section wrapper
+--------------------------------- */
+
+const Section = ({ title, subtitle, action, children }) => (
+  <section className="premium-card rounded-xl p-4 sm:p-6">
+    <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h2 className="text-base font-bold text-white">{title}</h2>
+        {subtitle && (
+          <p className="mt-1 text-xs text-neutral-500">{subtitle}</p>
+        )}
+      </div>
+      {action}
+    </div>
+    {children}
+  </section>
+);
+
+/* ---------------------------------
+   Create / Update modal
+--------------------------------- */
+
+const stop = (event) => event.stopPropagation();
+
+const DsaFormModal = ({ question, onClose, onSuccess }) => {
+  const title = question ? "Update Question" : "Create Question";
+
+  // Lock background scroll + close on Escape
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+
+    const prevHtml = html.style.overflow;
+    const prevBody = body.style.overflow;
+
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      html.style.overflow = prevHtml;
+      body.style.overflow = prevBody;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [onClose]);
+
+  return createPortal(
+    <div
+      className="dsa-modal-overlay"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <div
+        className="dsa-modal-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+      >
+        {/* HEADER (fixed) */}
+        <div className="dsa-modal-header">
+          <div>
+            <p className="text-[10px] uppercase tracking-[2px] text-neutral-500">
+              LearnHub / DSA
+            </p>
+            <h2 className="mt-1 text-sm font-semibold text-white">{title}</h2>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="dsa-close-button"
+            aria-label="Close form"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* BODY (only scrolling area).
+            stopPropagation keeps smooth-scroll libs / page handlers
+            from swallowing wheel & touch events. */}
+        <div
+          className="dsa-modal-body"
+          data-lenis-prevent
+          onWheel={stop}
+          onTouchMove={stop}
+        >
+          <CreateDsaQuestion question={question} onSuccess={onSuccess} />
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+};
+
+const handleFormSuccess = () => {
+  setShowForm(false);
+  setEditingQuestion(null);
+
+  refreshQuestions();
+};
+
+/* ---------------------------------
+   Dashboard
+--------------------------------- */
 
 const DsaDashboard = () => {
-
-  // ----------------------------------
-  // 1. LOCAL UI STATES
-  // ----------------------------------
-
   const [selectedQuestionId, setSelectedQuestionId] = useState(null);
-
   const [showForm, setShowForm] = useState(false);
-
   const [editingQuestion, setEditingQuestion] = useState(null);
 
-
-  // ----------------------------------
-  // 2. DSA QUESTIONS
-  // ----------------------------------
-
   const {
-    questions,
+    questions = [],
     pagination,
     loading: questionsLoading,
     error: questionsError,
@@ -43,201 +141,184 @@ const DsaDashboard = () => {
     previousPage
   } = useDsaQuestions();
 
-
-  // ----------------------------------
-  // 3. SINGLE QUESTION DETAILS
-  // ----------------------------------
-
   const {
     selectedQuestion,
     loading: detailsLoading,
     error: detailsError
   } = useSingleDsaQuestion(selectedQuestionId);
 
-
-  // ----------------------------------
-  // 4. STUDENT PROGRESS
-  // ----------------------------------
-
   const {
     progress,
     loading: progressLoading,
-    error: progressError
+    error: progressError,
+    fetchProgress,
+    markSolved
   } = useDsaProgress();
 
-
-  // ----------------------------------
-  // 5. DUE REVISIONS
-  // ----------------------------------
-
   const {
-    dueRevisions,
+    dueRevisions = [],
     loading: revisionsLoading,
     error: revisionsError,
-    markRevised,
-    fetchDueRevisions
+    fetchDueRevisions,
+    markRevised
   } = useDueRevisions();
 
-
-  // ----------------------------------
-  // 6. REVISION HISTORY
-  // ----------------------------------
-
   const {
-    revisionHistory,
+    revisionHistory = [],
     loading: historyLoading,
     error: historyError,
     fetchRevisionHistory
   } = useDsaRevisionHistory();
 
+  const { deleteQuestion } = useDeleteDsaQuestion();
 
-  // ----------------------------------
-  // 7. CREATE QUESTION
-  // ----------------------------------
+  /* ---------- data refresh ---------- */
 
-  const handleCreate = () => {
+  const refreshStudentData = useCallback(
+    () =>
+      Promise.all([
+        fetchProgress(),
+        fetchDueRevisions(),
+        fetchRevisionHistory()
+      ]),
+    [fetchProgress, fetchDueRevisions, fetchRevisionHistory]
+  );
 
-    // Edit mode clear kar do
+  const refreshQuestions = useCallback(
+    () =>
+      fetchQuestions(
+        pagination?.currentPage || 1,
+        pagination?.limit || 10
+      ),
+    [fetchQuestions, pagination?.currentPage, pagination?.limit]
+  );
+
+  /* ---------- form handlers ---------- */
+
+  const handleCreate = useCallback(() => {
     setEditingQuestion(null);
-
-    // Form open kar do
     setShowForm(true);
-  };
+  }, []);
 
-
-  // ----------------------------------
-  // 8. EDIT QUESTION
-  // ----------------------------------
-
-  const handleEdit = (question) => {
-
-    // Selected question ka complete data store karo
+  const handleEdit = useCallback((question) => {
     setEditingQuestion(question);
-
-    // Same form open karo
     setShowForm(true);
-  };
+  }, []);
 
-
-  // ----------------------------------
-  // 9. VIEW QUESTION
-  // ----------------------------------
-
-  const handleViewQuestion = (questionId) => {
-
-    // Selected question ki ID store karo
-    setSelectedQuestionId(questionId);
-  };
-
-
-  // ----------------------------------
-  // 10. CLOSE FORM
-  // ----------------------------------
-
-  const handleCloseForm = () => {
-
+  const handleCloseForm = useCallback(() => {
     setShowForm(false);
-
     setEditingQuestion(null);
-  };
+  }, []);
 
-
-  // ----------------------------------
-  // 11. AFTER CREATE / UPDATE
-  // ----------------------------------
-
-  const handleFormSuccess = () => {
-
-    // Form close karo
+  const handleFormSuccess = useCallback(async () => {
     handleCloseForm();
+    await refreshQuestions();
+  }, [handleCloseForm, refreshQuestions]);
 
-    // Question list refresh karo
-    fetchQuestions(1, 10);
-  };
+  /* ---------- question actions ---------- */
 
+  const handleViewQuestion = useCallback(
+    (questionId) => setSelectedQuestionId(questionId),
+    []
+  );
 
-  // ----------------------------------
-  // 12. MARK REVISION
-  // ----------------------------------
+  const handleCloseDetails = useCallback(
+    () => setSelectedQuestionId(null),
+    []
+  );
 
-  const handleMarkRevised = async (questionId) => {
+  const handleDelete = useCallback(
+    async (questionId) => {
+      if (!window.confirm("Are you sure you want to delete this question?")) {
+        return;
+      }
 
-    try {
+      try {
+        await deleteQuestion(questionId).unwrap();
+        await refreshQuestions();
 
-      // Revision API call
-      await markRevised(questionId).unwrap();
+        setSelectedQuestionId((current) =>
+          current === questionId ? null : current
+        );
+      } catch (error) {
+        console.error("Question deletion failed:", error);
+      }
+    },
+    [deleteQuestion, refreshQuestions]
+  );
 
-      // Due revisions refresh
-      fetchDueRevisions();
+  const handleMarkSolved = useCallback(
+    async (questionId) => {
+      try {
+        await markSolved(questionId).unwrap();
+        await refreshStudentData();
+      } catch (error) {
+        console.error("Mark solved failed:", error);
+      }
+    },
+    [markSolved, refreshStudentData]
+  );
 
-      // Revision history refresh
-      fetchRevisionHistory();
+  const handleMarkRevised = useCallback(
+    async (questionId) => {
+      try {
+        await markRevised(questionId).unwrap();
+        await refreshStudentData();
+      } catch (error) {
+        console.error("Revision update failed:", error);
+      }
+    },
+    [markRevised, refreshStudentData]
+  );
 
-    } catch (error) {
-
-      console.error("Revision failed:", error);
-
-    }
-  };
-
-
-  // ----------------------------------
-  // 13. DASHBOARD UI
-  // ----------------------------------
+  /* ---------- UI ---------- */
 
   return (
-
-    <div className="min-h-screen bg-slate-950 px-4 py-8 text-white md:px-8">
-
-      <div className="mx-auto max-w-7xl space-y-8">
+    <main className="premium-dashboard min-h-screen px-4 py-7 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl space-y-7">
 
         {/* HEADER */}
-
-        <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-
+        <header className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
-
-            <h1 className="text-3xl font-bold">
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-[2px] text-neutral-500">
+              LearnHub / Practice
+            </p>
+            <h1 className="text-2xl font-bold text-white sm:text-3xl">
               DSA Dashboard
             </h1>
-
-            <p className="mt-2 text-sm text-slate-400">
-              Manage questions, track progress and revise coding problems.
+            <p className="mt-2 text-xs text-neutral-500 sm:text-sm">
+              Practice consistently. Track progress. Revise smarter.
             </p>
-
           </div>
 
           <button
+            type="button"
             onClick={handleCreate}
-            className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold transition hover:bg-indigo-500"
+            className="lh-button-primary w-full sm:w-auto"
           >
             + Add Question
           </button>
-
         </header>
 
-
-        {/* STUDENT PROGRESS */}
-
+        {/* PROGRESS */}
         <section>
-
           <DsaProgressCard
             progress={progress}
             loading={progressLoading}
             error={progressError}
           />
-
         </section>
 
-
         {/* QUESTION BANK */}
-
-        <section className="space-y-4">
-
-          <h2 className="text-xl font-semibold">
-            DSA Question Bank
-          </h2>
-
+        <Section
+          title="Question Bank"
+          subtitle="Explore and manage coding questions"
+          action={
+            <span className="rounded-md border border-white/10 px-3 py-1 text-xs text-neutral-400">
+              {pagination?.totalQuestions ?? questions.length} Questions
+            </span>
+          }
+        >
           <DsaQuestionList
             questions={questions}
             loading={questionsLoading}
@@ -245,127 +326,70 @@ const DsaDashboard = () => {
             pagination={pagination}
             onView={handleViewQuestion}
             onEdit={handleEdit}
+            onDelete={handleDelete}
+            onMarkSolved={handleMarkSolved}
             onNextPage={nextPage}
             onPreviousPage={previousPage}
           />
+        </Section>
 
-        </section>
-
-
-        {/* SELECTED QUESTION DETAILS */}
-
+        {/* QUESTION DETAILS */}
         {selectedQuestionId && (
-
-          <section className="space-y-4">
-
-            <div className="flex items-center justify-between">
-
-              <h2 className="text-xl font-semibold">
-                Question Details
-              </h2>
-
+          <Section
+            title="Question Details"
+            action={
               <button
-                onClick={() => setSelectedQuestionId(null)}
-                className="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800"
+                type="button"
+                onClick={handleCloseDetails}
+                className="lh-button-secondary"
               >
-                Close Details
+                Close
               </button>
-
-            </div>
-
+            }
+          >
             <DsaQuestionDetails
               question={selectedQuestion}
               loading={detailsLoading}
               error={detailsError}
             />
-
-          </section>
-
+          </Section>
         )}
 
-
         {/* DUE REVISIONS */}
-
-        <section className="space-y-4">
-
-          <h2 className="text-xl font-semibold">
-            Due Revisions
-          </h2>
-
+        <Section
+          title="Due Revisions"
+          subtitle="Questions scheduled for revision"
+        >
           <DueRevisionList
             dueRevisions={dueRevisions}
             loading={revisionsLoading}
             error={revisionsError}
             onMarkRevised={handleMarkRevised}
           />
-
-        </section>
-
+        </Section>
 
         {/* REVISION HISTORY */}
-
-        <section className="space-y-4">
-
-          <h2 className="text-xl font-semibold">
-            Revision History
-          </h2>
-
+        <Section
+          title="Revision History"
+          subtitle="Your previous solving and revision activity"
+        >
           <RevisionHistory
             revisionHistory={revisionHistory}
             loading={historyLoading}
             error={historyError}
           />
-
-        </section>
-
-
-        {/* CREATE / UPDATE FORM MODAL */}
-
-        {showForm && (
-
-          <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 p-4">
-
-            <div className="mx-auto my-8 max-w-5xl rounded-2xl border border-slate-800 bg-slate-950">
-
-              {/* Modal Header */}
-
-              <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
-
-                <h2 className="text-lg font-semibold">
-                  {editingQuestion
-                    ? "Update DSA Question"
-                    : "Create DSA Question"}
-                </h2>
-
-                <button
-                  onClick={handleCloseForm}
-                  className="rounded-lg px-3 py-2 text-slate-400 hover:bg-slate-800 hover:text-white"
-                >
-                  ✕
-                </button>
-
-              </div>
-
-
-              {/* Same Form for Create and Update */}
-
-              <CreateDsaQuestion
-                question={editingQuestion}
-                onSuccess={handleFormSuccess}
-              />
-
-            </div>
-
-          </div>
-
-        )}
-
+        </Section>
       </div>
 
-    </div>
-
+      {showForm && (
+        <DsaFormModal
+          question={editingQuestion}
+          onClose={handleCloseForm}
+          onSuccess={handleFormSuccess}
+        />
+      )}
+    </main>
   );
-
 };
 
 export default DsaDashboard;

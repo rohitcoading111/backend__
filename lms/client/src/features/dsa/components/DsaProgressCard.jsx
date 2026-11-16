@@ -1,25 +1,86 @@
 
 const DsaProgressCard = ({ progress, loading, error }) => {
 
-  if (loading) return <p className="text-slate-400">Loading progress...</p>;
+  const totalSolved = progress?.totalSolvedQuestions || 0;
+  const totalTracked = progress?.progress?.length || 0;
 
-  if (error) return <p className="text-red-400">{error}</p>;
+  const percentage = totalTracked
+    ? Math.round((totalSolved / totalTracked) * 100)
+    : 0;
 
-  // Progress response se total solved count lena
-  const totalSolvedQuestions = progress?.totalSolvedQuestions ?? 0;
+  if (loading) {
+    return (
+      <div className="premium-card rounded-2xl p-5">
+        <div className="h-20 animate-pulse rounded bg-white/5" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="premium-card rounded-2xl p-5 text-sm text-neutral-400">
+        {error}
+      </div>
+    );
+  }
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 text-white">
+    <div className="premium-card rounded-2xl p-5 sm:p-6">
 
-      <p className="text-sm text-slate-400">Questions Solved</p>
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
 
-      <h2 className="mt-3 text-4xl font-bold text-indigo-400">
-        {totalSolvedQuestions}
-      </h2>
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[2px] text-neutral-500">
+            Your Performance
+          </p>
 
-      <p className="mt-2 text-sm text-slate-400">
-        Total unique questions solved
-      </p>
+          <h2 className="mt-1 text-lg font-bold text-white">
+            Practice Overview
+          </h2>
+        </div>
+
+        <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[10px] text-neutral-400">
+          Personal Progress
+        </span>
+
+      </div>
+
+
+      <div className="grid gap-3 sm:grid-cols-3">
+
+        <div className="rounded-xl border border-white/10 bg-black/30 p-4">
+          <p className="text-[10px] text-neutral-500">Solved Questions</p>
+          <p className="mt-2 text-3xl font-bold text-white">{totalSolved}</p>
+        </div>
+
+        <div className="rounded-xl border border-white/10 bg-black/30 p-4">
+          <p className="text-[10px] text-neutral-500">Tracked Questions</p>
+          <p className="mt-2 text-3xl font-bold text-white">{totalTracked}</p>
+        </div>
+
+        <div className="rounded-xl border border-white/10 bg-black/30 p-4">
+          <p className="text-[10px] text-neutral-500">Completion</p>
+          <p className="mt-2 text-3xl font-bold text-white">{percentage}%</p>
+        </div>
+
+      </div>
+
+
+      <div className="mt-5">
+
+        <div className="mb-2 flex justify-between text-[10px] text-neutral-500">
+          <span>Tracked question progress</span>
+          <span>{percentage}%</span>
+        </div>
+
+        <div className="lh-progress-track">
+          <div
+            className="lh-progress-fill"
+            style={{ width: `${percentage}%` }}
+          />
+        </div>
+
+      </div>
 
     </div>
   );

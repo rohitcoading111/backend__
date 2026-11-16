@@ -1,4 +1,3 @@
-
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
@@ -6,6 +5,7 @@ import {
   ArrowUpRight,
   Compass,
   Play,
+  Code2,
 } from "lucide-react";
 
 import DashboardStats from "../components/DashboardStats.jsx";
@@ -94,14 +94,28 @@ function Dashboard({ activeSection = "overview" }) {
                 </p>
               </div>
 
-              <button
-                type="button"
-                onClick={handleBrowseCourses}
-                className="inline-flex w-fit items-center gap-2 rounded-xl bg-white px-5 py-3.5 text-sm font-medium text-black transition hover:bg-neutral-200 active:scale-95"
-              >
-                Explore learning
-                <ArrowUpRight size={17} />
-              </button>
+             <div className="flex flex-wrap items-center gap-3">
+
+  <button
+    type="button"
+    onClick={handleBrowseCourses}
+    className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3.5 text-sm font-medium text-black transition hover:bg-neutral-200 active:scale-95"
+  >
+    Explore learning
+    <ArrowUpRight size={17} />
+  </button>
+
+  <button
+    type="button"
+    onClick={() => navigate("/dsa")}
+    className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-[#151515] px-5 py-3.5 text-sm font-medium text-white transition hover:bg-[#222] active:scale-95"
+  >
+    <Code2 size={17} />
+    DSA Practice
+    <ArrowUpRight size={16} />
+  </button>
+
+</div>
             </section>
 
             {/* Stats */}

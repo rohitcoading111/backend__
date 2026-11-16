@@ -1,57 +1,97 @@
 
 const DueRevisionList = ({
-  dueRevisions,
+  dueRevisions = [],
   loading,
   error,
   onMarkRevised
 }) => {
 
-  if (loading) return <p className="text-slate-400">Loading revisions...</p>;
-
-  if (error) return <p className="text-red-400">{error}</p>;
-
-  if (!dueRevisions?.length) {
+  if (loading) {
     return (
-      <p className="rounded-xl bg-slate-900 p-5 text-slate-400">
-        No revisions due right now.
+      <div className="space-y-3">
+        {[1, 2].map(item => (
+          <div
+            key={item}
+            className="h-16 animate-pulse rounded-xl bg-white/[0.04]"
+          />
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <p className="text-sm text-neutral-400">
+        {error}
       </p>
     );
   }
 
+  if (!dueRevisions.length) {
+    return (
+      <div className="rounded-xl border border-dashed border-white/15 px-5 py-9 text-center">
+
+        <p className="text-sm font-semibold text-white">
+          All caught up!
+        </p>
+
+        <p className="mt-2 text-xs text-neutral-500">
+          You don't have any revision scheduled right now.
+        </p>
+
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
 
       {dueRevisions.map((revision) => {
 
-        // Populated question reference se question details lena
         const question = revision.questionId;
 
+        if (!question || typeof question !== "object") return null;
+
         return (
-          <div
-            key={revision._id}
-            className="flex flex-col justify-between gap-4 rounded-xl border border-slate-800 bg-slate-900 p-5 sm:flex-row sm:items-center"
+          <article
+            key={revision._id || question._id}
+            className="premium-card rounded-xl p-4"
           >
 
-            <div>
-              <h3 className="font-semibold text-white">
-                {question?.title || "Question unavailable"}
-              </h3>
+            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
 
-              <p className="mt-1 text-sm text-slate-400">
-                {question?.difficulty}
-              </p>
+              <div className="min-w-0">
+
+                <h3 className="text-sm font-semibold text-white">
+                  {question.title}
+                </h3>
+
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+
+                  <span className="rounded-full border border-white/15 px-2.5 py-1 text-[9px] text-neutral-300">
+                    {question.difficulty}
+                  </span>
+
+                  <span className="text-[10px] text-neutral-500">
+                    {question.platform}
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <button
+                type="button"
+                onClick={() => onMarkRevised?.(question._id)}
+                className="lh-button-primary !rounded-lg !px-4 !py-2.5 !text-[11px]"
+              >
+                Mark Revised
+              </button>
+
             </div>
 
-            {/* Parent component se revision handler call karna */}
-            <button
-              onClick={() => onMarkRevised?.(question?._id)}
-              disabled={!question?._id}
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-500 disabled:opacity-40"
-            >
-              Mark Revised
-            </button>
-
-          </div>
+          </article>
         );
       })}
 

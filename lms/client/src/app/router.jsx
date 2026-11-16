@@ -50,7 +50,7 @@ import AboutPage from "../features/allPages/AboutPage.jsx";
 import ContactPage from "../features/allPages/ContactPage.jsx";
 
 
-import dsaDashboard from "../features/dsa/pages/DsaDashboard.jsx"
+import DsaDashboard from "../features/dsa/pages/DsaDashboard.jsx"
 export const router = createBrowserRouter([
 
   // Root
@@ -68,10 +68,7 @@ export const router = createBrowserRouter([
   element: <ContactPage />,
 },
 
-{
-  path:"/dsa",
-  element:<dsaDashboard/>
-},
+
 
   // Public Authentication Routes
   {
@@ -108,34 +105,39 @@ export const router = createBrowserRouter([
 
 
   // Student Routes
-  {
-    element: (
-      <ProtectedRoute allowedRoles={["STUDENT"]} />
-    ),
+// Student Routes
+{
+  element: (
+    <ProtectedRoute allowedRoles={["STUDENT"]} />
+  ),
 
-    children: [
-      {
-        path: "/dashboard",
-        element: <StudentLayout />,
-      },
-      {
-        path: "/courses",
-        element: <CourseCatalog />,
-      },
-      {
-        path: "/courses/:courseId/modules",
-        element: <ModulesPage />,
-      },
-      {
-        path: "/courses/:courseId/modules/:moduleId/lectures",
-        element: <ModuleLecturesPage />,
-      },
-      {
-        path: "/live-classes",
-        element: <LiveClassesPage />,
-      },
-    ],
-  },
+  children: [
+    {
+      path: "/dashboard",
+      element: <StudentLayout />,
+    },
+    {
+      path: "/courses",
+      element: <CourseCatalog />,
+    },
+    {
+      path: "/courses/:courseId/modules",
+      element: <ModulesPage />,
+    },
+    {
+      path: "/courses/:courseId/modules/:moduleId/lectures",
+      element: <ModuleLecturesPage />,
+    },
+    {
+      path: "/live-classes",
+      element: <LiveClassesPage />,
+    },
+    {
+      path: "/dsa",
+      element: <DsaDashboard />,
+    },
+  ],
+},
 
 
 {
