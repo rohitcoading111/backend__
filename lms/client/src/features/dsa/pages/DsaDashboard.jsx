@@ -34,6 +34,7 @@ const Section = ({ title, subtitle, action, children }) => (
   </section>
 );
 
+
 /* ---------------------------------
    Create / Update modal
 --------------------------------- */
@@ -115,12 +116,14 @@ const DsaFormModal = ({ question, onClose, onSuccess }) => {
   );
 };
 
-const handleFormSuccess = () => {
+const handleFormSuccess = useCallback(() => {
+  console.log("4. Parent success callback triggered");
+
   setShowForm(false);
   setEditingQuestion(null);
 
   refreshQuestions();
-};
+}, [refreshQuestions]);
 
 /* ---------------------------------
    Dashboard

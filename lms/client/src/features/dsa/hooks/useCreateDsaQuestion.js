@@ -11,7 +11,7 @@ const useCreateDsaQuestion = () => {
 );
 
 const createQuestion = useCallback((questionData) => {
-  dispatch(createDsaQuestion(questionData));
+   return dispatch(createDsaQuestion(questionData));
 }, [dispatch]);
 
 return{

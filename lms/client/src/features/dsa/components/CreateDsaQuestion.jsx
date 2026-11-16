@@ -204,32 +204,35 @@ const CreateDsaQuestion = ({ question = null, onSuccess }) => {
   // =====================================
 
 const onSubmit = async (formData) => {
-  const questionData = {
-    ...formData,
-    slug: generateSlug(formData.title),
-    topics: splitBy(formData.topics, ","),
-    companies: splitBy(formData.companies, ","),
-    hints: splitBy(formData.hints, "\n")
-  };
-
-  // Start API request
-  const request = isEditMode
-    ? updateQuestion({
-        questionId: question._id,
-        updateData: questionData
-      }).unwrap()
-    : createQuestion(questionData).unwrap();
-
-  // Close form immediately
-  onSuccess?.();
+  console.log("1. onSubmit triggered");
 
   try {
-    await request;
+    const questionData = {
+      ...formData,
+      slug: generateSlug(formData.title),
+      topics: splitBy(formData.topics, ","),
+      companies: splitBy(formData.companies, ","),
+      hints: splitBy(formData.hints, "\n")
+    };
+
+    if (isEditMode) {
+      await updateQuestion({
+        questionId: question._id,
+        updateData: questionData
+      }).unwrap();
+    } else {
+      await createQuestion(questionData).unwrap();
+    }
+
+    console.log("2. API successful");
+    console.log("3. Calling onSuccess");
+
+    onSuccess?.();
+
   } catch (error) {
-    console.error("DSA question operation failed:", error);
+    console.error("API failed:", error);
   }
 };
-
   
 
   const submitLabel = mutationLoading
