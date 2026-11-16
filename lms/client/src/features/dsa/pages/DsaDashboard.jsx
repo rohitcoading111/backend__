@@ -34,7 +34,6 @@ const Section = ({ title, subtitle, action, children }) => (
   </section>
 );
 
-
 /* ---------------------------------
    Create / Update modal
 --------------------------------- */
@@ -112,10 +111,9 @@ const DsaFormModal = ({ question, onClose, onSuccess }) => {
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 };
-
 
 /* ---------------------------------
    Dashboard
@@ -133,13 +131,13 @@ const DsaDashboard = () => {
     error: questionsError,
     fetchQuestions,
     nextPage,
-    previousPage
+    previousPage,
   } = useDsaQuestions();
 
   const {
     selectedQuestion,
     loading: detailsLoading,
-    error: detailsError
+    error: detailsError,
   } = useSingleDsaQuestion(selectedQuestionId);
 
   const {
@@ -147,7 +145,7 @@ const DsaDashboard = () => {
     loading: progressLoading,
     error: progressError,
     fetchProgress,
-    markSolved
+    markSolved,
   } = useDsaProgress();
 
   const {
@@ -155,14 +153,14 @@ const DsaDashboard = () => {
     loading: revisionsLoading,
     error: revisionsError,
     fetchDueRevisions,
-    markRevised
+    markRevised,
   } = useDueRevisions();
 
   const {
     revisionHistory = [],
     loading: historyLoading,
     error: historyError,
-    fetchRevisionHistory
+    fetchRevisionHistory,
   } = useDsaRevisionHistory();
 
   const { deleteQuestion } = useDeleteDsaQuestion();
@@ -174,18 +172,14 @@ const DsaDashboard = () => {
       Promise.all([
         fetchProgress(),
         fetchDueRevisions(),
-        fetchRevisionHistory()
+        fetchRevisionHistory(),
       ]),
-    [fetchProgress, fetchDueRevisions, fetchRevisionHistory]
+    [fetchProgress, fetchDueRevisions, fetchRevisionHistory],
   );
 
   const refreshQuestions = useCallback(
-    () =>
-      fetchQuestions(
-        pagination?.currentPage || 1,
-        pagination?.limit || 10
-      ),
-    [fetchQuestions, pagination?.currentPage, pagination?.limit]
+    () => fetchQuestions(pagination?.currentPage || 1, pagination?.limit || 10),
+    [fetchQuestions, pagination?.currentPage, pagination?.limit],
   );
 
   /* ---------- form handlers ---------- */
@@ -214,34 +208,36 @@ const DsaDashboard = () => {
 
   const handleViewQuestion = useCallback(
     (questionId) => setSelectedQuestionId(questionId),
-    []
+    [],
   );
 
-  const handleCloseDetails = useCallback(
-    () => setSelectedQuestionId(null),
-    []
-  );
+  const handleCloseDetails = useCallback(() => setSelectedQuestionId(null), []);
 
-  const handleDelete = useCallback(
-    async (questionId) => {
-      if (!window.confirm("Are you sure you want to delete this question?")) {
-        return;
-      }
+const handleDelete = useCallback(
+  async (questionId) => {
+    if (!window.confirm("Are you sure you want to delete this question?")) {
+      return;
+    }
 
-      try {
-        await deleteQuestion(questionId).unwrap();
-        await refreshQuestions();
+    try {
+      await deleteQuestion(questionId).unwrap();
 
-        setSelectedQuestionId((current) =>
-          current === questionId ? null : current
-        );
-      } catch (error) {
-        console.error("Question deletion failed:", error);
-      }
-    },
-    [deleteQuestion, refreshQuestions]
-  );
+      // Refresh all related student data
+      await Promise.all([
+        refreshQuestions(),
+        refreshStudentData()
+      ]);
 
+      setSelectedQuestionId((current) =>
+        current === questionId ? null : current
+      );
+
+    } catch (error) {
+      console.error("Question deletion failed:", error);
+    }
+  },
+  [deleteQuestion, refreshQuestions, refreshStudentData]
+);
   const handleMarkSolved = useCallback(
     async (questionId) => {
       try {
@@ -251,7 +247,7 @@ const DsaDashboard = () => {
         console.error("Mark solved failed:", error);
       }
     },
-    [markSolved, refreshStudentData]
+    [markSolved, refreshStudentData],
   );
 
   const handleMarkRevised = useCallback(
@@ -263,7 +259,15 @@ const DsaDashboard = () => {
         console.error("Revision update failed:", error);
       }
     },
-    [markRevised, refreshStudentData]
+    [markRevised, refreshStudentData],
+  );
+
+  const progressMap = Object.fromEntries(
+    (progress?.progress || []).map((item) => {
+      const questionId = item.questionId?._id || item.questionId;
+
+      return [questionId, item];
+    }),
   );
 
   /* ---------- UI ---------- */
@@ -271,7 +275,6 @@ const DsaDashboard = () => {
   return (
     <main className="premium-dashboard min-h-screen px-4 py-7 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl space-y-7">
-
         {/* HEADER */}
         <header className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -316,6 +319,7 @@ const DsaDashboard = () => {
         >
           <DsaQuestionList
             questions={questions}
+            progressMap={progressMap}
             loading={questionsLoading}
             error={questionsError}
             pagination={pagination}
@@ -323,6 +327,7 @@ const DsaDashboard = () => {
             onEdit={handleEdit}
             onDelete={handleDelete}
             onMarkSolved={handleMarkSolved}
+            onMarkRevised={handleMarkRevised}
             onNextPage={nextPage}
             onPreviousPage={previousPage}
           />

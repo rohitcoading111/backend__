@@ -3,6 +3,7 @@ import DsaQuestionCard from "./DsaQuestionCard";
 
 const DsaQuestionList = ({
   questions = [],
+  progressMap = {},
   loading,
   error,
   pagination,
@@ -10,6 +11,7 @@ const DsaQuestionList = ({
   onEdit,
   onDelete,
   onMarkSolved,
+  onMarkRevised,
   onNextPage,
   onPreviousPage
 }) => {
@@ -38,7 +40,6 @@ const DsaQuestionList = ({
   if (!questions.length) {
     return (
       <div className="rounded-xl border border-dashed border-white/15 px-5 py-12 text-center">
-
         <div className="mb-3 text-3xl text-neutral-600">∅</div>
 
         <h3 className="text-sm font-semibold text-white">
@@ -48,7 +49,6 @@ const DsaQuestionList = ({
         <p className="mt-2 text-xs text-neutral-500">
           Add your first DSA question to get started.
         </p>
-
       </div>
     );
   }
@@ -62,20 +62,18 @@ const DsaQuestionList = ({
           <DsaQuestionCard
             key={question._id}
             question={question}
+            progress={progressMap[question._id]}
             onView={onView}
             onEdit={onEdit}
             onDelete={onDelete}
             onMarkSolved={onMarkSolved}
+            onMarkRevised={onMarkRevised}
           />
         ))}
 
       </div>
 
-
-      {/* PAGINATION */}
-
       {pagination && pagination.totalPages > 1 && (
-
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4">
 
           <p className="text-xs text-neutral-500">
@@ -83,7 +81,6 @@ const DsaQuestionList = ({
           </p>
 
           <div className="flex gap-2">
-
             <button
               type="button"
               onClick={onPreviousPage}
@@ -101,11 +98,9 @@ const DsaQuestionList = ({
             >
               Next
             </button>
-
           </div>
 
         </div>
-
       )}
 
     </div>

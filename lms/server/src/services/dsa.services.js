@@ -76,42 +76,23 @@ return updateQuestion;
 }
 
 export const deleteDsaQuestion = async (questionId) => {
-  const session = await mongoose.startSession();
+  const existQuestion = await DsaQuestion.findById(questionId);
 
-  try {
-    let deletedQuestion;
-
-    await session.withTransaction(async () => {
-      deletedQuestion = await DsaQuestion.findById(questionId)
-        .session(session);
-
-      if (!deletedQuestion) {
-        throw new Error("Question not found");
-      }
-
-      // Remove all students' progress
-      await DsaProgress.deleteMany(
-        { questionId: deletedQuestion._id },
-        { session }
-      );
-
-      // Remove revision history
-      await DsaRevisionHistory.deleteMany(
-        { questionId: deletedQuestion._id },
-        { session }
-      );
-
-      // Permanently delete question
-      await DsaQuestion.deleteOne(
-        { _id: deletedQuestion._id },
-        { session }
-      );
-    });
-
-    return deletedQuestion;
-  } finally {
-    await session.endSession();
+  if (!existQuestion) {
+    throw new Error("Question not found");
   }
+
+  await DsaProgress.deleteMany({
+    questionId: existQuestion._id
+  });
+
+  await DsaRevisionHistory.deleteMany({
+    questionId: existQuestion._id
+  });
+
+  await DsaQuestion.findByIdAndDelete(questionId);
+
+  return existQuestion;
 };
 
 export const markQuestionSolved = async (studentId, questionId) => {
@@ -219,13 +200,12 @@ export const markQuestionRevised = async (studentId, questionId) => {
 
 
 export const getStudentDsaRevisionHistory = async (studentId) => {
-    const history = await DsaRevisionHistory.find({ studentId })
-        .populate("questionId", "title difficulty topics")
-        .sort({ activityAt: -1 });
+  const history = await DsaRevisionHistory.find({ studentId })
+    .populate("questionId", "title difficulty topics")
+    .sort({ activityAt: -1 });
 
-    return history;
+  return history;
 };
-
 
 export const getDueRevisions = async (studentId) => {
 
