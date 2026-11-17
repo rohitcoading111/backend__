@@ -9,21 +9,35 @@ const readline = new rl.Interface({
     output: process.stdout
 });
 
+const messages = [];
+
+
 const model = new ChatGroq({
     model: "openai/gpt-oss-120b",
     apiKey: process.env.API_KEY,
 });
 
 while (true) {
-    // 1. Yahan 'await' lagaya hai taaki user ke type karne ka wait kare
     const userInput = await readline.question("enter your question: ");
+    messages.push({
+        role:"user",
+        content:userInput
+    });
     
 
-    const stream = await model.stream(userInput);
+    const stream = await model.stream(messages);
+
+    let aiRes = ""
 
     for await (const chunk of stream) {
+        aiRes += chunk.content;
         process.stdout.write(chunk.content);
     }
+
+    messages.push({
+        role:"assistant",
+        content:aiRes
+    })
 
     console.log("\n");
 }
