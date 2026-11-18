@@ -25,9 +25,11 @@ export const ingestDocument = async (filePath) => {
     }));
 
     // Store records in Pinecone
-     await learnHubIndex.upsertRecords({
-         records,
+    const result = await learnHubIndex.documents.upsert({
+    documents: records,
         });
+
+        console.log("Pinecone upserted:", result.upsertedCount);
     console.log(`${records.length} chunks stored successfully`);
 
     return records.length;
