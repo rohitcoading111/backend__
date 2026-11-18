@@ -27,6 +27,7 @@
     "express-rate-limit": "^8.7.4",
     "express-validator": "^7.3.2",
     "googleapis": "^150.0.1",
+    "groq-sdk": "^1.6.0",
     "jsonwebtoken": "^9.0.3",
     "livekit-server-sdk": "^2.19.1",
     "mongoose": "^9.10.3",

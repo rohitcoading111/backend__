@@ -49,6 +49,10 @@ const config = {
    LIVEKIT_API_KEY:process.env.LIVEKIT_API_KEY,
    LIVEKIT_API_SECRET:process.env.LIVEKIT_API_SECRET,
    bankEncryptionKey: process.env.BANK_ENCRYPTION_KEY,
+
+   GROQ_API_KEY:process.env.GROQ_API_KEY,
+   GROQ_MODEL:process.env.GROQ_MODEL,
+
 };
 
 export default config;
