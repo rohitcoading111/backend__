@@ -1,3 +1,6 @@
+
+import { useNavigate } from "react-router-dom";
+
 import {
   GraduationCap,
   ShieldCheck,
@@ -8,6 +11,7 @@ import {
   ArrowRight,
   BriefcaseBusiness,
   CheckCircle2,
+  Sparkles,
 } from "lucide-react";
 
 import InstructorIdCard from "../components/InstructorIdCard.jsx";
@@ -95,6 +99,8 @@ function IndependentNotice() {
 }
 
 export default function IndependentInstructorDashboard() {
+  const navigate = useNavigate();
+
   const {
     user,
     instructorName,
@@ -151,7 +157,10 @@ export default function IndependentInstructorDashboard() {
               </p>
             </div>
 
+            {/* Header Actions */}
             <div className="flex flex-col gap-4 sm:flex-row lg:flex-col lg:items-end">
+
+              {/* Employment Status */}
               <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.035] p-4">
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.05] text-white/80">
                   <ShieldCheck size={22} />
@@ -168,15 +177,34 @@ export default function IndependentInstructorDashboard() {
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={handleLogout}
-                disabled={loggingOut}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-white/75 transition hover:border-white/35 hover:bg-white/[0.10] hover:text-white disabled:opacity-40"
-              >
-                <LogOut size={17} />
-                {loggingOut ? "Logging out..." : "Logout"}
-              </button>
+              {/* AI and Logout Buttons */}
+              <div className="flex flex-wrap items-center gap-3">
+
+                {/* Ask LearnHub AI */}
+                <button
+                  type="button"
+                  onClick={() => navigate("/ai-assistant")}
+                  className="group inline-flex items-center justify-center gap-2 rounded-xl border border-violet-400/30 bg-gradient-to-r from-violet-600/20 to-indigo-600/20 px-5 py-3 text-sm font-semibold text-violet-200 shadow-lg shadow-violet-950/20 transition duration-300 hover:-translate-y-0.5 hover:border-violet-400/60 hover:from-violet-600/30 hover:to-indigo-600/30 hover:text-white"
+                >
+                  <Sparkles
+                    size={17}
+                    className="text-violet-300 transition group-hover:rotate-12"
+                  />
+                  Ask LearnHub AI
+                </button>
+
+                {/* Logout */}
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  disabled={loggingOut}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-white/75 transition hover:border-white/35 hover:bg-white/[0.10] hover:text-white disabled:opacity-40"
+                >
+                  <LogOut size={17} />
+                  {loggingOut ? "Logging out..." : "Logout"}
+                </button>
+
+              </div>
             </div>
           </div>
         </header>
@@ -306,6 +334,7 @@ export default function IndependentInstructorDashboard() {
               : "Independent Instructor Portal"}
           </p>
         </footer>
+
       </div>
     </main>
   );

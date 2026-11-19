@@ -116,6 +116,15 @@ function AdminDashboard() {
                 Refresh
               </button>
 
+              <button
+    type="button"
+    onClick={() => navigate("/ai-assistant")}
+    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+>
+    <icon name="sparkles" />
+    Ask LearnHub AI
+</button>
+
               {/* Logout */}
               <button
                 type="button"

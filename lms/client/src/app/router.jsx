@@ -51,6 +51,9 @@ import ContactPage from "../features/allPages/ContactPage.jsx";
 
 
 import DsaDashboard from "../features/dsa/pages/DsaDashboard.jsx"
+
+
+import AIChat from "../features/ai/pages/AIChat.jsx";
 export const router = createBrowserRouter([
 
   // Root
@@ -66,6 +69,11 @@ export const router = createBrowserRouter([
 {
   path: "/contact",
   element: <ContactPage />,
+},
+
+{
+  path: "/ai-assistant",
+  element: <AIChat />,
 },
 
 
