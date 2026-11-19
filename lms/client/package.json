@@ -23,8 +23,10 @@
     "react-dom": "^19.3.1",
     "react-helmet-async": "^3.0.0",
     "react-hook-form": "^7.90.0",
+    "react-markdown": "^10.1.0",
     "react-redux": "^9.3.0",
     "react-router-dom": "^7.18.4",
+    "remark-gfm": "^4.0.1",
     "socket.io-client": "^4.8.4",
     "tailwindcss": "^4.3.3"
   },

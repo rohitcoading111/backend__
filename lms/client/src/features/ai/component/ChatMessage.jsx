@@ -1,4 +1,5 @@
-
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 const ChatMessage = ({ message }) => {
     const isAI = message.role === "assistant";
 
@@ -17,13 +18,18 @@ const ChatMessage = ({ message }) => {
                     {isAI ? "LearnHub AI" : "You"}
                 </p>
 
-                <div className={`px-5 py-4 rounded-2xl text-sm leading-7 whitespace-pre-wrap break-words ${
-                    isAI
-                        ? "bg-slate-800/80 border border-slate-700/70 text-slate-100 rounded-tl-sm"
-                        : "bg-gradient-to-br from-violet-600 to-indigo-600 text-white rounded-tr-sm shadow-lg shadow-violet-900/20"
-                }`}>
-                    {message.content}
-                </div>
+               <div className="prose prose-invert prose-sm max-w-none
+    prose-headings:text-white
+    prose-p:text-slate-200
+    prose-strong:text-white
+    prose-li:text-slate-200
+    prose-a:text-violet-400">
+
+    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+        {message.content}
+    </ReactMarkdown>
+
+</div>
 
             </div>
 
