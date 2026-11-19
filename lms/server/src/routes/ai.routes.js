@@ -6,6 +6,6 @@ import { streamAIController } from "../controllers/ai.controller.js";
 const router = express.Router();
 
 // AI chat streaming route
-router.post("/chat", authMiddleware, streamAIController);
+router.post("/chat", streamAIController);
 
 export default router;
