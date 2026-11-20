@@ -5,7 +5,7 @@ import Module from "../models/module.models.js";
 import Lecture from "../models/lecture.models.js";
 import { invalidatePublishedCoursesCache } from "./cache.service.js";
 import { getGeneration,} from "../utils/cacheGeneration.js";
-import {timeoutPromise} from "../utils/timeoutPromise.js"
+import timeoutPromise from "../utils/timeoutPromise.js"
 
 const TTL_JITTER = 60 + Math.floor(Math.random() * 15);
 
@@ -176,6 +176,7 @@ export const getSingleCourse = async (
 // Get All Published Courses (Public)
 export const getAllPublishedCourses = async () => {
   const cacheKey = "courses:published";
+  console.log("Published courses service called");
 
   let cachedCourses;
 
