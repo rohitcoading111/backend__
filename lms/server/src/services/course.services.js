@@ -3,7 +3,7 @@ import courseModel from "../models/course.models.js";
 import imagekit from "../config/imagekit.js";
 import Module from "../models/module.models.js";
 import Lecture from "../models/lecture.models.js";
-
+import { invalidatePublishedCoursesCache } from "./cache.service.js";
 // Common ownership filter
 const getCourseOwnershipFilter = (
   courseId,
@@ -223,6 +223,7 @@ export const updateCourse = async ({
   }
 
   await course.save();
+  await invalidatePublishedCoursesCache();
 
   return course;
 };
@@ -281,6 +282,7 @@ export const deleteCourse = async (
   if (!deletedCourse) {
     throw new Error("Course not found or access denied");
   }
+  await invalidatePublishedCoursesCache();
 
   // Collect ImageKit file IDs
   const fileIds = [];
@@ -343,6 +345,8 @@ export const publishCourse = async (
 
   await course.save();
 
+  await invalidatePublishedCoursesCache();
+
   return course;
 };
 
@@ -376,6 +380,6 @@ export const unpublishCourse = async (
   course.status = "DRAFT";
 
   await course.save();
-
+  await invalidatePublishedCoursesCache();
   return course;
 };
