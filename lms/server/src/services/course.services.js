@@ -133,17 +133,21 @@ export const getSingleCourse = async (
 export const getAllPublishedCourses = async () => {
   const cacheKey = "courses:published";
   const cacheTTL = 60;
+
   try {
-    const redisStart = Date.now();
-     const cachedCourse = await redis.get(cacheKey);
-     const redisGetTime = Date.now() - redisStart;
-     console.log("Redis GET time:", redisGetTime, "ms");
-     if(cachedCourse){
+    const cachedCourse = await redis.get(cacheKey);
+
+
+    if (cachedCourse) {
+      console.log("CACHE HIT");
       return JSON.parse(cachedCourse);
-     }
+    }
+
+
   } catch (error) {
-     console.error("Redis cache read error:", error.message);
+    console.error("Redis cache read error:", error.message);
   }
+
   const courses = await courseModel
     .find({
       status: "PUBLISHED",
@@ -151,20 +155,26 @@ export const getAllPublishedCourses = async () => {
     .select("-__v")
     .sort({ createdAt: -1 });
 
-   try {
-     await redis.set(
-      cacheKey,JSON.stringify(courses),
+  try {
+    await redis.set(
+      cacheKey,
+      JSON.stringify(courses),
       "EX",
       cacheTTL
-     )
-   } catch (error) {
-     console.error("Redis cache write error:", error.message);
-   }
-   return courses;
+    );
+  } catch (error) {
+    console.error("Redis cache write error:", error.message);
+  }
+
+  return courses;
 };
 
 
+
+
 // Update Course
+
+
 export const updateCourse = async ({
   courseId,
   instructorId,
