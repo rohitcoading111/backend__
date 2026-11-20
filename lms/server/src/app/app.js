@@ -56,8 +56,8 @@ app.use(
   })
 );
 
-// Apply global rate limiter to all API routes
-app.use("/api", globalApiLimiter);
+// // Apply global rate limiter to all API routes
+// app.use("/api", globalApiLimiter);
 
 app.use(passport.initialize());
 

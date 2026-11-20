@@ -1,4 +1,4 @@
-
+import redis from "../config/redis.js";
 import courseModel from "../models/course.models.js";
 import imagekit from "../config/imagekit.js";
 import Module from "../models/module.models.js";
@@ -131,6 +131,19 @@ export const getSingleCourse = async (
 
 // Get All Published Courses (Public)
 export const getAllPublishedCourses = async () => {
+  const cacheKey = "courses:published";
+  const cacheTTL = 60;
+  try {
+    const redisStart = Date.now();
+     const cachedCourse = await redis.get(cacheKey);
+     const redisGetTime = Date.now() - redisStart;
+     console.log("Redis GET time:", redisGetTime, "ms");
+     if(cachedCourse){
+      return JSON.parse(cachedCourse);
+     }
+  } catch (error) {
+     console.error("Redis cache read error:", error.message);
+  }
   const courses = await courseModel
     .find({
       status: "PUBLISHED",
@@ -138,7 +151,16 @@ export const getAllPublishedCourses = async () => {
     .select("-__v")
     .sort({ createdAt: -1 });
 
-  return courses;
+   try {
+     await redis.set(
+      cacheKey,JSON.stringify(courses),
+      "EX",
+      cacheTTL
+     )
+   } catch (error) {
+     console.error("Redis cache write error:", error.message);
+   }
+   return courses;
 };
 
 

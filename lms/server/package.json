@@ -46,6 +46,7 @@
     "twilio": "^6.2.0"
   },
   "devDependencies": {
+    "autocannon": "^9.0.0",
     "nodemon": "^3.1.14"
   }
 }
