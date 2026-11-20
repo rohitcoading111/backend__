@@ -98,7 +98,6 @@ export const getCourse = async (
 
 
 // Get Single Course
-// Get Single Course
 export const getSingleCourse = async (
   courseId,
   instructorId,
@@ -170,11 +169,7 @@ export const getAllPublishedCourses = async () => {
 };
 
 
-
-
 // Update Course
-
-
 export const updateCourse = async ({
   courseId,
   instructorId,
