@@ -5,6 +5,7 @@ import Module from "../models/module.models.js";
 import Lecture from "../models/lecture.models.js";
 import { invalidatePublishedCoursesCache } from "./cache.service.js";
 import { getGeneration,} from "../utils/cacheGeneration.js";
+import {timeoutPromise} from "../utils/timeoutPromise.js"
 
 const TTL_JITTER = 60 + Math.floor(Math.random() * 15);
 
@@ -178,9 +179,12 @@ export const getAllPublishedCourses = async () => {
 
   let cachedCourses;
 
-  // STEP 1: Read from Redis
+  // STEP 1: Read from Redis with timeout protection
   try {
-    cachedCourses = await redis.get(cacheKey);
+    cachedCourses = await Promise.race([
+      redis.get(cacheKey),
+      timeoutPromise(2000),
+    ]);
   } catch (error) {
     console.error("Redis cache read error:", error.message);
   }
@@ -203,7 +207,6 @@ export const getAllPublishedCourses = async () => {
       .sort({ createdAt: -1 });
   });
 };
-
 
 // Update Course
 export const updateCourse = async ({
