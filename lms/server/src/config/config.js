@@ -54,7 +54,9 @@ const config = {
    GROQ_MODEL:process.env.GROQ_MODEL,
 
    PINECONE_API_KEY:process.env.PINECONE_API_KEY,
-   PINECONE_INDEX_NAME:process.env.PINECONE_INDEX_NAME
+   PINECONE_INDEX_NAME:process.env.PINECONE_INDEX_NAME,
+
+   REDIS_URL:process.env.REDIS_URL,
 
 };
 
