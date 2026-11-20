@@ -5,6 +5,7 @@ import Module from "../models/module.models.js";
 import Lecture from "../models/lecture.models.js";
 import { invalidatePublishedCoursesCache } from "./cache.service.js";
 
+const TTL_JITTER = 60 + Math.floor(Math.random() * 15);
 
 const pendingRequests = new Map();
 
@@ -22,7 +23,7 @@ const getOrFetchCourses = async (cacheKey, fetchFromDB) => {
 
       // Save fresh data into Redis
       try {
-        await redis.set(cacheKey, JSON.stringify(data), "EX", 60);
+        await redis.set(cacheKey, JSON.stringify(data), "EX", TTL_JITTER);
       } catch (error) {
         console.error("Redis cache write error:", error.message);
       }
