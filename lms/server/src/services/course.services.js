@@ -4,6 +4,43 @@ import imagekit from "../config/imagekit.js";
 import Module from "../models/module.models.js";
 import Lecture from "../models/lecture.models.js";
 import { invalidatePublishedCoursesCache } from "./cache.service.js";
+
+
+const pendingRequests = new Map();
+
+const getOrFetchCourses = async (cacheKey, fetchFromDB) => {
+  // STEP 1: Check whether a fetch is already in progress
+  if (pendingRequests.has(cacheKey)) {
+    return pendingRequests.get(cacheKey);
+  }
+
+  // STEP 2: Create and execute a new async operation
+  const fetchPromise = (async () => {
+    try {
+      // Fetch fresh data from MongoDB
+      const data = await fetchFromDB();
+
+      // Save fresh data into Redis
+      try {
+        await redis.set(cacheKey, JSON.stringify(data), "EX", 60);
+      } catch (error) {
+        console.error("Redis cache write error:", error.message);
+      }
+
+      return data;
+    } finally {
+      // Remove the completed/failed fetch from pending tracking
+      pendingRequests.delete(cacheKey);
+    }
+  })();
+
+  // STEP 3: Register this ongoing Promise
+  pendingRequests.set(cacheKey, fetchPromise);
+
+  // STEP 4: Return the Promise
+  return fetchPromise;
+};
+
 // Common ownership filter
 const getCourseOwnershipFilter = (
   courseId,
@@ -131,41 +168,33 @@ export const getSingleCourse = async (
 // Get All Published Courses (Public)
 export const getAllPublishedCourses = async () => {
   const cacheKey = "courses:published";
-  const cacheTTL = 60;
 
+  let cachedCourses;
+
+  // STEP 1: Read from Redis
   try {
-    const cachedCourse = await redis.get(cacheKey);
-
-
-    if (cachedCourse) {
-      console.log("CACHE HIT");
-      return JSON.parse(cachedCourse);
-    }
-
-
+    cachedCourses = await redis.get(cacheKey);
   } catch (error) {
     console.error("Redis cache read error:", error.message);
   }
 
-  const courses = await courseModel
-    .find({
-      status: "PUBLISHED",
-    })
-    .select("-__v")
-    .sort({ createdAt: -1 });
-
-  try {
-    await redis.set(
-      cacheKey,
-      JSON.stringify(courses),
-      "EX",
-      cacheTTL
-    );
-  } catch (error) {
-    console.error("Redis cache write error:", error.message);
+  // STEP 2: Return valid cached data
+  if (cachedCourses) {
+    try {
+      return JSON.parse(cachedCourses);
+    } catch (error) {
+      console.error("Redis cache parse error:", error.message);
+    }
   }
 
-  return courses;
+  // STEP 3: Cache miss or Redis failure
+  // Request coalescing handles concurrent MongoDB fetches
+  return getOrFetchCourses(cacheKey, async () => {
+    return await courseModel
+      .find({ status: "PUBLISHED" })
+      .select("-__v")
+      .sort({ createdAt: -1 });
+  });
 };
 
 
