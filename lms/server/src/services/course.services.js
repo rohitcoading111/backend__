@@ -4,6 +4,7 @@ import imagekit from "../config/imagekit.js";
 import Module from "../models/module.models.js";
 import Lecture from "../models/lecture.models.js";
 import { invalidatePublishedCoursesCache } from "./cache.service.js";
+import { getGeneration,} from "../utils/cacheGeneration.js";
 
 const TTL_JITTER = 60 + Math.floor(Math.random() * 15);
 
@@ -15,11 +16,16 @@ const getOrFetchCourses = async (cacheKey, fetchFromDB) => {
     return pendingRequests.get(cacheKey);
   }
 
+  const currentGeneration = getGeneration();
+
   // STEP 2: Create and execute a new async operation
   const fetchPromise = (async () => {
     try {
       // Fetch fresh data from MongoDB
       const data = await fetchFromDB();
+      if (currentGeneration !== getGeneration()) {
+      return data;
+      } 
 
       // Save fresh data into Redis
       try {
