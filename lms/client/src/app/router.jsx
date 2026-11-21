@@ -1,82 +1,93 @@
+import { lazy, Suspense } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import { useSelector } from "react-redux";
 
 // Authentication
-import Login from "../features/auth/pages/Login.jsx";
-import Register from "../features/auth/pages/Register.jsx";
-import VerifyOtp from "../features/auth/pages/VerifyOtp.jsx";
-import GoogleAuthCallback from "../features/auth/pages/GoogleAuthCallback.jsx";
+const Login = lazy(() => import("../features/auth/pages/Login.jsx"));
+const Register = lazy(() => import("../features/auth/pages/Register.jsx"));
+const VerifyOtp = lazy(() => import("../features/auth/pages/VerifyOtp.jsx"));
+const GoogleAuthCallback = lazy(() => import("../features/auth/pages/GoogleAuthCallback.jsx"));
+const ForgotPassword = lazy(() => import("../features/auth/components/ForgotPassword.jsx"));
 
 // Student
-import CourseCatalog from "../features/courses/pages/CourseCatalog.jsx";
-import ModulesPage from "../features/modules/pages/ModulesPage.jsx";
-import ModuleLecturesPage from "../features/lectures/pages/ModuleLecturesPage.jsx";
-import StudentLayout from "../features/dashboard/components/StudentLayout.jsx";
+const CourseCatalog = lazy(() => import("../features/courses/pages/CourseCatalog.jsx"));
+const ModulesPage = lazy(() => import("../features/modules/pages/ModulesPage.jsx"));
+const ModuleLecturesPage = lazy(() => import("../features/lectures/pages/ModuleLecturesPage.jsx"));
+const StudentLayout = lazy(() => import("../features/dashboard/components/StudentLayout.jsx"));
 
 // Admin
-import AdminDashboard from "../features/admin/pages/AdminDashboard.jsx";
+const AdminDashboard = lazy(() => import("../features/admin/pages/AdminDashboard.jsx"));
 
 // Instructor
-import InstructorDashboard from "../features/instructor/pages/InstructorDashboard.jsx";
-import LiveRoom from "../features/instructor/components/LiveRoom.jsx";
+const InstructorDashboard = lazy(() => import("../features/instructor/pages/InstructorDashboard.jsx"));
+const LiveRoom = lazy(() => import("../features/instructor/components/LiveRoom.jsx"));
 
 // Live Classes
-import LiveClassesPage from "../features/liveClasses/pages/LiveClassesPage.jsx";
+const LiveClassesPage = lazy(() => import("../features/liveClasses/pages/LiveClassesPage.jsx"));
 
 // Organization
-import OrganizationRequest from "../features/adminRequests/pages/OrganizationRequest.jsx";
-import OrganizationAdminDashboard from "../features/organizationAdmin/pages/OrganizationAdminDashboard.jsx";
-import OrganizationDetailsPage from "../features/organizationAdmin/pages/OrganizationDetailsPage.jsx";
+const OrganizationRequest = lazy(() => import("../features/adminRequests/pages/OrganizationRequest.jsx"));
+const OrganizationAdminDashboard = lazy(() => import("../features/organizationAdmin/pages/OrganizationAdminDashboard.jsx"));
+const OrganizationDetailsPage = lazy(() => import("../features/organizationAdmin/pages/OrganizationDetailsPage.jsx"));
 
-import PaymentAnalyticsOverview from "../features/paymentAnalytics/pages/SuperAdminPaymentAnalytics.jsx";
-import OrganizationPaymentAnalytics from "../features/paymentAnalytics/pages/OrganizationPaymentAnalytics.jsx";
-import OrganizationBankDetails from "../features/organizationBankDetails/pages/OrganizationBankDetails.jsx";
-import SuperAdminBankDetails from "../features/organizationBankDetails/pages/SuperAdminBankDetails.jsx";
-import OrganizationPolicyAcceptancePage from "../features/organizationPolicies/pages/OrganizationPolicyAcceptancePage.jsx";
+const PaymentAnalyticsOverview = lazy(() => import("../features/paymentAnalytics/pages/SuperAdminPaymentAnalytics.jsx"));
+const OrganizationPaymentAnalytics = lazy(() => import("../features/paymentAnalytics/pages/OrganizationPaymentAnalytics.jsx"));
 
-import IndependentInstructorDashboard from
-  "../features/independentInstructor/pages/IndependentInstructorDashboard.jsx";
+const OrganizationBankDetails = lazy(() => import("../features/organizationBankDetails/pages/OrganizationBankDetails.jsx"));
+const SuperAdminBankDetails = lazy(() => import("../features/organizationBankDetails/pages/SuperAdminBankDetails.jsx"));
 
-  import OrganizationOverview from "../features/org-ins/pages/OrganizationOverview.jsx";
-// Route Guards
+const OrganizationPolicyAcceptancePage = lazy(() => import("../features/organizationPolicies/pages/OrganizationPolicyAcceptancePage.jsx"));
+
+const IndependentInstructorDashboard = lazy(() => import("../features/independentInstructor/pages/IndependentInstructorDashboard.jsx"));
+
+const OrganizationOverview = lazy(() => import("../features/org-ins/pages/OrganizationOverview.jsx"));
+
+// Public Pages
+const HomePage = lazy(() => import("../features/allPages/HomePage.jsx"));
+const AboutPage = lazy(() => import("../features/allPages/AboutPage.jsx"));
+const ContactPage = lazy(() => import("../features/allPages/ContactPage.jsx"));
+
+// DSA & AI
+const DsaDashboard = lazy(() => import("../features/dsa/pages/DsaDashboard.jsx"));
+const AIChat = lazy(() => import("../features/ai/pages/AIChat.jsx"));
+
+// Route Guards (remain normal imports)
 import ProtectedRoute from "../routes/ProtectedRoute.jsx";
 import OrganizationPolicyGuard from "../routes/OrganizationPolicyGuard.jsx";
 import PublicOnlyRoute from "../routes/PublicOnlyRoute.jsx";
 
-import ForgotPassword from "../features/auth/components/ForgotPassword.jsx";
+// Reusable loading fallback
+function LazyPage({ component: Component }) {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-blue-500" />
+        </div>
+      }
+    >
+      <Component />
+    </Suspense>
+  );
+}
 
-import HomePage from "../features/allPages/HomePage.jsx";
-import AboutPage from "../features/allPages/AboutPage.jsx";
-import ContactPage from "../features/allPages/ContactPage.jsx";
-
-
-import DsaDashboard from "../features/dsa/pages/DsaDashboard.jsx"
-
-
-import AIChat from "../features/ai/pages/AIChat.jsx";
 export const router = createBrowserRouter([
-
-  // Root
-{
-  path: "/",
-  element: <HomePage />,
-},
-
-{
-  path: "/about",
-  element: <AboutPage />,
-},
-{
-  path: "/contact",
-  element: <ContactPage />,
-},
-
-{
-  path: "/ai-assistant",
-  element: <AIChat />,
-},
-
-
+  // Public Pages
+  {
+    path: "/",
+    element: <LazyPage component={HomePage} />,
+  },
+  {
+    path: "/about",
+    element: <LazyPage component={AboutPage} />,
+  },
+  {
+    path: "/contact",
+    element: <LazyPage component={ContactPage} />,
+  },
+  {
+    path: "/ai-assistant",
+    element: <LazyPage component={AIChat} />,
+  },
 
   // Public Authentication Routes
   {
@@ -84,147 +95,133 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "/login",
-        element: <Login />,
+        element: <LazyPage component={Login} />,
       },
       {
         path: "/register",
-        element: <Register />,
+        element: <LazyPage component={Register} />,
       },
       {
         path: "/register-organization",
-        element: <OrganizationRequest />,
+        element: <LazyPage component={OrganizationRequest} />,
       },
     ],
   },
 
-
   // OTP Verification
   {
     path: "/verify-otp",
-    element: <VerifyOtp />,
+    element: <LazyPage component={VerifyOtp} />,
   },
-
 
   // Google Authentication
   {
     path: "/auth/google/callback",
-    element: <GoogleAuthCallback />,
+    element: <LazyPage component={GoogleAuthCallback} />,
   },
 
-
   // Student Routes
-// Student Routes
-{
-  element: (
-    <ProtectedRoute allowedRoles={["STUDENT"]} />
-  ),
+  {
+    element: <ProtectedRoute allowedRoles={["STUDENT"]} />,
+    children: [
+      {
+        path: "/dashboard",
+        element: <LazyPage component={StudentLayout} />,
+      },
+      {
+        path: "/courses",
+        element: <LazyPage component={CourseCatalog} />,
+      },
+      {
+        path: "/courses/:courseId/modules",
+        element: <LazyPage component={ModulesPage} />,
+      },
+      {
+        path: "/courses/:courseId/modules/:moduleId/lectures",
+        element: <LazyPage component={ModuleLecturesPage} />,
+      },
+      {
+        path: "/live-classes",
+        element: <LazyPage component={LiveClassesPage} />,
+      },
+      {
+        path: "/dsa",
+        element: <LazyPage component={DsaDashboard} />,
+      },
+    ],
+  },
 
-  children: [
-    {
-      path: "/dashboard",
-      element: <StudentLayout />,
-    },
-    {
-      path: "/courses",
-      element: <CourseCatalog />,
-    },
-    {
-      path: "/courses/:courseId/modules",
-      element: <ModulesPage />,
-    },
-    {
-      path: "/courses/:courseId/modules/:moduleId/lectures",
-      element: <ModuleLecturesPage />,
-    },
-    {
-      path: "/live-classes",
-      element: <LiveClassesPage />,
-    },
-    {
-      path: "/dsa",
-      element: <DsaDashboard />,
-    },
-  ],
-},
+  // Independent Instructor Routes
+  {
+    element: <ProtectedRoute allowedRoles={["INSTRUCTOR"]} />,
+    children: [
+      {
+        path: "/instructor-dashboard",
+        element: <LazyPage component={IndependentInstructorDashboard} />,
+      },
+    ],
+  },
 
-
-{
-  element: (
-    <ProtectedRoute allowedRoles={["INSTRUCTOR"]} />
-  ),
-  children: [
-    {
-      path: "/instructor-dashboard",
-      element: <IndependentInstructorDashboard />,
-    },
-  ],
-},
-
-
-// Organization Instructor Routes
-{
-  element: (
-    <ProtectedRoute
-      allowedRoles={["INSTRUCTOR"]}
-      instructorType="ORGANIZATION"
-    />
-  ),
-
-  children: [
-    {
-      path: "/organization-overview",
-      element: <OrganizationOverview />,
-    },
-    {
-      path: "/organization-instructor-dashboard",
-      element: <InstructorDashboard />,
-    },
-    {
-      path: "/instructor/live-room",
-      element: <LiveRoom />,
-    },
-  ],
-},
-
+  // Organization Instructor Routes
+  {
+    element: (
+      <ProtectedRoute
+        allowedRoles={["INSTRUCTOR"]}
+        instructorType="ORGANIZATION"
+      />
+    ),
+    children: [
+      {
+        path: "/organization-overview",
+        element: <LazyPage component={OrganizationOverview} />,
+      },
+      {
+        path: "/organization-instructor-dashboard",
+        element: <LazyPage component={InstructorDashboard} />,
+      },
+      {
+        path: "/instructor/live-room",
+        element: <LazyPage component={LiveRoom} />,
+      },
+    ],
+  },
 
   // Organization Admin Routes
-{
-  element: (
-    <ProtectedRoute
-      allowedRoles={["ADMIN"]}
-      allowedAdminTypes={["ORGANIZATION_ADMIN"]}
-    />
-  ),
-
-  children: [
-    {
-      path: "/organization-policy-acceptance",
-      element: <OrganizationPolicyAcceptancePage />,
-    },
-    {
-      element: <OrganizationPolicyGuard />,
-      children: [
-        {
-          path: "/organization-admin-dashboard",
-          element: <OrganizationAdminDashboard />,
-        },
-        {
-          path: "/organization-details",
-          element: <OrganizationDetailsPage />,
-        },
-        {
-          path: "/organization-admin/payment-analytics",
-          element: <OrganizationPaymentAnalytics />,
-        },
-        {
-          path: "/organization-admin/bank-details",
-          element: <OrganizationBankDetails />,
-        },
-      ],
-    },
-  ],
-},
-
+  {
+    element: (
+      <ProtectedRoute
+        allowedRoles={["ADMIN"]}
+        allowedAdminTypes={["ORGANIZATION_ADMIN"]}
+      />
+    ),
+    children: [
+      {
+        path: "/organization-policy-acceptance",
+        element: <LazyPage component={OrganizationPolicyAcceptancePage} />,
+      },
+      {
+        element: <OrganizationPolicyGuard />,
+        children: [
+          {
+            path: "/organization-admin-dashboard",
+            element: <LazyPage component={OrganizationAdminDashboard} />,
+          },
+          {
+            path: "/organization-details",
+            element: <LazyPage component={OrganizationDetailsPage} />,
+          },
+          {
+            path: "/organization-admin/payment-analytics",
+            element: <LazyPage component={OrganizationPaymentAnalytics} />,
+          },
+          {
+            path: "/organization-admin/bank-details",
+            element: <LazyPage component={OrganizationBankDetails} />,
+          },
+        ],
+      },
+    ],
+  },
 
   // Super Admin Routes
   {
@@ -234,41 +231,35 @@ export const router = createBrowserRouter([
         allowedAdminTypes={["SUPER_ADMIN"]}
       />
     ),
-
     children: [
       {
         path: "/super-admin-dashboard",
-        element: <AdminDashboard />,
+        element: <LazyPage component={AdminDashboard} />,
       },
       {
         path: "/super-admin/payment-analytics",
-        element: <PaymentAnalyticsOverview />,
+        element: <LazyPage component={PaymentAnalyticsOverview} />,
       },
       {
         path: "/super-admin/payment-analytics/:organizationId",
-        element: <PaymentAnalyticsOverview />,
+        element: <LazyPage component={PaymentAnalyticsOverview} />,
       },
       {
         path: "/super-admin/bank-details",
-        element: <SuperAdminBankDetails />,
+        element: <LazyPage component={SuperAdminBankDetails} />,
       },
 
       // Backward compatibility
       {
         path: "/adminDashboard",
-        element: (
-          <Navigate
-            to="/super-admin-dashboard"
-            replace
-          />
-        ),
+        element: <Navigate to="/super-admin-dashboard" replace />,
       },
     ],
   },
 
+  // Forgot Password
   {
-  path: "/forgot-password",
-  element: <ForgotPassword />,
-},
-
+    path: "/forgot-password",
+    element: <LazyPage component={ForgotPassword} />,
+  },
 ]);
