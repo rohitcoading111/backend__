@@ -88,17 +88,18 @@ function LiveRoom() {
       isSessionActive && historyAction === "POP"
   );
 
-  const {
-    room,
-    isConnected,
-    isMicEnabled,
-    isCameraEnabled,
-    isScreenShareEnabled,
-    toggleMic,
-    toggleCamera,
-    toggleScreenShare,
-    error,
-  } = useLiveRoom(token, liveKitUrl);
+const {
+  room,
+  isConnected,
+  isMicEnabled,
+  isCameraEnabled,
+  isScreenShareEnabled,
+  isScreenShareSupported,
+  toggleMic,
+  toggleCamera,
+  toggleScreenShare,
+  error,
+} = useLiveRoom(token, liveKitUrl);
 
   // Live chat
   const {
@@ -453,14 +454,20 @@ function LiveRoom() {
             ariaLabel={isCameraEnabled ? "Turn camera off" : "Turn camera on"}
           />
 
-          <ControlButton
-            onClick={toggleScreenShare}
-            disabled={!isConnected}
-            highlighted={isScreenShareEnabled}
-            pressed={isScreenShareEnabled}
-            icon={isScreenShareEnabled ? MonitorOff : MonitorUp}
-            label={isScreenShareEnabled ? "Stop sharing" : "Share screen"}
-          />
+       <ControlButton
+  onClick={toggleScreenShare}
+  disabled={!isConnected || !isScreenShareSupported}
+  highlighted={isScreenShareEnabled}
+  pressed={isScreenShareEnabled}
+  icon={isScreenShareEnabled ? MonitorOff : MonitorUp}
+  label={
+    !isScreenShareSupported
+      ? "Screen sharing unsupported"
+      : isScreenShareEnabled
+        ? "Stop sharing"
+        : "Share screen"
+  }
+/>
 
           <span className="mx-1 hidden h-6 w-px bg-white/15 sm:block" />
 
