@@ -143,42 +143,44 @@ const {
   }, [isSessionActive]);
 
   // Attach instructor camera track
-  useEffect(() => {
-    if (!room || !isConnected || !isCameraEnabled) return;
+useEffect(() => {
+  if (!room || !isConnected || !isCameraEnabled) return;
 
-    const publication = room.localParticipant.getTrackPublication(
-      Track.Source.Camera
-    );
+  const publication = room.localParticipant.getTrackPublication(
+    Track.Source.Camera
+  );
 
-    const track = publication?.track;
+  const track = publication?.track;
+  const videoElement = videoRef.current;
 
-    if (!track || !videoRef.current) return;
+  if (!track || !videoElement) return;
 
-    track.attach(videoRef.current);
+  track.attach(videoElement);
 
-    return () => {
-      track.detach(videoRef.current);
-    };
-  }, [room, isConnected, isCameraEnabled]);
+  return () => {
+    track.detach(videoElement);
+  };
+}, [room, isConnected, isCameraEnabled]);
 
-  // Attach instructor screen-share track
-  useEffect(() => {
-    if (!room || !isConnected || !isScreenShareEnabled) return;
+ // Attach instructor screen-share track
+useEffect(() => {
+  if (!room || !isConnected || !isScreenShareEnabled) return;
 
-    const publication = room.localParticipant.getTrackPublication(
-      Track.Source.ScreenShare
-    );
+  const publication = room.localParticipant.getTrackPublication(
+    Track.Source.ScreenShare
+  );
 
-    const track = publication?.track;
+  const track = publication?.track;
+  const screenElement = screenRef.current;
 
-    if (!track || !screenRef.current) return;
+  if (!track || !screenElement) return;
 
-    track.attach(screenRef.current);
+  track.attach(screenElement);
 
-    return () => {
-      track.detach(screenRef.current);
-    };
-  }, [room, isConnected, isScreenShareEnabled]);
+  return () => {
+    track.detach(screenElement);
+  };
+}, [room, isConnected, isScreenShareEnabled]);
 
   if (!token || !liveKitUrl) {
     return (
