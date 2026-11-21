@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { Room, RoomEvent, Track } from "livekit-client";
+import { Room, RoomEvent } from "livekit-client";
 
 function useLiveRoom(token, liveKitUrl) {
   const [room, setRoom] = useState(null);
@@ -12,60 +12,87 @@ function useLiveRoom(token, liveKitUrl) {
 
   const [error, setError] = useState(null);
 
+  const isScreenShareSupported =
+  typeof navigator !== "undefined" &&
+  !!navigator.mediaDevices &&
+  typeof navigator.mediaDevices.getDisplayMedia === "function";
+
   useEffect(() => {
     if (!token || !liveKitUrl) return;
 
+    let isMounted = true;
     const liveRoom = new Room();
+
+    setRoom(liveRoom);
+    setError(null);
+
+    const handleConnected = () => {
+      if (isMounted) setIsConnected(true);
+    };
+
+    const handleDisconnected = () => {
+      if (!isMounted) return;
+
+      setIsConnected(false);
+      setIsMicEnabled(false);
+      setIsCameraEnabled(false);
+      setIsScreenShareEnabled(false);
+    };
+
+    liveRoom.on(RoomEvent.Connected, handleConnected);
+    liveRoom.on(RoomEvent.Disconnected, handleDisconnected);
 
     const connectToRoom = async () => {
       try {
         await liveRoom.connect(liveKitUrl, token);
 
-        setRoom(liveRoom);
-        setIsConnected(true);
+        if (!isMounted) return;
+
         setError(null);
 
-        // Camera
         try {
           await liveRoom.localParticipant.setCameraEnabled(true);
-          setIsCameraEnabled(true);
+
+          if (isMounted) setIsCameraEnabled(true);
         } catch (cameraError) {
-          console.error("Camera error:", cameraError);
-          setIsCameraEnabled(false);
-          setError(`Camera: ${cameraError.message}`);
+          if (isMounted) {
+            setIsCameraEnabled(false);
+            setError(`Camera: ${cameraError.message}`);
+          }
         }
 
-        // Microphone
         try {
           await liveRoom.localParticipant.setMicrophoneEnabled(true);
-          setIsMicEnabled(true);
-        } catch (micError) {
-          console.error("Microphone error:", micError);
-          setIsMicEnabled(false);
-          setError(`Microphone: ${micError.message}`);
-        }
 
+          if (isMounted) setIsMicEnabled(true);
+        } catch (micError) {
+          if (isMounted) {
+            setIsMicEnabled(false);
+            setError(`Microphone: ${micError.message}`);
+          }
+        }
       } catch (err) {
-        console.error("LiveKit connection error:", err);
-        setError(`Connection: ${err.message}`);
+        if (isMounted) {
+          setError(`Connection: ${err.message}`);
+          setIsConnected(false);
+        }
       }
     };
 
     connectToRoom();
 
-    liveRoom.on(RoomEvent.Disconnected, () => {
-      setIsConnected(false);
-      setIsScreenShareEnabled(false);
-    });
-
     return () => {
+      isMounted = false;
+
+      liveRoom.off(RoomEvent.Connected, handleConnected);
+      liveRoom.off(RoomEvent.Disconnected, handleDisconnected);
+
       liveRoom.disconnect();
     };
   }, [token, liveKitUrl]);
 
-  // Toggle microphone
   const toggleMic = async () => {
-    if (!room) return;
+    if (!room || !isConnected) return;
 
     try {
       const enabled = !isMicEnabled;
@@ -77,9 +104,8 @@ function useLiveRoom(token, liveKitUrl) {
     }
   };
 
-  // Toggle camera
   const toggleCamera = async () => {
-    if (!room) return;
+    if (!room || !isConnected) return;
 
     try {
       const enabled = !isCameraEnabled;
@@ -91,38 +117,37 @@ function useLiveRoom(token, liveKitUrl) {
     }
   };
 
-  // Toggle screen sharing
-  const toggleScreenShare = async () => {
-    if (!room) return;
+const toggleScreenShare = async () => {
+  if (!room || !isConnected) return;
 
-    try {
-      const enabled = !isScreenShareEnabled;
+  if (!isScreenShareSupported) {
+    setError("Screen sharing is not supported on this browser/device.");
+    return;
+  }
 
-      await room.localParticipant.setScreenShareEnabled(enabled);
+  try {
+    const enabled = !isScreenShareEnabled;
 
-      setIsScreenShareEnabled(enabled);
-    } catch (err) {
-      console.error("Screen share error:", err);
-      setError(`Screen Share: ${err.message}`);
-    }
-  };
+    await room.localParticipant.setScreenShareEnabled(enabled);
+    setIsScreenShareEnabled(enabled);
+  } catch (err) {
+    console.error("Screen share error:", err);
+    setError(`Screen Share: ${err.message}`);
+  }
+};
 
-  
-
-  return {
-    room,
-    isConnected,
-
-    isMicEnabled,
-    isCameraEnabled,
-    isScreenShareEnabled,
-
-    toggleMic,
-    toggleCamera,
-    toggleScreenShare,
-
-    error,
-  };
+ return {
+  room,
+  isConnected,
+  isMicEnabled,
+  isCameraEnabled,
+  isScreenShareEnabled,
+  isScreenShareSupported,
+  toggleMic,
+  toggleCamera,
+  toggleScreenShare,
+  error,
+};
 }
 
 export default useLiveRoom;
