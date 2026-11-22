@@ -8349,4 +8349,645 @@ export default ChatComponent;`,
     }
   ]
 },
+"node-js": {
+  title: "Node.js",
+  description: "Runtime, event loop, modules and backend JavaScript.",
+  overview:
+    "Node.js is a JavaScript runtime built on the V8 JavaScript engine. It allows JavaScript to run outside the browser and is widely used for backend development, APIs, real-time applications and server-side tools. It uses an event-driven architecture and non-blocking I/O.",
+  sections: [
+    {
+      title: "1. What is Node.js?",
+      content: [
+        "Node.js is a JavaScript runtime environment that allows developers to execute JavaScript outside the browser.",
+        "It is commonly used for building backend services, REST APIs, real-time applications and CLI tools.",
+        "Node.js uses the V8 engine and an event-driven, non-blocking I/O architecture."
+      ]
+    },
+    {
+      title: "2. Installing Node.js",
+      content: [
+        "Node.js can be installed from its official website.",
+        "The installation generally includes Node.js and npm."
+      ],
+      code: `node --version
+npm --version`,
+      language: "bash"
+    },
+    {
+      title: "3. Running JavaScript with Node.js",
+      content: [
+        "Node.js executes JavaScript files directly from the terminal."
+      ],
+      code: `console.log("Hello from Node.js");`,
+      language: "javascript"
+    },
+    {
+      title: "4. Creating a Node.js Server",
+      content: [
+        "Node.js provides built-in modules such as HTTP for creating servers.",
+        "The HTTP module allows applications to receive requests and send responses."
+      ],
+      code: `const http = require("http");
+
+const server = http.createServer((req, res) => {
+  res.end("Hello from Server");
+});
+
+server.listen(5000, () => {
+  console.log("Server running on port 5000");
+});`,
+      language: "javascript"
+    },
+    {
+      title: "5. Node.js Modules",
+      content: [
+        "Modules allow code to be separated into reusable files.",
+        "Node.js supports CommonJS and ES Modules."
+      ],
+      code: `// CommonJS
+const fs = require("fs");
+
+// ES Modules
+import fs from "fs";`,
+      language: "javascript"
+    },
+    {
+      title: "6. Built-in Modules",
+      content: [
+        "fs — file system operations.",
+        "http — HTTP server functionality.",
+        "path — file and directory path utilities.",
+        "os — operating system information.",
+        "crypto — cryptographic utilities.",
+        "events — event-driven programming.",
+        "stream — streaming data processing."
+      ]
+    },
+    {
+      title: "7. Event Loop",
+      content: [
+        "The event loop allows Node.js to handle asynchronous operations without blocking the main JavaScript execution thread for typical I/O operations.",
+        "It coordinates callbacks and asynchronous work with the underlying runtime.",
+        "Node.js can handle many concurrent I/O operations through its event-driven architecture."
+      ]
+    },
+    {
+      title: "8. Non-blocking I/O",
+      content: [
+        "Non-blocking I/O allows Node.js to initiate operations such as file reading or network requests without waiting for them to complete before continuing execution.",
+        "This helps Node.js handle concurrent I/O workloads efficiently."
+      ],
+      code: `const fs = require("fs");
+
+fs.readFile("data.txt", "utf8", (err, data) => {
+  if (err) {
+    console.error(err);
+    return;
+  }
+
+  console.log(data);
+});
+
+console.log("This runs without waiting for file reading");`,
+      language: "javascript"
+    },
+    {
+      title: "9. Asynchronous Programming",
+      content: [
+        "Node.js supports callbacks, Promises and async/await for asynchronous programming.",
+        "These patterns help handle I/O operations without blocking execution unnecessarily."
+      ],
+      code: `async function fetchData() {
+  try {
+    const result = await Promise.resolve("Data loaded");
+    console.log(result);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+fetchData();`,
+      language: "javascript"
+    },
+    {
+      title: "10. npm and package.json",
+      content: [
+        "npm is used to install, manage and execute JavaScript packages.",
+        "package.json stores project metadata, dependencies and scripts."
+      ],
+      code: `npm init -y
+npm install express`,
+      language: "bash"
+    },
+    {
+      title: "11. Environment Variables",
+      content: [
+        "Environment variables store configuration values outside application source code.",
+        "They are commonly used for database URLs, configuration and credentials."
+      ],
+      code: `process.env.PORT
+process.env.NODE_ENV`,
+      language: "javascript"
+    },
+    {
+      title: "12. Common Use Cases",
+      content: [
+        "REST API development.",
+        "Backend applications.",
+        "Real-time communication.",
+        "CLI tools.",
+        "Streaming applications.",
+        "Microservices.",
+        "Automation tools."
+      ]
+    },
+    {
+      title: "13. Best Practices",
+      content: [
+        "Use asynchronous APIs where appropriate.",
+        "Handle errors properly.",
+        "Avoid blocking the event loop with heavy synchronous operations.",
+        "Keep configuration in environment variables.",
+        "Organize code into reusable modules.",
+        "Use logging and monitoring.",
+        "Validate incoming data.",
+        "Keep dependencies maintained."
+      ]
+    }
+  ]
+},
+"express-js": {
+  title: "Express.js",
+  description: "Routes, middleware, controllers and REST APIs.",
+  overview:
+    "Express.js is a lightweight web framework for Node.js that simplifies server-side application development. It provides routing, middleware handling, request and response utilities, error handling and a flexible architecture for building REST APIs and web applications.",
+  sections: [
+    {
+      title: "1. What is Express.js?",
+      content: [
+        "Express.js is a web framework built on top of Node.js.",
+        "It simplifies server creation, routing, middleware execution and HTTP request handling.",
+        "It is commonly used for building REST APIs, web applications and backend services."
+      ]
+    },
+    {
+      title: "2. Installation",
+      code: `npm install express`,
+      language: "bash"
+    },
+    {
+      title: "3. Creating an Express Server",
+      code: `const express = require("express");
+
+const app = express();
+
+app.get("/", (req, res) => {
+  res.send("Hello Express");
+});
+
+app.listen(5000, () => {
+  console.log("Server running on port 5000");
+});`,
+      language: "javascript"
+    },
+    {
+      title: "4. HTTP Methods",
+      content: [
+        "GET — retrieves data.",
+        "POST — creates or submits data.",
+        "PUT — replaces or updates a resource.",
+        "PATCH — partially updates a resource.",
+        "DELETE — removes a resource."
+      ],
+      code: `app.get("/users", (req, res) => {
+  res.send("Get Users");
+});
+
+app.post("/users", (req, res) => {
+  res.send("Create User");
+});
+
+app.put("/users/:id", (req, res) => {
+  res.send("Update User");
+});
+
+app.patch("/users/:id", (req, res) => {
+  res.send("Partial Update");
+});
+
+app.delete("/users/:id", (req, res) => {
+  res.send("Delete User");
+});`,
+      language: "javascript"
+    },
+    {
+      title: "5. Routing",
+      content: [
+        "Routing defines how an application responds to specific HTTP methods and URL paths.",
+        "Express supports route parameters, query parameters and route handlers."
+      ],
+      code: `app.get("/users/:id", (req, res) => {
+  const userId = req.params.id;
+
+  res.json({ userId });
+});`,
+      language: "javascript"
+    },
+    {
+      title: "6. Express Router",
+      content: [
+        "Express Router allows routes to be separated into modular files.",
+        "It helps organize large applications into feature-based or resource-based routes."
+      ],
+      code: `const express = require("express");
+
+const router = express.Router();
+
+router.get("/", (req, res) => {
+  res.send("Users Route");
+});
+
+module.exports = router;`,
+      language: "javascript"
+    },
+    {
+      title: "7. Middleware",
+      content: [
+        "Middleware functions execute during the request-response lifecycle.",
+        "They can access req, res and next.",
+        "Middleware can process requests, authenticate users, validate input, log requests and handle errors."
+      ],
+      code: `const middleware = (req, res, next) => {
+  console.log("Middleware executed");
+
+  next();
+};
+
+app.use(middleware);`,
+      language: "javascript"
+    },
+    {
+      title: "8. Built-in Middleware",
+      content: [
+        "express.json() — parses JSON request bodies.",
+        "express.urlencoded() — parses URL-encoded request bodies.",
+        "express.static() — serves static files."
+      ],
+      code: `app.use(express.json());
+
+app.use(express.urlencoded({
+  extended: true
+}));
+
+app.use(express.static("public"));`,
+      language: "javascript"
+    },
+    {
+      title: "9. Request and Response",
+      content: [
+        "req represents the incoming request.",
+        "res represents the outgoing response.",
+        "req.params contains route parameters.",
+        "req.query contains query string parameters.",
+        "req.body contains parsed request body data when appropriate middleware is configured."
+      ],
+      code: `app.get("/products/:id", (req, res) => {
+  console.log(req.params);
+  console.log(req.query);
+
+  res.json({
+    message: "Product fetched"
+  });
+});`,
+      language: "javascript"
+    },
+    {
+      title: "10. Controllers",
+      content: [
+        "Controllers contain request-handling logic.",
+        "They help separate route definitions from application logic and make code easier to maintain."
+      ],
+      code: `const getUsers = (req, res) => {
+  res.json({
+    users: []
+  });
+};
+
+module.exports = { getUsers };`,
+      language: "javascript"
+    },
+    {
+      title: "11. Error Handling",
+      content: [
+        "Express supports centralized error-handling middleware.",
+        "Error handlers generally use four parameters: err, req, res and next."
+      ],
+      code: `app.use((err, req, res, next) => {
+  console.error(err);
+
+  res.status(err.status || 500).json({
+    message: err.message || "Internal Server Error"
+  });
+});`,
+      language: "javascript"
+    },
+    {
+      title: "12. REST API Example",
+      code: `const express = require("express");
+
+const app = express();
+
+app.use(express.json());
+
+app.get("/api/users", (req, res) => {
+  res.status(200).json({
+    success: true,
+    users: []
+  });
+});
+
+app.post("/api/users", (req, res) => {
+  res.status(201).json({
+    success: true,
+    message: "User created",
+    data: req.body
+  });
+});
+
+app.listen(5000);`,
+      language: "javascript"
+    },
+    {
+      title: "13. Common Express Ecosystem",
+      content: [
+        "Express Validator — request validation.",
+        "Multer — multipart file uploads.",
+        "Cors — cross-origin configuration.",
+        "Cookie Parser — cookie parsing.",
+        "Express Rate Limit — rate limiting.",
+        "Mongoose — MongoDB integration.",
+        "JWT — token-based authentication."
+      ]
+    },
+    {
+      title: "14. Best Practices",
+      content: [
+        "Separate routes, controllers and services.",
+        "Use centralized error handling.",
+        "Validate and sanitize request data.",
+        "Configure security middleware.",
+        "Use authentication and authorization middleware where required.",
+        "Avoid putting business logic directly in route handlers.",
+        "Use environment variables for configuration.",
+        "Use appropriate HTTP status codes.",
+        "Apply rate limiting to sensitive endpoints.",
+        "Keep middleware ordering intentional."
+      ]
+    }
+  ]
+},
+"ioredis": {
+  title: "ioredis",
+  description: "Redis client integration with Node.js.",
+  overview:
+    "ioredis is a feature-rich Redis client for Node.js. It provides asynchronous Redis operations, connection management, pipelining, transactions, Pub/Sub, Lua scripting and support for Redis Cluster and Sentinel.",
+  sections: [
+    {
+      title: "1. What is ioredis?",
+      content: [
+        "ioredis is a Node.js client library used to communicate with Redis servers.",
+        "It provides an API for performing Redis operations from JavaScript applications.",
+        "It is commonly used for caching, session management, queues, rate limiting, Pub/Sub and temporary data storage."
+      ]
+    },
+    {
+      title: "2. Installation",
+      code: `npm install ioredis`,
+      language: "bash"
+    },
+    {
+      title: "3. Connecting to Redis",
+      content: [
+        "Redis can be connected using a Redis URL or connection configuration.",
+        "The Redis client can be reused across application services."
+      ],
+      code: `import Redis from "ioredis";
+
+const redis = new Redis(
+  process.env.REDIS_URL
+);
+
+redis.on("connect", () => {
+  console.log("Redis connected");
+});
+
+redis.on("error", (error) => {
+  console.error("Redis error:", error);
+});
+
+export default redis;`,
+      language: "javascript"
+    },
+    {
+      title: "4. Basic SET and GET",
+      content: [
+        "SET stores a key-value pair in Redis.",
+        "GET retrieves the value associated with a key."
+      ],
+      code: `await redis.set("name", "LearnHub");
+
+const name = await redis.get("name");
+
+console.log(name);`,
+      language: "javascript"
+    },
+    {
+      title: "5. Expiration (TTL)",
+      content: [
+        "Redis supports expiration for keys.",
+        "EX sets a key expiration time in seconds.",
+        "Expiration is useful for temporary cached data, OTP-related workflows, temporary tokens and short-lived records."
+      ],
+      code: `await redis.set("otp", "123456", "EX", 60);
+
+const otp = await redis.get("otp");`,
+      language: "javascript"
+    },
+    {
+      title: "6. Deleting Keys",
+      code: `await redis.del("name");
+
+await redis.del("key1", "key2");`,
+      language: "javascript"
+    },
+    {
+      title: "7. Checking Key Existence",
+      content: [
+        "EXISTS checks whether a key exists in Redis.",
+        "It returns the number of matching keys that exist."
+      ],
+      code: `const exists = await redis.exists("name");
+
+console.log(exists);`,
+      language: "javascript"
+    },
+    {
+      title: "8. Hashes",
+      content: [
+        "Redis hashes store multiple fields and values under a single key.",
+        "They are useful for storing structured data when Redis hash operations are appropriate."
+      ],
+      code: `await redis.hset("user:1", {
+  name: "Alex",
+  role: "student"
+});
+
+const user = await redis.hgetall("user:1");
+
+console.log(user);`,
+      language: "javascript"
+    },
+    {
+      title: "9. Lists",
+      content: [
+        "Redis lists store ordered collections of values.",
+        "LPUSH inserts values at the beginning of a list.",
+        "RPUSH inserts values at the end.",
+        "LRANGE retrieves elements from a range."
+      ],
+      code: `await redis.rpush("tasks", "task1", "task2");
+
+const tasks = await redis.lrange("tasks", 0, -1);
+
+console.log(tasks);`,
+      language: "javascript"
+    },
+    {
+      title: "10. Sets",
+      content: [
+        "Redis sets store unique values.",
+        "SADD adds values and SMEMBERS retrieves set members."
+      ],
+      code: `await redis.sadd("tags", "react", "node", "redis");
+
+const tags = await redis.smembers("tags");`,
+      language: "javascript"
+    },
+    {
+      title: "11. Pipelining",
+      content: [
+        "Pipelining sends multiple Redis commands together to reduce network round trips.",
+        "It can improve performance when multiple independent operations need to be executed."
+      ],
+      code: `const pipeline = redis.pipeline();
+
+pipeline.set("key1", "value1");
+pipeline.set("key2", "value2");
+pipeline.get("key1");
+
+const results = await pipeline.exec();`,
+      language: "javascript"
+    },
+    {
+      title: "12. Transactions",
+      content: [
+        "Redis transactions execute a group of commands using MULTI and EXEC.",
+        "ioredis provides transaction support through multi()."
+      ],
+      code: `const result = await redis
+  .multi()
+  .set("key1", "value1")
+  .set("key2", "value2")
+  .exec();`,
+      language: "javascript"
+    },
+    {
+      title: "13. Pub/Sub",
+      content: [
+        "Redis Pub/Sub enables publishers to send messages to channels and subscribers to receive them.",
+        "A dedicated subscriber connection is generally used for subscription workflows."
+      ],
+      code: `const subscriber = new Redis();
+
+await subscriber.subscribe("notifications");
+
+subscriber.on("message", (channel, message) => {
+  console.log(channel, message);
+});`,
+      language: "javascript"
+    },
+    {
+      title: "14. Caching Pattern",
+      content: [
+        "Redis can cache frequently requested data.",
+        "Applications can first check Redis and retrieve data from the primary database only when the cache misses."
+      ],
+      code: `async function getData(key) {
+  const cached = await redis.get(key);
+
+  if (cached) {
+    return JSON.parse(cached);
+  }
+
+  const data = await fetchDataFromDatabase();
+
+  await redis.set(
+    key,
+    JSON.stringify(data),
+    "EX",
+    300
+  );
+
+  return data;
+}`,
+      language: "javascript"
+    },
+    {
+      title: "15. Important Redis Commands",
+      content: [
+        "SET — stores a key-value pair.",
+        "GET — retrieves a value.",
+        "DEL — deletes keys.",
+        "EXISTS — checks key existence.",
+        "EXPIRE — sets expiration.",
+        "TTL — checks remaining expiration time.",
+        "HSET — stores hash fields.",
+        "HGET — retrieves a hash field.",
+        "HGETALL — retrieves all hash fields.",
+        "LPUSH / RPUSH — inserts list elements.",
+        "LRANGE — retrieves list elements.",
+        "SADD — adds set members.",
+        "SMEMBERS — retrieves set members.",
+        "INCR — increments a numeric value."
+      ]
+    },
+    {
+      title: "16. Common Use Cases",
+      content: [
+        "Caching API responses.",
+        "Session storage.",
+        "Rate limiting.",
+        "OTP expiration workflows.",
+        "Temporary data storage.",
+        "Pub/Sub messaging.",
+        "Queue-related workflows.",
+        "Reducing database load."
+      ]
+    },
+    {
+      title: "17. Best Practices",
+      content: [
+        "Reuse Redis connections instead of creating a new connection for every request.",
+        "Use environment variables for Redis configuration.",
+        "Set expiration for temporary cache entries where appropriate.",
+        "Handle Redis connection errors.",
+        "Avoid caching sensitive data unnecessarily.",
+        "Use appropriate key naming conventions.",
+        "Monitor Redis memory usage.",
+        "Use pipelining when multiple independent commands can benefit from fewer round trips.",
+        "Close connections gracefully during application shutdown."
+      ]
+    }
+  ]
+},
 };
