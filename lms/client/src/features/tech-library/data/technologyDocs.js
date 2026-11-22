@@ -10551,4 +10551,274 @@ for await (const chunk of stream) {
     }
   ]
 },
+"node-test-runner": {
+  title: "Node Test Runner",
+  description: "Built-in testing framework for Node.js.",
+  overview:
+    "The Node.js Test Runner is a built-in testing framework that allows developers to write, execute and organize tests without installing an external testing framework. It provides test definitions, assertions, subtests, mocking support and test reporting.",
+  sections: [
+    {
+      title: "1. What is Node Test Runner?",
+      content: [
+        "Node.js includes a built-in test runner through the node:test module.",
+        "It allows developers to write automated tests without installing a separate testing framework.",
+        "It works alongside Node.js assertion utilities to verify expected behavior.",
+        "It supports test cases, subtests, hooks, mocking and test execution."
+      ]
+    },
+    {
+      title: "2. Basic Test",
+      content: [
+        "The test() function is used to define a test case.",
+        "Tests can verify whether application logic behaves as expected."
+      ],
+      code: `import test from "node:test";
+import assert from "node:assert";
+
+test("addition works", () => {
+  assert.strictEqual(2 + 2, 4);
+});`,
+      language: "javascript"
+    },
+    {
+      title: "3. Running Tests",
+      content: [
+        "Node.js can execute test files using its built-in test runner.",
+        "Test files can be run using the --test flag."
+      ],
+      code: `node --test`,
+      language: "bash"
+    },
+    {
+      title: "4. Assertions",
+      content: [
+        "Assertions verify whether actual results match expected results.",
+        "Node.js provides the node:assert module for assertion operations."
+      ],
+      code: `import assert from "node:assert";
+
+assert.strictEqual(10, 10);
+
+assert.deepStrictEqual(
+  { name: "Alex" },
+  { name: "Alex" }
+);
+
+assert.ok(true);`,
+      language: "javascript"
+    },
+    {
+      title: "5. Asynchronous Tests",
+      content: [
+        "The test runner supports asynchronous tests.",
+        "Tests can use Promises or async/await to verify asynchronous operations."
+      ],
+      code: `import test from "node:test";
+import assert from "node:assert";
+
+test("async test", async () => {
+  const result = await Promise.resolve("success");
+
+  assert.strictEqual(result, "success");
+});`,
+      language: "javascript"
+    },
+    {
+      title: "6. Subtests",
+      content: [
+        "Subtests allow tests to be organized inside parent tests.",
+        "They help structure test scenarios and related behaviors."
+      ],
+      code: `import test from "node:test";
+import assert from "node:assert";
+
+test("user functionality", async (t) => {
+  await t.test("user name", () => {
+    assert.strictEqual("Alex", "Alex");
+  });
+
+  await t.test("user role", () => {
+    assert.strictEqual("student", "student");
+  });
+});`,
+      language: "javascript"
+    },
+    {
+      title: "7. Hooks",
+      content: [
+        "Hooks allow setup and teardown logic to run around tests.",
+        "They can be used for initialization, cleanup and preparing test environments."
+      ],
+      code: `import test, {
+  before,
+  after,
+  beforeEach,
+  afterEach
+} from "node:test";
+
+before(() => {
+  console.log("Setup");
+});
+
+after(() => {
+  console.log("Cleanup");
+});
+
+beforeEach(() => {
+  console.log("Before test");
+});
+
+afterEach(() => {
+  console.log("After test");
+});
+
+test("example", () => {});`,
+      language: "javascript"
+    },
+    {
+      title: "8. Mocking",
+      content: [
+        "Mocking allows developers to replace functions or dependencies during testing.",
+        "Mocks help test behavior without always relying on real external dependencies."
+      ]
+    },
+    {
+      title: "9. Test Filtering",
+      content: [
+        "Tests can be organized and selectively executed.",
+        "The test runner supports options for filtering, skipping and selecting tests."
+      ],
+      code: `node --test test/user.test.js`,
+      language: "bash"
+    },
+    {
+      title: "10. Common Use Cases",
+      content: [
+        "Unit testing.",
+        "Testing utility functions.",
+        "Testing services.",
+        "Testing asynchronous operations.",
+        "Testing backend logic.",
+        "Automated regression testing."
+      ]
+    },
+    {
+      title: "11. Best Practices",
+      content: [
+        "Write tests for expected behavior.",
+        "Keep tests independent.",
+        "Use descriptive test names.",
+        "Test edge cases.",
+        "Avoid unnecessary external dependencies.",
+        "Keep test data isolated.",
+        "Use assertions to verify outcomes.",
+        "Run tests regularly during development."
+      ]
+    }
+  ]
+},
+"autocannon": {
+  title: "Autocannon",
+  description: "HTTP benchmarking and performance testing.",
+  overview:
+    "Autocannon is an HTTP benchmarking tool for Node.js used to evaluate server performance. It can measure metrics such as throughput, latency and request handling behavior under controlled workloads. It is useful for comparing application performance and identifying bottlenecks.",
+  sections: [
+    {
+      title: "1. What is Autocannon?",
+      content: [
+        "Autocannon is an HTTP benchmarking tool built for testing web server performance.",
+        "It can generate HTTP workloads against a server and collect performance metrics.",
+        "It is commonly used to benchmark Node.js applications and APIs.",
+        "Benchmarking helps developers understand latency, throughput and server behavior."
+      ]
+    },
+    {
+      title: "2. Installation",
+      code: `npm install -D autocannon`,
+      language: "bash"
+    },
+    {
+      title: "3. Basic Benchmark",
+      content: [
+        "Autocannon can be run against a development or test server to collect benchmark metrics.",
+        "Benchmarking should be performed against systems you own or are explicitly authorized to test."
+      ],
+      code: `npx autocannon http://localhost:3000`,
+      language: "bash"
+    },
+    {
+      title: "4. Benchmark Metrics",
+      content: [
+        "Latency — time taken for requests to complete.",
+        "Throughput — amount of work handled over a period.",
+        "Requests per second — request processing rate.",
+        "Errors — unsuccessful requests during a benchmark.",
+        "Connection behavior — how connections behave during the test."
+      ]
+    },
+    {
+      title: "5. JavaScript API",
+      content: [
+        "Autocannon can also be used programmatically from Node.js.",
+        "The API allows benchmark results to be integrated into development workflows."
+      ],
+      code: `import autocannon from "autocannon";
+
+autocannon(
+  {
+    url: "http://localhost:3000",
+    duration: 5
+  },
+  (error, result) => {
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    console.log(result);
+  }
+);`,
+      language: "javascript"
+    },
+    {
+      title: "6. Benchmark Results",
+      content: [
+        "Benchmark results can help compare performance before and after code changes.",
+        "Latency distributions, throughput and errors should be considered together.",
+        "Results depend on the testing environment and should not be interpreted as universal performance guarantees."
+      ]
+    },
+    {
+      title: "7. Performance Comparison",
+      content: [
+        "Autocannon can help compare different implementations under the same controlled test conditions.",
+        "Comparisons should use consistent environments, workloads and server configurations."
+      ]
+    },
+    {
+      title: "8. Common Use Cases",
+      content: [
+        "HTTP server benchmarking.",
+        "API performance evaluation.",
+        "Performance regression checks.",
+        "Comparing server implementations.",
+        "Identifying performance bottlenecks.",
+        "Testing performance improvements."
+      ]
+    },
+    {
+      title: "9. Best Practices",
+      content: [
+        "Benchmark only systems you own or have permission to test.",
+        "Use isolated testing environments where possible.",
+        "Start with small, controlled workloads.",
+        "Avoid benchmarking production systems without explicit authorization and a coordinated plan.",
+        "Compare results using consistent test conditions.",
+        "Monitor server resources alongside benchmark metrics.",
+        "Consider latency, errors and throughput together.",
+        "Repeat tests to account for variability."
+      ]
+    }
+  ]
+},
 };
