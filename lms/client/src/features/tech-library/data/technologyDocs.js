@@ -9488,4 +9488,1067 @@ passport.use(
     }
   ]
 },
+"socket-io": {
+  title: "Socket.IO",
+  description: "Realtime events, rooms and bidirectional communication.",
+  overview:
+    "Socket.IO is a library for real-time, bidirectional and event-based communication between clients and servers. It provides event-based messaging, rooms, namespaces, reconnection handling and acknowledgements.",
+  sections: [
+    {
+      title: "1. What is Socket.IO?",
+      content: [
+        "Socket.IO enables real-time communication between clients and servers.",
+        "It uses event-based communication and typically uses WebSocket when available, with fallback mechanisms when necessary.",
+        "It is commonly used for chat applications, notifications, live dashboards and collaborative features."
+      ]
+    },
+    {
+      title: "2. Installation",
+      code: "npm install socket.io",
+      language: "bash"
+    },
+    {
+      title: "3. Creating a Socket.IO Server",
+      code: `import { Server } from "socket.io";
+
+const io = new Server(5000, {
+  cors: {
+    origin: "http://localhost:5173"
+  }
+});
+
+io.on("connection", (socket) => {
+  console.log("Connected:", socket.id);
+
+  socket.on("disconnect", () => {
+    console.log("Disconnected:", socket.id);
+  });
+});`,
+      language: "javascript"
+    },
+    {
+      title: "4. Connection Event",
+      content: [
+        "The connection event is triggered when a client successfully connects to the Socket.IO server.",
+        "Each connected socket has a unique socket.id."
+      ],
+      code: `io.on("connection", (socket) => {
+  console.log(socket.id);
+});`,
+      language: "javascript"
+    },
+    {
+      title: "5. Emitting Events",
+      content: [
+        "emit() sends an event with optional data to a target.",
+        "The server can emit events to a specific connected client."
+      ],
+      code: `socket.emit("welcome", {
+  message: "Welcome to the server"
+});`,
+      language: "javascript"
+    },
+    {
+      title: "6. Listening to Events",
+      content: [
+        "on() listens for events sent by clients or other parts of the application."
+      ],
+      code: `socket.on("sendMessage", (data) => {
+  console.log(data);
+});`,
+      language: "javascript"
+    },
+    {
+      title: "7. Broadcasting",
+      content: [
+        "Broadcasting sends an event to other connected clients while excluding the sender."
+      ],
+      code: `socket.broadcast.emit("newUser", {
+  message: "A new user connected"
+});`,
+      language: "javascript"
+    },
+    {
+      title: "8. Rooms",
+      content: [
+        "Rooms allow sockets to be grouped together.",
+        "Events can be sent to specific rooms instead of every connected client.",
+        "Rooms are useful for chats, course sessions and collaborative features."
+      ],
+      code: `socket.join("course-101");
+
+io.to("course-101").emit("announcement", {
+  message: "Welcome to the course room"
+});`,
+      language: "javascript"
+    },
+    {
+      title: "9. Sending to a Specific Client",
+      code: `io.to(socketId).emit("notification", {
+  message: "Hello"
+});`,
+      language: "javascript"
+    },
+    {
+      title: "10. Disconnect Event",
+      content: [
+        "The disconnect event is triggered when a socket connection ends."
+      ],
+      code: `socket.on("disconnect", (reason) => {
+  console.log("Disconnected:", reason);
+});`,
+      language: "javascript"
+    },
+    {
+      title: "11. Acknowledgements",
+      content: [
+        "Acknowledgements allow the sender to receive a response after an event has been processed."
+      ],
+      code: `socket.on("sendMessage", (data, callback) => {
+  callback({
+    success: true
+  });
+});`,
+      language: "javascript"
+    },
+    {
+      title: "12. Namespaces",
+      content: [
+        "Namespaces allow separate communication channels within a single Socket.IO server.",
+        "They can help organize different communication areas of an application."
+      ],
+      code: `const adminNamespace = io.of("/admin");
+
+adminNamespace.on("connection", (socket) => {
+  console.log("Admin connected");
+});`,
+      language: "javascript"
+    },
+    {
+      title: "13. Common Use Cases",
+      content: [
+        "Real-time chat.",
+        "Notifications.",
+        "Live dashboards.",
+        "Online user status.",
+        "Collaborative applications.",
+        "Live course updates.",
+        "Room-based communication."
+      ]
+    },
+    {
+      title: "14. Best Practices",
+      content: [
+        "Validate incoming socket events.",
+        "Authenticate socket connections.",
+        "Use rooms for targeted communication.",
+        "Handle disconnects and reconnects.",
+        "Avoid duplicate event listeners.",
+        "Do not trust client-supplied data.",
+        "Use appropriate rate limiting and event validation."
+      ]
+    }
+  ]
+},
+"livekit-components-react": {
+  title: "LiveKit Components React",
+  description: "React components for realtime video applications.",
+  overview:
+    "LiveKit Components React provides prebuilt React components and hooks for building real-time audio, video and interactive applications using LiveKit. It simplifies participant rendering, video tracks, room interfaces, media controls and realtime user experiences.",
+  sections: [
+    {
+      title: "1. What is LiveKit Components React?",
+      content: [
+        "LiveKit Components React is a React component library for building LiveKit-powered realtime applications.",
+        "It provides UI components and hooks for handling participants, audio, video, tracks and room interactions.",
+        "It helps developers build realtime video interfaces without implementing every media UI component manually."
+      ]
+    },
+    {
+      title: "2. Installation",
+      code: `npm install @livekit/components-react @livekit/components-styles livekit-client`,
+      language: "bash"
+    },
+    {
+      title: "3. Importing Styles",
+      content: [
+        "LiveKit provides component styles that can be imported to apply default styling to supported UI components."
+      ],
+      code: `import "@livekit/components-styles";`,
+      language: "jsx"
+    },
+    {
+      title: "4. LiveKitRoom",
+      content: [
+        "LiveKitRoom is a foundational component for connecting and managing the LiveKit room context within a React component tree.",
+        "It provides the room context for nested LiveKit components."
+      ],
+      code: `import {
+  LiveKitRoom
+} from "@livekit/components-react";
+
+<LiveKitRoom
+  serverUrl={serverUrl}
+  token={token}
+  connect={true}
+>
+  {/* Room UI */}
+</LiveKitRoom>`,
+      language: "jsx"
+    },
+    {
+      title: "5. VideoConference",
+      content: [
+        "VideoConference provides a ready-made conference interface with common meeting functionality.",
+        "It can be used as a starting point for video conferencing experiences."
+      ],
+      code: `import {
+  VideoConference
+} from "@livekit/components-react";
+
+<LiveKitRoom
+  serverUrl={serverUrl}
+  token={token}
+  connect={true}
+>
+  <VideoConference />
+</LiveKitRoom>`,
+      language: "jsx"
+    },
+    {
+      title: "6. Participant Components",
+      content: [
+        "Participant-related components and hooks provide access to participant information and their media tracks.",
+        "They help render participant-specific UI."
+      ]
+    },
+    {
+      title: "7. Track Components",
+      content: [
+        "Track components render media tracks such as video and audio.",
+        "They can be used to display participant media in realtime interfaces."
+      ]
+    },
+    {
+      title: "8. useTracks()",
+      content: [
+        "useTracks() is a hook used to retrieve track references for specified track sources.",
+        "It can be used to render track-based UI."
+      ],
+      code: `import {
+  useTracks
+} from "@livekit/components-react";
+
+import {
+  Track
+} from "livekit-client";
+
+const tracks = useTracks([
+  Track.Source.Camera,
+  Track.Source.Microphone
+]);`,
+      language: "jsx"
+    },
+    {
+      title: "9. Audio and Video Controls",
+      content: [
+        "LiveKit components and hooks support UI workflows for microphone, camera and media tracks.",
+        "These controls can be integrated into custom meeting interfaces."
+      ]
+    },
+    {
+      title: "10. Room Context",
+      content: [
+        "Room context allows nested components to access room-related information and functionality.",
+        "Components inside the LiveKitRoom tree can use supported hooks and components to interact with the room."
+      ]
+    },
+    {
+      title: "11. Common Use Cases",
+      content: [
+        "Online classrooms.",
+        "Video conferencing.",
+        "Live interviews.",
+        "Realtime collaboration.",
+        "Webinar interfaces.",
+        "Audio rooms.",
+        "Participant video grids."
+      ]
+    },
+    {
+      title: "12. Best Practices",
+      content: [
+        "Use LiveKitRoom as the room context boundary.",
+        "Keep token generation on the backend.",
+        "Do not expose server API secrets in frontend code.",
+        "Handle connection and disconnection states.",
+        "Handle participant and track changes.",
+        "Use appropriate UI for loading and connection errors.",
+        "Use responsive layouts for participant video grids.",
+        "Use permissions and room access controls on the backend."
+      ]
+    }
+  ]
+},
+"google-apis": {
+  title: "Google APIs",
+  description: "Integration with Google services and APIs.",
+  overview:
+    "Google APIs allow applications to interact with Google services programmatically. Developers can integrate services such as Google Drive, Gmail, Calendar, YouTube and other Google products using API requests, authentication and authorization.",
+  sections: [
+    {
+      title: "1. What are Google APIs?",
+      content: [
+        "Google APIs allow applications to access and interact with Google services.",
+        "They enable developers to integrate Google functionality into web, mobile and backend applications.",
+        "APIs can provide access to resources such as files, calendars, user information and other Google services depending on permissions."
+      ]
+    },
+    {
+      title: "2. Google API Ecosystem",
+      content: [
+        "Google Drive API — manage files and folders.",
+        "Gmail API — access email-related functionality.",
+        "Google Calendar API — manage calendar events.",
+        "YouTube Data API — access YouTube resources.",
+        "Google Sheets API — read and modify spreadsheets.",
+        "Google Maps APIs — integrate maps and location-related functionality."
+      ]
+    },
+    {
+      title: "3. Google Cloud Project",
+      content: [
+        "Google APIs are generally configured through a Google Cloud project.",
+        "A Cloud project provides a central place to enable APIs, configure credentials, manage permissions and monitor usage."
+      ]
+    },
+    {
+      title: "4. Enabling APIs",
+      content: [
+        "Developers select and enable the required APIs in Google Cloud Console.",
+        "An application can only use enabled APIs when the required authentication, authorization and access requirements are satisfied."
+      ]
+    },
+    {
+      title: "5. API Credentials",
+      content: [
+        "Google APIs can use different credential types depending on the API and use case.",
+        "API keys are commonly used for certain public-data or application-restricted API requests.",
+        "OAuth 2.0 credentials are used when accessing user-authorized resources.",
+        "Service accounts are used for supported server-to-server and application identity workflows."
+      ]
+    },
+    {
+      title: "6. OAuth 2.0",
+      content: [
+        "OAuth 2.0 allows applications to obtain permission to access specific resources on behalf of a user.",
+        "Users grant requested permissions through an authorization flow.",
+        "Access tokens are used to access authorized API resources."
+      ]
+    },
+    {
+      title: "7. API Requests",
+      content: [
+        "Applications communicate with Google APIs using HTTP requests.",
+        "Requests may include authentication credentials, query parameters, headers and request bodies."
+      ],
+      code: `const response = await fetch(
+  "https://www.googleapis.com/some-api-endpoint",
+  {
+    headers: {
+      Authorization: \`Bearer \${accessToken}\`
+    }
+  }
+);
+
+const data = await response.json();`,
+      language: "javascript"
+    },
+    {
+      title: "8. Using Google APIs in Node.js",
+      content: [
+        "Node.js applications can use HTTP clients or Google's official client libraries to interact with supported APIs.",
+        "Client libraries simplify authentication, requests and API-specific operations."
+      ],
+      code: `npm install googleapis`,
+      language: "bash"
+    },
+    {
+      title: "9. Google API Client Library",
+      content: [
+        "The googleapis package provides client interfaces for many Google APIs.",
+        "Developers can initialize API clients and use supported methods."
+      ],
+      code: `import { google } from "googleapis";
+
+const drive = google.drive({
+  version: "v3",
+  auth: authClient
+});
+
+const response = await drive.files.list({
+  pageSize: 10,
+  fields: "files(id,name)"
+});`,
+      language: "javascript"
+    },
+    {
+      title: "10. API Scopes",
+      content: [
+        "Scopes define the permissions an application requests.",
+        "Different scopes provide different levels of access to Google resources.",
+        "Applications should request only the scopes they actually need."
+      ]
+    },
+    {
+      title: "11. Rate Limits and Quotas",
+      content: [
+        "Google APIs may enforce quotas and rate limits.",
+        "Applications should handle quota errors and retry appropriately when supported.",
+        "Caching and efficient request patterns can reduce unnecessary API calls."
+      ]
+    },
+    {
+      title: "12. Common Use Cases",
+      content: [
+        "Google Drive integration.",
+        "Calendar synchronization.",
+        "Email-related integrations.",
+        "Google Sheets automation.",
+        "Google account integrations.",
+        "Third-party service integrations.",
+        "Application data synchronization."
+      ]
+    },
+    {
+      title: "13. Best Practices",
+      content: [
+        "Enable only the APIs that your application needs.",
+        "Request minimum necessary OAuth scopes.",
+        "Protect credentials and tokens.",
+        "Restrict API keys where supported.",
+        "Handle API errors and quotas.",
+        "Avoid exposing sensitive credentials in frontend code.",
+        "Use appropriate authentication methods for each API.",
+        "Monitor API usage in Google Cloud Console."
+      ]
+    }
+  ]
+},
+"langchain-core": {
+  title: "LangChain Core",
+  description: "Core abstractions, prompts, runnables and model interfaces.",
+  overview:
+    "LangChain Core provides the fundamental abstractions and interfaces used throughout the LangChain ecosystem. It includes components such as prompts, messages, runnables, output parsers, tools and model interfaces that help developers build modular AI applications.",
+  sections: [
+    {
+      title: "1. What is LangChain Core?",
+      content: [
+        "LangChain Core provides the foundational abstractions that power the LangChain ecosystem.",
+        "It defines interfaces for components such as chat models, prompts, tools, output parsers and runnables.",
+        "It is designed to be modular and independent of specific model providers.",
+        "Provider-specific integrations are generally provided by separate packages."
+      ]
+    },
+    {
+      title: "2. Installation",
+      code: `npm install @langchain/core`,
+      language: "bash"
+    },
+    {
+      title: "3. Messages",
+      content: [
+        "Messages represent structured communication between users, AI models and other components.",
+        "Common message types include HumanMessage, SystemMessage and AIMessage.",
+        "Messages can contain text and other supported content."
+      ],
+      code: `import {
+  HumanMessage,
+  SystemMessage,
+  AIMessage
+} from "@langchain/core/messages";
+
+const messages = [
+  new SystemMessage("You are a helpful assistant."),
+  new HumanMessage("Explain React."),
+  new AIMessage("React is a UI library.")
+];`,
+      language: "javascript"
+    },
+    {
+      title: "4. Prompt Templates",
+      content: [
+        "Prompt templates allow developers to create reusable prompts.",
+        "Variables can be inserted dynamically into prompts.",
+        "Prompt templates help separate prompt structure from application data."
+      ],
+      code: `import {
+  ChatPromptTemplate
+} from "@langchain/core/prompts";
+
+const prompt = ChatPromptTemplate.fromMessages([
+  ["system", "You are a helpful assistant."],
+  ["human", "Explain {topic}."]
+]);
+
+const result = await prompt.invoke({
+  topic: "Node.js"
+});`,
+      language: "javascript"
+    },
+    {
+      title: "5. Runnable Interface",
+      content: [
+        "Runnables are a standardized interface for executing components in LangChain.",
+        "Runnable components can be invoked, streamed, batched and composed.",
+        "The runnable interface allows different components to work together through a common execution model."
+      ],
+      code: `const result = await runnable.invoke(input);
+
+const results = await runnable.batch(inputs);
+
+for await (const chunk of await runnable.stream(input)) {
+  console.log(chunk);
+}`,
+      language: "javascript"
+    },
+    {
+      title: "6. RunnableSequence",
+      content: [
+        "RunnableSequence combines multiple runnable components sequentially.",
+        "The output of one component becomes the input of the next component.",
+        "It is useful for creating pipelines such as prompt-to-model-to-parser."
+      ],
+      code: `import {
+  RunnableSequence
+} from "@langchain/core/runnables";
+
+const pipeline = RunnableSequence.from([
+  firstRunnable,
+  secondRunnable,
+  thirdRunnable
+]);
+
+const result = await pipeline.invoke(input);`,
+      language: "javascript"
+    },
+    {
+      title: "7. RunnableLambda",
+      content: [
+        "RunnableLambda wraps a function so that it can participate in runnable pipelines.",
+        "It allows custom logic to be integrated into LangChain workflows."
+      ],
+      code: `import {
+  RunnableLambda
+} from "@langchain/core/runnables";
+
+const processData = RunnableLambda.from(
+  async (input) => {
+    return {
+      processed: input.value.toUpperCase()
+    };
+  }
+);`,
+      language: "javascript"
+    },
+    {
+      title: "8. Output Parsers",
+      content: [
+        "Output parsers convert model outputs into application-friendly formats.",
+        "They can help extract structured data, parse text and enforce output formats."
+      ],
+      code: `import {
+  StringOutputParser
+} from "@langchain/core/output_parsers";
+
+const parser = new StringOutputParser();
+
+const result = await parser.invoke(
+  modelOutput
+);`,
+      language: "javascript"
+    },
+    {
+      title: "9. Tools",
+      content: [
+        "Tools represent functions that AI systems can potentially use.",
+        "Tools define functionality, names, descriptions and input schemas.",
+        "Models capable of tool calling can use tool definitions to request execution of application functions."
+      ],
+      code: `import {
+  tool
+} from "@langchain/core/tools";
+
+import { z } from "zod";
+
+const calculator = tool(
+  async ({ a, b }) => a + b,
+  {
+    name: "calculator",
+    description: "Add two numbers",
+    schema: z.object({
+      a: z.number(),
+      b: z.number()
+    })
+  }
+);`,
+      language: "javascript"
+    },
+    {
+      title: "10. Structured Output and Schemas",
+      content: [
+        "LangChain Core works with schemas and structured representations.",
+        "Schemas help define expected inputs and outputs for components and tools.",
+        "Structured interfaces make AI workflows easier to integrate with application logic."
+      ]
+    },
+    {
+      title: "11. Streaming",
+      content: [
+        "Runnable components can support streaming execution.",
+        "Streaming allows applications to process output incrementally rather than waiting for the entire response.",
+        "It is useful for AI chat interfaces and applications where progressive output improves responsiveness."
+      ]
+    },
+    {
+      title: "12. Batching",
+      content: [
+        "Batch execution allows multiple inputs to be processed through a runnable.",
+        "It can help simplify execution of multiple independent inputs."
+      ],
+      code: `const results = await runnable.batch([
+  input1,
+  input2,
+  input3
+]);`,
+      language: "javascript"
+    },
+    {
+      title: "13. Common Components",
+      content: [
+        "Messages — structured conversation messages.",
+        "Prompt Templates — reusable prompt structures.",
+        "Runnables — standardized execution interfaces.",
+        "Output Parsers — transform model outputs.",
+        "Tools — callable functionality.",
+        "Schemas — define structured inputs.",
+        "Callbacks — observe execution events."
+      ]
+    },
+    {
+      title: "14. Common Use Cases",
+      content: [
+        "LLM application pipelines.",
+        "Prompt engineering workflows.",
+        "AI chat applications.",
+        "Tool calling.",
+        "Structured output generation.",
+        "Streaming AI responses.",
+        "Composable AI workflows."
+      ]
+    },
+    {
+      title: "15. Best Practices",
+      content: [
+        "Build reusable runnable components.",
+        "Keep prompts separate from application logic.",
+        "Use schemas for structured inputs.",
+        "Validate AI-generated data before using it.",
+        "Use appropriate output parsers.",
+        "Handle model and pipeline errors.",
+        "Use streaming where it improves user experience.",
+        "Keep provider integrations modular."
+      ]
+    }
+  ]
+},
+"text-splitters": {
+  title: "Text Splitters",
+  description: "Chunking documents for LLMs and retrieval workflows.",
+  overview:
+    "Text Splitters divide large text documents into smaller chunks that can be processed by language models. They are commonly used in document ingestion, embeddings, retrieval systems and RAG pipelines to improve context handling and retrieval relevance.",
+  sections: [
+    {
+      title: "1. What are Text Splitters?",
+      content: [
+        "Text splitters divide large documents into smaller pieces of text.",
+        "LLMs have context window limits, so processing extremely large documents at once may not be practical.",
+        "Chunking allows documents to be processed, embedded and retrieved in smaller portions.",
+        "Text splitters are commonly used in RAG pipelines."
+      ]
+    },
+    {
+      title: "2. Installation",
+      code: `npm install @langchain/textsplitters`,
+      language: "bash"
+    },
+    {
+      title: "3. Recursive Character Text Splitter",
+      content: [
+        "RecursiveCharacterTextSplitter attempts to split text using a sequence of separators.",
+        "It tries to preserve larger meaningful text units before splitting into smaller ones.",
+        "It is a commonly used splitter for general-purpose document chunking."
+      ],
+      code: `import {
+  RecursiveCharacterTextSplitter
+} from "@langchain/textsplitters";
+
+const splitter = new RecursiveCharacterTextSplitter({
+  chunkSize: 1000,
+  chunkOverlap: 200
+});
+
+const chunks = await splitter.splitText(
+  "Your large document text..."
+);
+
+console.log(chunks);`,
+      language: "javascript"
+    },
+    {
+      title: "4. Chunk Size",
+      content: [
+        "Chunk size determines the approximate maximum size of individual text chunks.",
+        "Smaller chunks provide more granular retrieval but may lose broader context.",
+        "Larger chunks provide more context but may include irrelevant information."
+      ]
+    },
+    {
+      title: "5. Chunk Overlap",
+      content: [
+        "Chunk overlap allows adjacent chunks to share some text.",
+        "Overlap helps preserve context when information spans chunk boundaries.",
+        "Excessive overlap can increase storage and processing costs."
+      ]
+    },
+    {
+      title: "6. Splitting Documents",
+      content: [
+        "Document splitting is useful when processing files such as PDFs, text files and other supported document sources.",
+        "Document metadata can be preserved during splitting depending on the splitter workflow."
+      ],
+      code: `const documents = await splitter.splitDocuments(
+  loadedDocuments
+);`,
+      language: "javascript"
+    },
+    {
+      title: "7. Recursive Splitting Strategy",
+      content: [
+        "Recursive splitting uses multiple separators in sequence.",
+        "It typically attempts to preserve paragraphs, lines, sentences or smaller text units before splitting further.",
+        "This approach helps maintain more natural text boundaries."
+      ]
+    },
+    {
+      title: "8. Common Use Cases",
+      content: [
+        "RAG applications.",
+        "Document embeddings.",
+        "Knowledge bases.",
+        "Vector database ingestion.",
+        "PDF processing.",
+        "AI document search.",
+        "Question-answering systems."
+      ]
+    },
+    {
+      title: "9. Best Practices",
+      content: [
+        "Choose chunk sizes according to the use case.",
+        "Experiment with chunk overlap.",
+        "Preserve document metadata.",
+        "Avoid splitting text unnecessarily into extremely small chunks.",
+        "Evaluate retrieval quality rather than relying only on chunk size.",
+        "Use appropriate chunking strategies for structured content."
+      ]
+    }
+  ]
+},
+"groq-sdk": {
+  title: "Groq SDK",
+  description: "Fast inference API integration with Groq.",
+  overview:
+    "Groq SDK is the official JavaScript SDK for interacting with the Groq API. It allows applications to send requests to supported language models, generate completions, stream responses and integrate AI inference into applications.",
+  sections: [
+    {
+      title: "1. What is Groq SDK?",
+      content: [
+        "Groq SDK provides a JavaScript interface for interacting with the Groq API.",
+        "It allows applications to request AI-generated responses from supported models.",
+        "It supports completion workflows, streaming and other supported API capabilities."
+      ]
+    },
+    {
+      title: "2. Installation",
+      code: `npm install groq-sdk`,
+      language: "bash"
+    },
+    {
+      title: "3. Environment Variables",
+      code: `GROQ_API_KEY=your_api_key`,
+      language: "bash"
+    },
+    {
+      title: "4. Initializing Groq",
+      content: [
+        "The Groq client can be initialized using an API key.",
+        "API keys should remain on the server and should not be exposed in frontend code."
+      ],
+      code: `import Groq from "groq-sdk";
+
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY
+});`,
+      language: "javascript"
+    },
+    {
+      title: "5. Chat Completions",
+      content: [
+        "The chat completions API accepts a collection of messages and generates a response.",
+        "Messages can include system, user and assistant roles."
+      ],
+      code: `const completion = await groq.chat.completions.create({
+  messages: [
+    {
+      role: "system",
+      content: "You are a helpful assistant."
+    },
+    {
+      role: "user",
+      content: "Explain Node.js."
+    }
+  ],
+  model: "your-supported-model"
+});
+
+console.log(
+  completion.choices[0].message.content
+);`,
+      language: "javascript"
+    },
+    {
+      title: "6. Streaming Responses",
+      content: [
+        "Streaming allows responses to be received incrementally.",
+        "It can be used to display AI responses as they are generated."
+      ],
+      code: `const stream = await groq.chat.completions.create({
+  messages: [
+    {
+      role: "user",
+      content: "Explain React."
+    }
+  ],
+  model: "your-supported-model",
+  stream: true
+});
+
+for await (const chunk of stream) {
+  const content = chunk.choices[0]?.delta?.content;
+
+  if (content) {
+    process.stdout.write(content);
+  }
+}`,
+      language: "javascript"
+    },
+    {
+      title: "7. Model Selection",
+      content: [
+        "Groq provides access to supported models through its API.",
+        "Model availability and capabilities can change over time.",
+        "Applications should select models based on their supported features, performance and requirements."
+      ]
+    },
+    {
+      title: "8. Error Handling",
+      content: [
+        "API requests may fail because of invalid credentials, rate limits, network problems or unsupported requests.",
+        "Applications should handle errors appropriately."
+      ],
+      code: `try {
+  const response = await groq.chat.completions.create({
+    messages: [
+      {
+        role: "user",
+        content: "Hello"
+      }
+    ],
+    model: "your-supported-model"
+  });
+} catch (error) {
+  console.error("Groq API error:", error);
+}`,
+      language: "javascript"
+    },
+    {
+      title: "9. Common Use Cases",
+      content: [
+        "AI chat applications.",
+        "Text generation.",
+        "Streaming AI interfaces.",
+        "AI assistants.",
+        "Backend AI integrations.",
+        "LLM-powered applications."
+      ]
+    },
+    {
+      title: "10. Best Practices",
+      content: [
+        "Keep API keys on the backend.",
+        "Handle API errors and rate limits.",
+        "Use streaming where appropriate.",
+        "Validate incoming user requests.",
+        "Monitor token usage and costs.",
+        "Choose models according to application requirements.",
+        "Avoid exposing provider credentials to clients."
+      ]
+    }
+  ]
+},
+"langchain-groq": {
+  title: "LangChain Groq",
+  description: "Connect LangChain applications with Groq models.",
+  overview:
+    "LangChain Groq is a provider integration that connects LangChain applications with Groq-hosted language models. It allows developers to use Groq models through LangChain interfaces and combine them with prompts, chains, tools, output parsers and other components.",
+  sections: [
+    {
+      title: "1. What is LangChain Groq?",
+      content: [
+        "LangChain Groq is an integration between LangChain and Groq's inference API.",
+        "It provides a LangChain-compatible interface for supported Groq chat models.",
+        "It allows Groq models to be used within LangChain pipelines and AI application workflows."
+      ]
+    },
+    {
+      title: "2. Installation",
+      code: `npm install @langchain/groq @langchain/core`,
+      language: "bash"
+    },
+    {
+      title: "3. Environment Variables",
+      code: `GROQ_API_KEY=your_api_key`,
+      language: "bash"
+    },
+    {
+      title: "4. Initializing ChatGroq",
+      content: [
+        "ChatGroq provides a LangChain chat model interface for supported Groq models.",
+        "It can be initialized using a model identifier and API credentials."
+      ],
+      code: `import {
+  ChatGroq
+} from "@langchain/groq";
+
+const model = new ChatGroq({
+  model: "your-supported-model",
+  apiKey: process.env.GROQ_API_KEY
+});`,
+      language: "javascript"
+    },
+    {
+      title: "5. Invoking the Model",
+      content: [
+        "invoke() sends input to the model and returns its response.",
+        "LangChain message types can be used to provide structured conversation inputs."
+      ],
+      code: `import {
+  HumanMessage,
+  SystemMessage
+} from "@langchain/core/messages";
+
+const response = await model.invoke([
+  new SystemMessage("You are a helpful assistant."),
+  new HumanMessage("Explain Express.js.")
+]);
+
+console.log(response.content);`,
+      language: "javascript"
+    },
+    {
+      title: "6. Prompt Templates",
+      content: [
+        "LangChain Groq models can be combined with prompt templates.",
+        "Prompt templates allow reusable prompts with dynamically supplied values."
+      ],
+      code: `import {
+  ChatPromptTemplate
+} from "@langchain/core/prompts";
+
+const prompt = ChatPromptTemplate.fromMessages([
+  ["system", "You are a technical tutor."],
+  ["human", "Explain {topic}."]
+]);
+
+const chain = prompt.pipe(model);
+
+const response = await chain.invoke({
+  topic: "Redis"
+});`,
+      language: "javascript"
+    },
+    {
+      title: "7. Runnable Pipelines",
+      content: [
+        "LangChain Groq models implement LangChain runnable interfaces.",
+        "They can be composed with prompts, parsers and other compatible components.",
+        "Runnable pipelines help organize AI workflows into reusable components."
+      ],
+      code: `const chain = prompt
+  .pipe(model)
+  .pipe(parser);
+
+const result = await chain.invoke(input);`,
+      language: "javascript"
+    },
+    {
+      title: "8. Streaming",
+      content: [
+        "LangChain Groq supports streaming workflows where supported by the configured model and integration.",
+        "Streaming can be used to progressively display AI-generated content."
+      ],
+      code: `const stream = await model.stream(
+  "Explain AI agents."
+);
+
+for await (const chunk of stream) {
+  console.log(chunk.content);
+}`,
+      language: "javascript"
+    },
+    {
+      title: "9. Tool Calling",
+      content: [
+        "Compatible Groq models can be integrated into LangChain tool-calling workflows.",
+        "Tools allow models to request application functions when supported by the model and API.",
+        "Tool execution is handled by the application or agent workflow."
+      ]
+    },
+    {
+      title: "10. Common Use Cases",
+      content: [
+        "LangChain AI applications.",
+        "AI chatbots.",
+        "Prompt-based pipelines.",
+        "Streaming responses.",
+        "Tool-calling workflows.",
+        "AI assistants.",
+        "LLM-powered backend services."
+      ]
+    },
+    {
+      title: "11. Best Practices",
+      content: [
+        "Keep API keys in server-side environment variables.",
+        "Select models based on supported features.",
+        "Handle rate limits and API errors.",
+        "Use reusable prompt templates.",
+        "Validate AI-generated outputs.",
+        "Use streaming where appropriate.",
+        "Keep provider integrations modular."
+      ]
+    }
+  ]
+},
 };
