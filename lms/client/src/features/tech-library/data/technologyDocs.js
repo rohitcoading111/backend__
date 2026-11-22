@@ -8990,4 +8990,502 @@ subscriber.on("message", (channel, message) => {
     }
   ]
 },
+"bcryptjs": {
+  title: "bcryptjs",
+  description: "Password hashing implementation in JavaScript.",
+  overview:
+    "bcryptjs is a pure JavaScript implementation of the bcrypt password hashing algorithm. It is used to securely hash passwords and compare submitted passwords against stored hashes. It does not require native compilation.",
+  sections: [
+    {
+      title: "1. What is bcryptjs?",
+      content: [
+        "bcryptjs is a JavaScript library for password hashing.",
+        "It uses the bcrypt algorithm to create salted password hashes.",
+        "Passwords should be hashed before storing them in a database.",
+        "Hashing is one-way and is not the same as encryption."
+      ]
+    },
+    {
+      title: "2. Installation",
+      code: "npm install bcryptjs",
+      language: "bash"
+    },
+    {
+      title: "3. Hashing a Password",
+      content: [
+        "hash() generates a bcrypt hash from a password.",
+        "The salt rounds parameter controls the computational cost of hashing."
+      ],
+      code: `import bcrypt from "bcryptjs";
+
+const password = "userPassword";
+
+const hashedPassword = await bcrypt.hash(
+  password,
+  10
+);
+
+console.log(hashedPassword);`,
+      language: "javascript"
+    },
+    {
+      title: "4. Comparing Passwords",
+      content: [
+        "compare() checks whether a submitted password matches an existing bcrypt hash.",
+        "It returns a boolean result."
+      ],
+      code: `const isMatch = await bcrypt.compare(
+  password,
+  hashedPassword
+);
+
+console.log(isMatch);`,
+      language: "javascript"
+    },
+    {
+      title: "5. Salt and Hashing",
+      content: [
+        "bcrypt incorporates salt into the hashing process.",
+        "A salt helps prevent identical passwords from producing identical hashes.",
+        "bcryptjs manages salt generation as part of its hashing workflow."
+      ]
+    },
+    {
+      title: "6. Async vs Sync",
+      content: [
+        "bcryptjs provides asynchronous and synchronous APIs.",
+        "Asynchronous methods are generally preferable in server applications because synchronous hashing can block the JavaScript execution thread."
+      ],
+      code: `// Async
+const hash = await bcrypt.hash(password, 10);
+
+// Sync
+const syncHash = bcrypt.hashSync(password, 10);`,
+      language: "javascript"
+    },
+    {
+      title: "7. Authentication Workflow",
+      content: [
+        "Receive the password during registration.",
+        "Hash the password.",
+        "Store the hash in the database instead of the plaintext password.",
+        "During login, compare the submitted password with the stored hash.",
+        "Continue authentication only if the comparison succeeds."
+      ]
+    },
+    {
+      title: "8. Best Practices",
+      content: [
+        "Never store plaintext passwords.",
+        "Use asynchronous hashing in server-side request workflows.",
+        "Choose an appropriate bcrypt cost factor.",
+        "Never return password hashes in API responses.",
+        "Keep password hashing and authentication logic appropriately separated."
+      ]
+    }
+  ]
+},
+"jsonwebtoken": {
+  title: "jsonwebtoken",
+  description: "JWT creation, verification and token-based authentication.",
+  overview:
+    "jsonwebtoken is a Node.js library used to create, sign, verify and decode JSON Web Tokens. It is commonly used in authentication and authorization workflows to securely transmit claims between parties.",
+  sections: [
+    {
+      title: "1. What is jsonwebtoken?",
+      content: [
+        "jsonwebtoken is a library used to work with JSON Web Tokens.",
+        "It allows applications to generate signed tokens and verify their authenticity.",
+        "JWTs are commonly used in authentication systems and API authorization."
+      ]
+    },
+    {
+      title: "2. Installation",
+      code: "npm install jsonwebtoken",
+      language: "bash"
+    },
+    {
+      title: "3. Creating a JWT",
+      content: [
+        "sign() creates a signed JWT.",
+        "A payload can contain claims such as a user identifier and role.",
+        "Signing does not encrypt the token payload."
+      ],
+      code: `import jwt from "jsonwebtoken";
+
+const token = jwt.sign(
+  {
+    userId: "123",
+    role: "student"
+  },
+  process.env.JWT_SECRET,
+  {
+    expiresIn: "15m"
+  }
+);
+
+console.log(token);`,
+      language: "javascript"
+    },
+    {
+      title: "4. JWT Structure",
+      content: [
+        "A JWT commonly consists of three parts separated by dots.",
+        "Header — contains metadata such as the signing algorithm.",
+        "Payload — contains claims.",
+        "Signature — helps verify the token's integrity."
+      ]
+    },
+    {
+      title: "5. Verifying a JWT",
+      content: [
+        "verify() validates the token's signature and checks supported claims such as expiration."
+      ],
+      code: `const decoded = jwt.verify(
+  token,
+  process.env.JWT_SECRET
+);
+
+console.log(decoded);`,
+      language: "javascript"
+    },
+    {
+      title: "6. Decoding a JWT",
+      content: [
+        "decode() reads the token payload without verifying its signature.",
+        "Decoded data must not be trusted until the token has been verified."
+      ],
+      code: `const decodedToken = jwt.decode(token);
+
+console.log(decodedToken);`,
+      language: "javascript"
+    },
+    {
+      title: "7. Token Expiration",
+      content: [
+        "JWTs can include expiration claims.",
+        "The expiresIn option can configure the token lifetime."
+      ],
+      code: `const token = jwt.sign(
+  { userId: "123" },
+  process.env.JWT_SECRET,
+  {
+    expiresIn: "15m"
+  }
+);`,
+      language: "javascript"
+    },
+    {
+      title: "8. Authentication Middleware",
+      code: `import jwt from "jsonwebtoken";
+
+const authMiddleware = (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader?.startsWith("Bearer ")) {
+      return res.status(401).json({
+        message: "Unauthorized"
+      });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
+
+    req.user = decoded;
+
+    next();
+  } catch (error) {
+    return res.status(401).json({
+      message: "Invalid or expired token"
+    });
+  }
+};
+
+export default authMiddleware;`,
+      language: "javascript"
+    },
+    {
+      title: "9. Important Methods",
+      content: [
+        "sign() — creates a signed JWT.",
+        "verify() — validates a JWT.",
+        "decode() — decodes token data without signature verification."
+      ]
+    },
+    {
+      title: "10. Common Use Cases",
+      content: [
+        "Authentication.",
+        "API authorization.",
+        "Access token generation.",
+        "Token-based identity verification.",
+        "Protected routes."
+      ]
+    },
+    {
+      title: "11. Best Practices",
+      content: [
+        "Use strong secrets or appropriate cryptographic keys.",
+        "Store secrets in environment variables.",
+        "Always verify tokens before trusting their payload.",
+        "Use short-lived access tokens where appropriate.",
+        "Never put sensitive information in JWT payloads.",
+        "Validate allowed signing algorithms.",
+        "Implement appropriate token revocation or refresh strategies when required."
+      ]
+    }
+  ]
+},
+"passport": {
+  title: "Passport",
+  description: "Authentication middleware and strategies.",
+  overview:
+    "Passport is an authentication middleware for Node.js applications. It provides a flexible and modular authentication framework using strategies for different authentication methods such as username-password authentication, JWT, OAuth and other identity providers.",
+  sections: [
+    {
+      title: "1. What is Passport?",
+      content: [
+        "Passport is an authentication middleware for Node.js.",
+        "It uses strategies to authenticate users through different authentication mechanisms.",
+        "Passport itself does not implement every authentication method; strategies provide the specific authentication logic."
+      ]
+    },
+    {
+      title: "2. Installation",
+      code: "npm install passport",
+      language: "bash"
+    },
+    {
+      title: "3. Initializing Passport",
+      content: [
+        "Passport can be initialized as middleware in an Express application."
+      ],
+      code: `import passport from "passport";
+import express from "express";
+
+const app = express();
+
+app.use(passport.initialize());`,
+      language: "javascript"
+    },
+    {
+      title: "4. Authentication Strategies",
+      content: [
+        "Passport uses strategies to authenticate requests.",
+        "Different strategies support different authentication mechanisms.",
+        "Examples include Local, JWT and Google OAuth strategies."
+      ]
+    },
+    {
+      title: "5. Strategy Configuration",
+      content: [
+        "A strategy defines how authentication credentials are validated.",
+        "The strategy's verification callback determines whether the user is authenticated."
+      ],
+      code: `passport.use(
+  new SomeStrategy(
+    options,
+    async (credentials, done) => {
+      // Authentication logic
+    }
+  )
+);`,
+      language: "javascript"
+    },
+    {
+      title: "6. Passport Authentication Middleware",
+      content: [
+        "Passport middleware can be used to protect routes.",
+        "The configured strategy is selected by its name."
+      ],
+      code: `app.get(
+  "/protected",
+  passport.authenticate("jwt", {
+    session: false
+  }),
+  (req, res) => {
+    res.json({
+      message: "Protected route",
+      user: req.user
+    });
+  }
+);`,
+      language: "javascript"
+    },
+    {
+      title: "7. Sessions vs Stateless Authentication",
+      content: [
+        "Passport can support session-based authentication.",
+        "It can also be used in stateless authentication workflows such as JWT authentication.",
+        "For stateless JWT authentication, session: false is commonly used."
+      ]
+    },
+    {
+      title: "8. Common Passport Strategies",
+      content: [
+        "passport-local — username and password authentication.",
+        "passport-jwt — JWT-based authentication.",
+        "passport-google-oauth20 — Google OAuth 2.0 authentication.",
+        "Other strategies support additional identity providers and authentication mechanisms."
+      ]
+    },
+    {
+      title: "9. Common Use Cases",
+      content: [
+        "User authentication.",
+        "JWT-protected routes.",
+        "OAuth authentication.",
+        "Social login.",
+        "Session-based authentication."
+      ]
+    },
+    {
+      title: "10. Best Practices",
+      content: [
+        "Choose an appropriate strategy for your authentication workflow.",
+        "Keep authentication and authorization separate.",
+        "Validate user credentials carefully.",
+        "Avoid exposing sensitive user information.",
+        "Configure session behavior intentionally.",
+        "Use secure authentication configurations."
+      ]
+    }
+  ]
+},
+"passport-google-oauth": {
+  title: "Passport Google OAuth 2.0",
+  description: "Google authentication using Passport.",
+  overview:
+    "Passport Google OAuth 2.0 is an authentication integration that allows Node.js applications to authenticate users through their Google accounts using Passport and the Google OAuth 2.0 strategy.",
+  sections: [
+    {
+      title: "1. What is Passport Google OAuth 2.0?",
+      content: [
+        "It allows users to authenticate using their Google accounts.",
+        "It uses OAuth 2.0 authorization flows through Google's identity services.",
+        "Passport provides middleware and strategy integration for handling authentication."
+      ]
+    },
+    {
+      title: "2. Installation",
+      code: "npm install passport passport-google-oauth20",
+      language: "bash"
+    },
+    {
+      title: "3. Google OAuth Credentials",
+      content: [
+        "Google OAuth credentials are configured through the Google Cloud Console.",
+        "Applications typically configure a Client ID and Client Secret.",
+        "Authorized redirect URIs must match the application's OAuth callback URL."
+      ]
+    },
+    {
+      title: "4. Environment Variables",
+      code: `GOOGLE_CLIENT_ID=your_client_id
+GOOGLE_CLIENT_SECRET=your_client_secret
+GOOGLE_CALLBACK_URL=http://localhost:5000/auth/google/callback`,
+      language: "bash"
+    },
+    {
+      title: "5. Configuring Google Strategy",
+      code: `import passport from "passport";
+import GoogleStrategy from "passport-google-oauth20";
+
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: process.env.GOOGLE_CALLBACK_URL
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        // Find or create the application user
+
+        return done(null, profile);
+      } catch (error) {
+        return done(error, null);
+      }
+    }
+  )
+);`,
+      language: "javascript"
+    },
+    {
+      title: "6. Google Authentication Route",
+      code: `app.get(
+  "/auth/google",
+  passport.authenticate("google", {
+    scope: ["profile", "email"]
+  })
+);`,
+      language: "javascript"
+    },
+    {
+      title: "7. OAuth Callback Route",
+      content: [
+        "Google redirects the user to the callback URL after authorization.",
+        "Passport processes the OAuth response and invokes the configured strategy."
+      ],
+      code: `app.get(
+  "/auth/google/callback",
+  passport.authenticate("google", {
+    session: false,
+    failureRedirect: "/login"
+  }),
+  (req, res) => {
+    res.redirect("/dashboard");
+  }
+);`,
+      language: "javascript"
+    },
+    {
+      title: "8. OAuth Workflow",
+      content: [
+        "The user clicks Sign in with Google.",
+        "The application redirects the user to Google's authorization page.",
+        "The user authenticates and grants the requested permissions.",
+        "Google redirects the user to the configured callback URL.",
+        "Passport processes the OAuth response.",
+        "The application finds or creates the user.",
+        "The application establishes its own authentication mechanism."
+      ]
+    },
+    {
+      title: "9. Google Profile Data",
+      content: [
+        "The Google strategy can provide profile information such as the Google profile identifier, display name and email information depending on the requested scopes and available profile data.",
+        "Applications should only request the permissions and information they actually need."
+      ]
+    },
+    {
+      title: "10. Common Use Cases",
+      content: [
+        "Google login.",
+        "Google signup.",
+        "Social authentication.",
+        "OAuth-based account onboarding.",
+        "Connecting Google identity with an application account."
+      ]
+    },
+    {
+      title: "11. Best Practices",
+      content: [
+        "Keep OAuth Client Secrets private.",
+        "Use correctly configured callback URLs.",
+        "Handle OAuth callback failures.",
+        "Avoid requesting unnecessary scopes.",
+        "Link Google accounts with application accounts carefully.",
+        "Do not blindly trust profile data for authorization decisions.",
+        "Use HTTPS in production.",
+        "Generate your application's own authentication mechanism after OAuth when appropriate."
+      ]
+    }
+  ]
+},
 };
