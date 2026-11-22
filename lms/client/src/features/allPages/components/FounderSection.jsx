@@ -257,11 +257,18 @@ export default function FounderSection() {
 
             {/* Company links */}
             <div className="mt-8">
-              <h3 className="mb-3 text-sm font-semibold text-zinc-300">
-                Follow LearnHub
-              </h3>
-              <SocialLinks links={companyLinks} owner="LearnHub" />
-            </div>
+  <h3 className="mb-3 text-sm font-semibold text-zinc-300">
+    Follow LearnHub on Social Media
+  </h3>
+
+  <p className="mb-4 text-sm leading-relaxed text-zinc-400">
+    Connect with LearnHub through our official social media channels
+    for the latest updates, learning resources, new features, and
+    announcements.
+  </p>
+
+  <SocialLinks links={companyLinks} owner="LearnHub" />
+</div>
 
             <Link
               to="/about"
