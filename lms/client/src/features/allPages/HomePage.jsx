@@ -142,6 +142,12 @@ export default function HomePage() {
               <Link to="/contact" className="learnhub-about-link">
                 Contact
               </Link>
+              <Link
+  to="/technologies"
+  className="learnhub-about-link"
+>
+  Technology Library
+</Link>
             </div>
 
             <Link

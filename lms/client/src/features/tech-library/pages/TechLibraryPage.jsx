@@ -16,11 +16,20 @@ const TechLibraryPage = () => {
       <div className="pointer-events-none absolute left-1/2 top-0 h-[420px] w-[720px] -translate-x-1/2 rounded-full bg-white/10 blur-[140px]" />
 
       <div className="relative mx-auto max-w-7xl">
+        {/* Home Button */}
+<button
+  type="button"
+  onClick={() => navigate("/")}
+  className="mb-8 inline-flex items-center gap-2 rounded-xl border border-white/30 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white hover:text-black hover:shadow-[0_0_22px_rgba(255,255,255,0.7)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+>
+  ← Home
+</button>
         {/* Header */}
         <header className="mb-14 text-center">
           <span className="mb-4 inline-block rounded-full border border-white/30 bg-white/5 px-4 py-1 text-sm font-medium text-white shadow-[0_0_20px_rgba(255,255,255,0.25)]">
             LearnHub Developer Library
           </span>
+          
 
           <h1 className="mb-4 text-3xl font-bold text-white drop-shadow-[0_0_25px_rgba(255,255,255,0.45)] sm:text-5xl">
             Technology Library
