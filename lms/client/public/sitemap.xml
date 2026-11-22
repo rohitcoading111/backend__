@@ -18,4 +18,171 @@
   <priority>0.8</priority>
 </url>
 
+
+<url>
+  <loc>https://learnhubcloud.in/technologies/react</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/react-dom</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/tailwind-css</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/framer-motion</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/lenis</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/lucide-react</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/react-markdown</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/remark-gfm</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/redux-toolkit</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/react-redux</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/react-hook-form</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/react-router-dom</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/axios</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/react-helmet-async</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/socket-io-client</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/vite</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/npm</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/es-modules</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/oxlint</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/rollup-plugin-visualizer</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/node-js</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/express-js</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/express-validator</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/multer</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/cors</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/cookie-parser</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/express-rate-limit</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/nodemon</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/dotenv</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/mongodb</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/mongoose</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/redis</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/ioredis</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/bcrypt</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/bcryptjs</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/jsonwebtoken</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/passport</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/passport-google-oauth</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/socket-io</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/livekit-client</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/livekit-server-sdk</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/livekit-components-react</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/imagekit</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/razorpay</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/google-apis</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/google-oauth</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/twilio</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/langchain</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/langchain-core</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/langchain-groq</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/groq-sdk</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/text-splitters</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/pinecone</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/node-test-runner</loc>
+</url>
+<url>
+  <loc>https://learnhubcloud.in/technologies/autocannon</loc>
+</url>
+
 </urlset>
