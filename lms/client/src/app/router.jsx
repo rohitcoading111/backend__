@@ -57,6 +57,7 @@ import PublicOnlyRoute from "../routes/PublicOnlyRoute.jsx";
 
 const TechLibraryPage = lazy(() =>  import("../features/tech-library/pages/TechLibraryPage.jsx"));
 const TechnologyDetailPage = lazy(() =>  import("../features/tech-library/pages/TechnologyDetailPage.jsx"));
+const FounderPage = lazy(()=> import("../features/allPages/FounderPage.jsx") )
 
 // Reusable loading fallback
 function LazyPage({ component: Component }) {
@@ -99,6 +100,12 @@ export const router = createBrowserRouter([
   path: "/technologies/:slug",
   element: <LazyPage component={TechnologyDetailPage} />,
 },
+{
+    path:"/founder",
+    element: <LazyPage component={FounderPage} />
+},
+
+
   // Public Authentication Routes
   {
     element: <PublicOnlyRoute />,

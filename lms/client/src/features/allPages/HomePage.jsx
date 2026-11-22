@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import SEO from "../../components/SEO.jsx";
 import "./HomePage.css";
+import FounderSection from "./components/FounderSection";
 
 const features = [
   {
@@ -136,6 +137,12 @@ export default function HomePage() {
 
           <div className="learnhub-home-nav-actions hidden items-center md:flex">
             <div className="learnhub-home-page-links flex items-center">
+              <Link
+           to="/founder"
+          className="learnhub-about-link"
+        >
+          Founder
+          </Link>
               <Link to="/about" className="learnhub-about-link">
                 About
               </Link>
@@ -143,11 +150,11 @@ export default function HomePage() {
                 Contact
               </Link>
               <Link
-  to="/technologies"
-  className="learnhub-about-link"
->
-  Technology Library
-</Link>
+           to="/technologies"
+            className="learnhub-about-link"
+          >
+             Technology Library
+            </Link>
             </div>
 
             <Link
@@ -193,6 +200,13 @@ export default function HomePage() {
               <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="learnhub-about-link">
                 FAQs
               </a>
+              <Link
+  to="/founder"
+  onClick={() => setMobileMenuOpen(false)}
+  className="learnhub-about-link"
+>
+  Founder
+</Link>
               <Link to="/about" onClick={() => setMobileMenuOpen(false)} className="learnhub-about-link">
                 About
               </Link>
