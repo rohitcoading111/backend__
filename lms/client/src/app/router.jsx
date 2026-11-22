@@ -55,6 +55,8 @@ import ProtectedRoute from "../routes/ProtectedRoute.jsx";
 import OrganizationPolicyGuard from "../routes/OrganizationPolicyGuard.jsx";
 import PublicOnlyRoute from "../routes/PublicOnlyRoute.jsx";
 
+const TechLibraryPage = lazy(() =>  import("../features/tech-library/pages/TechLibraryPage.jsx"));
+
 // Reusable loading fallback
 function LazyPage({ component: Component }) {
   return (
@@ -87,6 +89,10 @@ export const router = createBrowserRouter([
   {
     path: "/ai-assistant",
     element: <LazyPage component={AIChat} />,
+  },
+  {
+  path: "/technologies",
+  element: <LazyPage component={TechLibraryPage} />,
   },
 
   // Public Authentication Routes
