@@ -32,7 +32,6 @@ export const createInterviewQuestion = async (data, adminId) => {
   return question;
 };
 
-
 export const updateInterviewQuestion = async (questionId, data) => {
   // 1. Find existing question
   const question = await InterviewQuestion.findById(questionId);
@@ -99,5 +98,66 @@ export const deleteInterviewQuestion = async (questionId) => {
   return {
     questionId: question._id,
     message: "Interview question deleted successfully",
+  };
+};
+
+export const getAllInterviewQuestions = async ({
+  categoryId,
+  difficulty,
+  search,
+  page = 1,
+  limit = 10,
+} = {}) => {
+  // 1. Build filter query
+  const filter = {};
+
+  if (categoryId) {
+    filter.categoryId = categoryId;
+  }
+
+  if (difficulty) {
+    filter.difficulty = difficulty;
+  }
+
+  if (search) {
+    filter.title = { $regex: search, $options: "i" };
+  }
+
+  // 2. Pagination
+  const skip = (page - 1) * limit;
+
+  // 3. Fetch questions and total count
+  const [questions, totalQuestions] = await Promise.all([
+    InterviewQuestion.find(filter)
+      .populate("categoryId", "name slug")
+      .sort({ order: 1, createdAt: -1 })
+      .skip(skip)
+      .limit(limit),
+
+    InterviewQuestion.countDocuments(filter),
+  ]);
+
+  // 4. Return data
+  return {
+    questions,
+    pagination: {
+      currentPage: page,
+      limit,
+      totalQuestions,
+      totalPages: Math.ceil(totalQuestions / limit),
+    },
+  };
+};
+
+export const getSingleQuestion = async (questionId) => {
+  const question = await InterviewQuestion.findById(questionId).populate(
+    "categoryId",
+    "name slug",
+  );
+  if (!question) {
+    throw new Error("Interview question not found");
+  }
+  return {
+    question,
   };
 };
