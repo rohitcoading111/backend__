@@ -21,6 +21,8 @@ import organizationPolicyAcceptanceRoutes from "../routes/organizationPolicyAcce
 import chatRoutes from "../routes/chat.routes.js";
 import dsaRoutes from "../routes/dsa.routes.js";
 import aiRoutes from "../routes/ai.routes.js";
+import interviewQuestionRoutes from "../routes/interviewQuestion.routes.js";
+
 
 // Global rate limiter
 import { globalApiLimiter } from "../middleware/globalRateLimit.middleware.js";
@@ -104,5 +106,8 @@ app.use("/api/chat", chatRoutes);
 app.use("/api/dsa",dsaRoutes);
 
 app.use("/api/ai", aiRoutes);
+
+app.use("/api/interview", interviewQuestionRoutes);
+
 
 export default app;
