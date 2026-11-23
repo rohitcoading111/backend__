@@ -31,3 +31,55 @@ export const createInterviewQuestion = async (data, adminId) => {
   // 4. Return created question
   return question;
 };
+
+
+export const updateInterviewQuestion = async (questionId, data) => {
+  // 1. Find existing question
+  const question = await InterviewQuestion.findById(questionId);
+
+  if (!question) {
+    throw new Error("Interview question not found");
+  }
+
+  // 2. Validate category if categoryId is provided
+  if (data.categoryId) {
+    const category = await InterviewCategory.findById(data.categoryId);
+
+    if (!category) {
+      throw new Error("Interview category not found");
+    }
+
+    if (!category.isActive) {
+      throw new Error("Cannot assign question to inactive category");
+    }
+
+    question.categoryId = data.categoryId;
+  }
+
+  // 3. Update only allowed fields
+  if (data.title !== undefined) {
+    question.title = data.title;
+  }
+
+  if (data.answer !== undefined) {
+    question.answer = data.answer;
+  }
+
+  if (data.difficulty !== undefined) {
+    question.difficulty = data.difficulty;
+  }
+
+  if (data.tags !== undefined) {
+    question.tags = data.tags;
+  }
+
+  if (data.order !== undefined) {
+    question.order = data.order;
+  }
+
+  // 4. Save updated document
+  await question.save();
+
+  // 5. Return updated question
+  return question;
+};
