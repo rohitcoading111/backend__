@@ -83,3 +83,21 @@ export const updateInterviewQuestion = async (questionId, data) => {
   // 5. Return updated question
   return question;
 };
+
+export const deleteInterviewQuestion = async (questionId) => {
+  // 1. Find the specific question
+  const question = await InterviewQuestion.findById(questionId);
+
+  if (!question) {
+    throw new Error("Interview question not found");
+  }
+
+  // 2. Delete only this question
+  await InterviewQuestion.deleteOne({ _id: questionId });
+
+  // 3. Return confirmation data
+  return {
+    questionId: question._id,
+    message: "Interview question deleted successfully",
+  };
+};
