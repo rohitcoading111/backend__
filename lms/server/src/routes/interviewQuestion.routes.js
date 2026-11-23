@@ -6,6 +6,8 @@ import {
   deleteInterviewQuestionController,
   getAllInterviewQuestionsController,
   getSingleQuestionController,
+  markQuestionCompletedController,
+  getMyInterviewProgressController,
 } from "../controllers/interviewQuestion.controller.js";
 
 import { superAdminMiddleware } from "../middleware/superAdmin.middleware.js";
@@ -37,6 +39,19 @@ router.delete(
   authMiddleware,
   superAdminMiddleware,
   deleteInterviewQuestionController
+);
+
+// User Progress Routes (Authenticated Users Only)
+router.post(
+  "/questions/:questionId/complete",
+  authMiddleware,
+  markQuestionCompletedController
+);
+
+router.get(
+  "/progress",
+  authMiddleware,
+  getMyInterviewProgressController
 );
 
 router.get("/questions", getAllInterviewQuestionsController);
