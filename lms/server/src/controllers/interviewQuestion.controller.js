@@ -1,5 +1,5 @@
 import { createInterviewQuestion,deleteInterviewQuestion,getAllInterviewQuestions,getSingleQuestion,updateInterviewQuestion } from "../services/interviewQuestion.service.js";
-
+import {  markQuestionCompleted,  getMyInterviewProgress,} from "../services/interviewProgress.service.js";
 export const createInterviewQuestionController = async (req, res) => {
   try {
     const question = await createInterviewQuestion(
@@ -95,6 +95,43 @@ export const updateInterviewQuestionController = async (req, res) => {
     });
   } catch (error) {
     return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+export const markQuestionCompletedController = async (req, res) => {
+  try {
+    const progress = await markQuestionCompleted(
+      req.user.id,
+      req.params.questionId
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Question marked as completed",
+      progress,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getMyInterviewProgressController = async (req, res) => {
+  try {
+    const progress = await getMyInterviewProgress(req.user.id);
+
+    return res.status(200).json({
+      success: true,
+      progress,
+    });
+  } catch (error) {
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
