@@ -24,3 +24,11 @@ export const markQuestionCompleted = async (userId, questionId) => {
 
   return progress;
 };
+
+export const getMyInterviewProgress = async (userId) => {
+  const progress = await InterviewProgress.find({ userId })
+    .populate("questionId", "title categoryId difficulty")
+    .sort({ completedAt: -1 });
+
+  return progress;
+};
