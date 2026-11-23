@@ -1,4 +1,4 @@
-import { createInterviewQuestion,deleteInterviewQuestion } from "../services/interviewQuestion.service.js";
+import { createInterviewQuestion,deleteInterviewQuestion,getAllInterviewQuestions } from "../services/interviewQuestion.service.js";
 
 export const createInterviewQuestionController = async (req, res) => {
   try {
@@ -34,6 +34,29 @@ export const deleteInterviewQuestionController = async (req, res) => {
     });
   } catch (error) {
     return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+export const getAllInterviewQuestionsController = async (req, res) => {
+  try {
+    const result = await getAllInterviewQuestions({
+      categoryId: req.query.categoryId,
+      difficulty: req.query.difficulty,
+      search: req.query.search,
+      page: Number(req.query.page) || 1,
+      limit: Number(req.query.limit) || 10,
+    });
+
+    return res.status(200).json({
+      success: true,
+      ...result,
+    });
+  } catch (error) {
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
