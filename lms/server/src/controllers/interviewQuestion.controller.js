@@ -1,4 +1,4 @@
-import { createInterviewQuestion,deleteInterviewQuestion,getAllInterviewQuestions,getSingleQuestion } from "../services/interviewQuestion.service.js";
+import { createInterviewQuestion,deleteInterviewQuestion,getAllInterviewQuestions,getSingleQuestion,updateInterviewQuestion } from "../services/interviewQuestion.service.js";
 
 export const createInterviewQuestionController = async (req, res) => {
   try {
@@ -74,6 +74,27 @@ export const getSingleQuestionController = async (req, res) => {
     });
   } catch (error) {
     return res.status(404).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+export const updateInterviewQuestionController = async (req, res) => {
+  try {
+    const question = await updateInterviewQuestion(
+      req.params.questionId,
+      req.body
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Interview question updated successfully",
+      question,
+    });
+  } catch (error) {
+    return res.status(400).json({
       success: false,
       message: error.message,
     });
