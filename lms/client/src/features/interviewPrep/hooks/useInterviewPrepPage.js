@@ -75,15 +75,15 @@ export const useInterviewPrepPage = () => {
   };
 
   // Mark question completed
-  const handleCompleteQuestion = async (questionId) => {
-    const result = await completeQuestion(questionId);
+ const handleCompleteQuestion = async (questionId) => {
+  const result = await completeQuestion(questionId);
 
-    if (completeQuestion.fulfilled.match(result)) {
-      await fetchProgress();
-    }
+  if (result.meta?.requestStatus === "fulfilled") {
+    await fetchProgress();
+  }
 
-    return result;
-  };
+  return result;
+};
 
   // Statistics
   const completedCount = completedQuestionIds.length;

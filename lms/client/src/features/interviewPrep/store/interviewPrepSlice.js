@@ -5,7 +5,7 @@ import {
   fetchSingleInterviewQuestion,
   completeInterviewQuestion,
   fetchMyInterviewProgress,
-} from "./interviewPrepThunk";
+} from "../thunks/interviewPrepThunk";
 
 const initialState = {
   questions: [],

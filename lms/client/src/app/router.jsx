@@ -59,6 +59,8 @@ const TechLibraryPage = lazy(() =>  import("../features/tech-library/pages/TechL
 const TechnologyDetailPage = lazy(() =>  import("../features/tech-library/pages/TechnologyDetailPage.jsx"));
 const FounderPage = lazy(()=> import("../features/allPages/FounderPage.jsx") )
 
+import InterviewPrepPage from "../features/interviewPrep/pages/InterviewPrepPage.jsx"
+
 // Reusable loading fallback
 function LazyPage({ component: Component }) {
   return (
@@ -103,6 +105,10 @@ export const router = createBrowserRouter([
 {
     path:"/founder",
     element: <LazyPage component={FounderPage} />
+},
+{
+  path:"/interview",
+  element:<InterviewPrepPage/>
 },
 
 

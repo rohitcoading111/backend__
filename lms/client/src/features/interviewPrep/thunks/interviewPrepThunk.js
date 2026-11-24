@@ -5,7 +5,7 @@ import {
   getSingleInterviewQuestion,
   markQuestionCompleted,
   getMyInterviewProgress,
-} from "./services/interviewPrepService";
+} from "../services/interviewPrepService";
 
 // Fetch all questions
 export const fetchInterviewQuestions = createAsyncThunk(

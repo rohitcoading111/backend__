@@ -1,6 +1,14 @@
 import InterviewQuestionCard from "./InterviewQuestionCard";
 
-const InterviewQuestionList = ({ questions, onQuestionClick }) => {
+const InterviewQuestionList = ({
+  questions,
+  onQuestionClick,
+  expandedQuestionId,
+  user,
+  isQuestionCompleted,
+  onCompleteQuestion,
+  completionLoading,
+}) => {
   if (!questions?.length) {
     return (
       <div className="py-16 text-center">
@@ -21,7 +29,12 @@ const InterviewQuestionList = ({ questions, onQuestionClick }) => {
         <InterviewQuestionCard
           key={question._id}
           question={question}
-          onClick={() => onQuestionClick(question)}
+          onClick={() => onQuestionClick(question._id)}
+          isExpanded={expandedQuestionId === question._id}
+          user={user}
+          isCompleted={isQuestionCompleted(question._id)}
+          onComplete={() => onCompleteQuestion(question._id)}
+          completionLoading={completionLoading}
         />
       ))}
     </div>
