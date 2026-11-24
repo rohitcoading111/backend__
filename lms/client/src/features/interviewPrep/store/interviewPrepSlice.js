@@ -43,10 +43,21 @@ const interviewPrepSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchInterviewQuestions.fulfilled, (state, action) => {
-        state.loading = false;
-        state.questions = action.payload.questions;
-        state.pagination = action.payload.pagination;
-      })
+  state.loading = false;
+
+  const { questions, pagination } = action.payload;
+
+  // Page 1: Replace existing questions
+  if (pagination.currentPage === 1) {
+    state.questions = questions;
+  } 
+  // Next pages: Append new questions
+  else {
+    state.questions = [...state.questions, ...questions];
+  }
+
+  state.pagination = pagination;
+})
       .addCase(fetchInterviewQuestions.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;

@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
@@ -8,62 +9,54 @@ import { useCompleteInterviewQuestion } from "./useCompleteInterviewQuestion";
 export const useInterviewPrepPage = () => {
   const user = useSelector((state) => state.auth.user);
 
-  // Question fetching
   const {
     questions,
+    pagination,
     loading,
     error,
     fetchQuestions,
   } = useInterviewQuestions();
 
-  // User progress
   const {
     progress,
     progressLoading,
     fetchProgress,
   } = useInterviewProgress();
 
-  // Completion action
   const {
     completeQuestion,
     completionLoading,
   } = useCompleteInterviewQuestion();
 
-  // Local UI state
   const [search, setSearch] = useState("");
   const [difficulty, setDifficulty] = useState("ALL");
   const [expandedQuestionId, setExpandedQuestionId] = useState(null);
 
-  // Fetch questions whenever filters change
+  // Fetch first page whenever search or difficulty changes
   useEffect(() => {
-    const params = {};
+    const params = {
+      page: 1,
+      limit: 10,
+    };
 
-    if (search.trim()) {
-      params.search = search.trim();
-    }
-
-    if (difficulty !== "ALL") {
-      params.difficulty = difficulty;
-    }
+    if (search.trim()) params.search = search.trim();
+    if (difficulty !== "ALL") params.difficulty = difficulty;
 
     fetchQuestions(params);
   }, [search, difficulty]);
 
-  // Fetch user progress only when logged in
+  // Fetch user progress
   useEffect(() => {
-    if (user) {
-      fetchProgress();
-    }
+    if (user) fetchProgress();
   }, [user]);
 
-  // Normalize question IDs from progress
+  // Extract completed question IDs
   const completedQuestionIds = progress.map((item) =>
     typeof item.questionId === "object"
       ? item.questionId?._id
       : item.questionId
   );
 
-  // Check whether a question is completed
   const isQuestionCompleted = (questionId) =>
     completedQuestionIds.includes(questionId);
 
@@ -75,23 +68,41 @@ export const useInterviewPrepPage = () => {
   };
 
   // Mark question completed
- const handleCompleteQuestion = async (questionId) => {
-  const result = await completeQuestion(questionId);
+  const handleCompleteQuestion = async (questionId) => {
+    const result = await completeQuestion(questionId);
 
-  if (result.meta?.requestStatus === "fulfilled") {
-    await fetchProgress();
-  }
+    if (result.meta?.requestStatus === "fulfilled") {
+      await fetchProgress();
+    }
 
-  return result;
-};
+    return result;
+  };
 
-  // Statistics
+  // Load next page
+  const loadNextPage = () => {
+    if (!pagination || loading) return;
+
+    if (pagination.currentPage >= pagination.totalPages) return;
+
+    const nextPage = pagination.currentPage + 1;
+
+    const params = {
+      page: nextPage,
+      limit: 10,
+    };
+
+    if (search.trim()) params.search = search.trim();
+    if (difficulty !== "ALL") params.difficulty = difficulty;
+
+    fetchQuestions(params);
+  };
+
   const completedCount = completedQuestionIds.length;
 
   return {
     user,
-
     questions,
+    pagination,
     loading,
     error,
 
@@ -111,9 +122,11 @@ export const useInterviewPrepPage = () => {
     completedQuestionIds,
     completedCount,
     isQuestionCompleted,
+
     handleCompleteQuestion,
 
     fetchQuestions,
     fetchProgress,
+    loadNextPage,
   };
 };

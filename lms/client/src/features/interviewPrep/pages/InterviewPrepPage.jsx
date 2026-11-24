@@ -1,3 +1,4 @@
+
 import { useInterviewPrepPage } from "../hooks/useInterviewPrepPage";
 
 import InterviewPrepHeader from "../components/InterviewPrepHeader";
@@ -10,6 +11,7 @@ const InterviewPrepPage = () => {
   const {
     user,
     questions,
+    pagination,
     loading,
     error,
 
@@ -25,7 +27,13 @@ const InterviewPrepPage = () => {
     isQuestionCompleted,
     handleCompleteQuestion,
     completionLoading,
+
+    loadNextPage,
   } = useInterviewPrepPage();
+
+  const hasMore = pagination
+    ? pagination.currentPage < pagination.totalPages
+    : false;
 
   return (
     <div className="min-h-screen bg-zinc-950 px-4 py-8 text-white sm:px-6 lg:px-8">
@@ -33,7 +41,7 @@ const InterviewPrepPage = () => {
         <InterviewPrepHeader />
 
         <InterviewPrepStats
-          totalQuestions={questions.length}
+          totalQuestions={pagination?.totalQuestions ?? questions.length}
           completedQuestions={completedCount}
         />
 
@@ -44,7 +52,7 @@ const InterviewPrepPage = () => {
           onDifficultyChange={setDifficulty}
         />
 
-        {loading ? (
+        {loading && questions.length === 0 ? (
           <InterviewQuestionSkeleton count={6} />
         ) : error ? (
           <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-5 text-red-400">
@@ -59,6 +67,9 @@ const InterviewPrepPage = () => {
             isQuestionCompleted={isQuestionCompleted}
             onCompleteQuestion={handleCompleteQuestion}
             completionLoading={completionLoading}
+            loadNextPage={loadNextPage}
+            hasMore={hasMore}
+            loading={loading}
           />
         )}
       </div>
