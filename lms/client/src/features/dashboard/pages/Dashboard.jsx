@@ -1,12 +1,7 @@
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-import {
-  ArrowUpRight,
-  Compass,
-  Play,
-  Code2,
-} from "lucide-react";
+import { ArrowUpRight, Compass, Play, Code2 } from "lucide-react";
 
 import DashboardStats from "../components/DashboardStats.jsx";
 import MyCourses from "../components/MyCourses.jsx";
@@ -24,8 +19,7 @@ function Dashboard({ activeSection = "overview" }) {
   const navigate = useNavigate();
 
   // User information
-  const firstName =
-    user?.name?.trim()?.split(/\s+/)[0] || "Learner";
+  const firstName = user?.name?.trim()?.split(/\s+/)[0] || "Learner";
 
   // Learning progress hook
   const {
@@ -105,14 +99,14 @@ function Dashboard({ activeSection = "overview" }) {
                 </button>
 
                 <button
-    type="button"
-    onClick={() => navigate("/ai-assistant")}
-    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
->
-    <icon name="sparkles" />
-    Ask LearnHub AI
-    <ArrowUpRight size={17} />
-</button>
+                  type="button"
+                  onClick={() => navigate("/ai-assistant")}
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                >
+                  <icon name="sparkles" />
+                  Ask LearnHub AI
+                  <ArrowUpRight size={17} />
+                </button>
 
                 <button
                   type="button"
@@ -124,7 +118,15 @@ function Dashboard({ activeSection = "overview" }) {
                   <ArrowUpRight size={16} />
                 </button>
 
-                
+                <button
+                  type="button"
+                  onClick={() => navigate("/interview")}
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-[#151515] px-5 py-3.5 text-sm font-medium text-white transition hover:bg-[#222] active:scale-95"
+                >
+                  <Code2 size={17} />
+                  Interview Practice
+                  <ArrowUpRight size={16} />
+                </button>
               </div>
             </section>
 
@@ -329,9 +331,7 @@ function Dashboard({ activeSection = "overview" }) {
 
       {/* Footer */}
       <footer className="flex flex-col gap-2 border-t border-white/10 py-6 text-xs text-neutral-500 sm:flex-row sm:items-center sm:justify-between">
-        <p>
-          © {new Date().getFullYear()} LearnHub. Keep learning.
-        </p>
+        <p>© {new Date().getFullYear()} LearnHub. Keep learning.</p>
 
         <p className="flex items-center gap-2">
           <span className="h-1.5 w-1.5 rounded-full bg-neutral-500" />

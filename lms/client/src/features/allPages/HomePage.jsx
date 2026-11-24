@@ -142,7 +142,7 @@ export default function HomePage() {
           className="learnhub-about-link"
         >
           Founder
-          </Link>
+              </Link>
               <Link to="/about" className="learnhub-about-link">
                 About
               </Link>
@@ -155,6 +155,12 @@ export default function HomePage() {
           >
              Technology Library
             </Link>
+            <Link
+           to="/interview"
+          className="learnhub-about-link"
+        >
+          interview
+              </Link>
             </div>
 
             <Link
