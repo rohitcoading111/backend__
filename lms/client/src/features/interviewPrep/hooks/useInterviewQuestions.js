@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import { fetchInterviewQuestions } from "../interviewPrepThunk";
+import { fetchInterviewQuestions } from "../thunks/interviewPrepThunk";
 
 export const useInterviewQuestions = () => {
   const dispatch = useDispatch();
