@@ -6,6 +6,7 @@ import lectureReducer from "../features/instructor/store/lectureSlice.js";
 import liveSessionReducer from "../features/instructor/store/liveSessionSlice";
 import dsaReducer from "../features/dsa/dsaSlices/dsaSlice";
 import aiReducer from "../features/ai/aiSclice/aiSlice.js";
+import interviewPrepReducer from "../features/interviewPrep/store/interviewPrepSlice.js";
 
 export const store = configureStore({
   reducer: {
@@ -16,5 +17,6 @@ export const store = configureStore({
     liveSession: liveSessionReducer,
     dsa: dsaReducer,
     ai: aiReducer,
+    interviewPrep: interviewPrepReducer,
   },
 });
