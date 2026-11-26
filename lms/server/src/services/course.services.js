@@ -110,6 +110,21 @@ export const getSingleCourse = async (
   if (!courseId || !instructorId) {
     throw new Error("Invalid course or instructor ID");
   }
+ const cacheKey = `course:${courseId}:${instructorId}:${organizationId || "individual"}`;
+
+ let cachedCourse;
+
+ try {
+   cachedCourse = await Promise.race([
+     redis.get(cacheKey),
+     timeoutPromise(2000)
+   ])
+ } catch (error) {
+   console.error("Redis cache read error:", error.message);
+ }
+  if (cachedCourse) {
+  return JSON.parse(cachedCourse);
+}
 
   const filter = organizationId
     ? {
@@ -121,14 +136,15 @@ export const getSingleCourse = async (
         instructor: instructorId,
         organizationId: null,
       };
-
-  const course = await courseModel.findOne(filter);
-
-  if (!course) {
-    throw new Error("Course not found or access denied");
-  }
-
-  return course;
+   
+  return getOrFetchCourses(cacheKey, async()=>{
+      const course = await courseModel.findOne(filter);
+      
+      if(!course){
+        throw new Error("Course has been not founde")
+      }
+      return course;
+    })
 };
 
 
