@@ -56,6 +56,8 @@ const config = {
    PINECONE_API_KEY:process.env.PINECONE_API_KEY,
    PINECONE_INDEX_NAME:process.env.PINECONE_INDEX_NAME,
 
+   TAVILY_API_KEY:process.env.TAVILY_API_KEY,
+   
    REDIS_URL:process.env.REDIS_URL,
 
 };
