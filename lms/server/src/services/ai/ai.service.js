@@ -1,13 +1,11 @@
 import llm from "./llm.service.js";
 import { visionLlm } from "./llm.service.js";
-import { HumanMessage } from "@langchain/core/messages";
 import { retrieveKnowledge } from "./retrieval.service.js";
-import {searchWeb} from "./browser.service.js"
-import {shouldSearchWeb} from "../ai/keyword.service.js"
+import { searchWeb } from "./browser.service.js";
+import { shouldSearchWeb } from "../ai/keyword.service.js";
 import { z } from "zod";
 import { createCourse } from "../course.services.js";
 import { createCourseSchema } from "./tools/create-course.tool.js";
-
 
 // Generate LearnHub AI response as a stream
 export const streamAIResponse = async function* (question, { image } = {}) {
@@ -20,16 +18,20 @@ export const streamAIResponse = async function* (question, { image } = {}) {
         .join("\n\n");
 
     let webContext = "";
-    if(shouldSearchWeb(question)){
-        const webResults  = await searchWeb(question);
+
+    if (shouldSearchWeb(question)) {
+        const webResults = await searchWeb(question);
+
         webContext = webResults
-    .map((result) => `Title: ${result.title}\nURL: ${result.url}\nContent: ${result.content}`)
-    .join("\n\n");
+            .map(
+                (result) =>
+                    `Title: ${result.title}\nURL: ${result.url}\nContent: ${result.content}`
+            )
+            .join("\n\n");
     }
 
-
-    // 3. Prepare prompt for Groq
-const prompt = `
+    // 3. Prepare prompt
+    const prompt = `
 You are LearnHub's official AI assistant.
 
 Your job is to answer the user's question accurately using the available context.
@@ -56,36 +58,40 @@ ${question}
 Answer:
 `;
 
+    // 4. Prepare model input
+    const modelInput = image
+        ? [
+              {
+                  role: "user",
+                  content: [
+                      { type: "text", text: String(prompt) },
+                      {
+                          type: "image_url",
+                          image_url: {
+                              url: `data:${image.mimetype};base64,${image.buffer.toString("base64")}`,
+                          },
+                      },
+                  ],
+              },
+          ]
+        : String(prompt);
 
-// 4. Stream the AI response, including an optional uploaded image
-const modelInput = image
-    ? [
-        new HumanMessage({
-            content: [
-                { type: "text", text: prompt },
-                {
-                    type: "image_url",
-                    image_url: {
-                        url: `data:${image.mimetype};base64,${image.buffer.toString("base64")}`,
-                    },
-                },
-            ],
-        }),
-    ]
-    : prompt;
-const stream = await (image ? visionLlm : llm).stream(modelInput);
+    // 5. Stream response
+    const stream = await (image ? visionLlm : llm).stream(modelInput);
 
-for await (const chunk of stream) {
-    const content = chunk.content;
+    for await (const chunk of stream) {
+        const content = chunk.content;
 
-    if (typeof content === "string" && content.length > 0) {
-        yield content;
+        if (typeof content === "string" && content.length > 0) {
+            yield content;
+        }
     }
-}
 };
 
+// Structured course schema
 const generatedCourseSchema = z.object(createCourseSchema);
 
+// AI Course Creation
 export const createAICourse = async ({
     prompt,
     instructorId,
@@ -110,4 +116,4 @@ ${prompt}
         organizationId,
         file: thumbnail,
     });
-}
+};
