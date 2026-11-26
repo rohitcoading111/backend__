@@ -137,7 +137,7 @@ export const getSingleCourse = async (
         organizationId: null,
       };
    
-  return getOrFetchCourses(cacheKey, async()=>{
+   return getOrFetchCourses(cacheKey, async()=>{
       const course = await courseModel.findOne(filter);
       
       if(!course){
@@ -145,6 +145,7 @@ export const getSingleCourse = async (
       }
       return course;
     })
+
 };
 
 
@@ -239,6 +240,7 @@ export const updateCourse = async ({
 
   await course.save();
   await invalidatePublishedCoursesCache();
+  await invalidateSingleCourseCache(  course._id,  instructorId,  organizationId);
 
   return course;
 };
