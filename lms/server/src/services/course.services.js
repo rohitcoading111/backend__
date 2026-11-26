@@ -9,44 +9,45 @@ import timeoutPromise from "../utils/timeoutPromise.js"
 
 const TTL_JITTER = 60 + Math.floor(Math.random() * 15);
 
-const pendingRequests = new Map();
+// Tracks the currently running fetch
+let pendingFetch = null;
 
 const getOrFetchCourses = async (cacheKey, fetchFromDB) => {
-  // STEP 1: Check whether a fetch is already in progress
-  if (pendingRequests.has(cacheKey)) {
-    return pendingRequests.get(cacheKey);
+
+  // If a fetch is already running, reuse it
+  if (pendingFetch) {
+    return pendingFetch;
   }
 
-  const currentGeneration = getGeneration();
-
-  // STEP 2: Create and execute a new async operation
-  const fetchPromise = (async () => {
+  // Start a new fetch and store its Promise
+  pendingFetch = (async () => {
     try {
-      // Fetch fresh data from MongoDB
+      // Fetch data from MongoDB
       const data = await fetchFromDB();
-      if (currentGeneration !== getGeneration()) {
-      return data;
-      } 
 
-      // Save fresh data into Redis
+      // Store the fetched data in Redis
       try {
-        await redis.set(cacheKey, JSON.stringify(data), "EX", TTL_JITTER);
+        await redis.set(
+          cacheKey,
+          JSON.stringify(data),
+          "EX",
+          TTL_JITTER
+        );
       } catch (error) {
-        console.error("Redis cache write error:", error.message);
+        console.error("Redis error:", error.message);
       }
 
+      // Return the fetched data
       return data;
+
     } finally {
-      // Remove the completed/failed fetch from pending tracking
-      pendingRequests.delete(cacheKey);
+      // Clear the pending request after completion
+      pendingFetch = null;
     }
   })();
 
-  // STEP 3: Register this ongoing Promise
-  pendingRequests.set(cacheKey, fetchPromise);
-
-  // STEP 4: Return the Promise
-  return fetchPromise;
+  // Return the ongoing Promise
+  return pendingFetch;
 };
 
 // Common ownership filter
