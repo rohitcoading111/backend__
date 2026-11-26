@@ -7,7 +7,6 @@ import {shouldSearchWeb} from "../ai/keyword.service.js"
 
 // Generate LearnHub AI response as a stream
 export const streamAIResponse = async function* (question) {
-console.log("AI SERVICE STARTED:", question);
     // 1. Retrieve relevant knowledge from Pinecone
     const knowledge = await retrieveKnowledge(question);
 
