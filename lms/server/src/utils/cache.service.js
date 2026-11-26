@@ -1,5 +1,5 @@
 import redis from "../config/redis.js";
-import {  incrementGeneration,} from "../utils/cacheGeneration.js";
+import {  incrementGeneration,} from "./cacheGeneration.js";
 
 export const invalidatePublishedCoursesCache = async () => {
   try {

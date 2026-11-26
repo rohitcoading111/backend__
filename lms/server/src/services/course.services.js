@@ -3,52 +3,10 @@ import courseModel from "../models/course.models.js";
 import imagekit from "../config/imagekit.js";
 import Module from "../models/module.models.js";
 import Lecture from "../models/lecture.models.js";
-import { invalidatePublishedCoursesCache } from "./cache.service.js";
-import { getGeneration,} from "../utils/cacheGeneration.js";
+import { invalidatePublishedCoursesCache } from "../utils/cache.service.js";
 import timeoutPromise from "../utils/timeoutPromise.js"
+import {getOrFetchCourses} from "../utils/singleFlight.js"
 
-const TTL_JITTER = 60 + Math.floor(Math.random() * 15);
-
-// Tracks the currently running fetch
-let pendingFetch = null;
-
-const getOrFetchCourses = async (cacheKey, fetchFromDB) => {
-
-  // If a fetch is already running, reuse it
-  if (pendingFetch) {
-    return pendingFetch;
-  }
-
-  // Start a new fetch and store its Promise
-  pendingFetch = (async () => {
-    try {
-      // Fetch data from MongoDB
-      const data = await fetchFromDB();
-
-      // Store the fetched data in Redis
-      try {
-        await redis.set(
-          cacheKey,
-          JSON.stringify(data),
-          "EX",
-          TTL_JITTER
-        );
-      } catch (error) {
-        console.error("Redis error:", error.message);
-      }
-
-      // Return the fetched data
-      return data;
-
-    } finally {
-      // Clear the pending request after completion
-      pendingFetch = null;
-    }
-  })();
-
-  // Return the ongoing Promise
-  return pendingFetch;
-};
 
 // Common ownership filter
 const getCourseOwnershipFilter = (
