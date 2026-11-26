@@ -20,10 +20,13 @@ export const streamAIController = async (req, res) => {
         res.setHeader("X-Accel-Buffering", "no");
 
         // 4. Generate and send AI response chunks
-        for await (const chunk of streamAIResponse(question.trim())) {
-            res.write(chunk);
-        }
-
+        for await (const chunk of streamAIResponse(question.trim(), {
+    userId: req.user?.id,
+    role: req.user?.role,
+    organizationId: req.organizationId ?? null,
+})) {
+    res.write(chunk);
+}
         // 5. End response
         res.end();
 

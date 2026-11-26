@@ -22,6 +22,7 @@ import chatRoutes from "../routes/chat.routes.js";
 import dsaRoutes from "../routes/dsa.routes.js";
 import aiRoutes from "../routes/ai.routes.js";
 import interviewQuestionRoutes from "../routes/interviewQuestion.routes.js";
+import mcpRoutes from "../routes/mcp.routes.js";
 
 
 // Global rate limiter
@@ -108,6 +109,8 @@ app.use("/api/dsa",dsaRoutes);
 app.use("/api/ai", aiRoutes);
 
 app.use("/api/interview", interviewQuestionRoutes);
+
+app.use("/api/mcp", mcpRoutes);
 
 
 export default app;

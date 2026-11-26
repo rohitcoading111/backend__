@@ -2,11 +2,15 @@ import llm from "./llm.service.js";
 import { retrieveKnowledge } from "./retrieval.service.js";
 import {searchWeb} from "./browser.service.js"
 import {shouldSearchWeb} from "../ai/keyword.service.js"
-
+import { createMcpServer } from "./tools/mcp.server.js";
 
 
 // Generate LearnHub AI response as a stream
-export const streamAIResponse = async function* (question) {
+export const streamAIResponse = async function* (question, data) {
+    const { userId, role, organizationId } = data ?? {};
+ 
+
+    // Baaki tera existing code yahin se continue hoga
     // 1. Retrieve relevant knowledge from Pinecone
     const knowledge = await retrieveKnowledge(question);
 
