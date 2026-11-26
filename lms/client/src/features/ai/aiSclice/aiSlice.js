@@ -34,9 +34,23 @@ const aiSlice = createSlice({
             }
         },
 
+        startAIRequest: (state) => {
+            state.loading = true;
+            state.error = null;
+        },
+
+        finishAIRequest: (state) => {
+            state.loading = false;
+        },
+
+        setAIError: (state, action) => {
+            state.error = action.payload;
+        },
+
         clearChat: (state) => {
             state.messages = [];
             state.error = null;
+            state.loading = false;
         },
     },
 
@@ -59,6 +73,9 @@ const aiSlice = createSlice({
 export const {
     addUserMessage,
     addAIChunk,
+    startAIRequest,
+    finishAIRequest,
+    setAIError,
     clearChat,
 } = aiSlice.actions;
 

@@ -49,7 +49,7 @@ export const createCourse = async ({
 
   const uploadResponse = await imagekit.files.upload({
     file: file.buffer.toString("base64"),
-    fileName: `${Date.now()}-${file.originalname}`,
+    fileName: `${Date.now()}-${file.originalname.replace(/[^a-zA-Z0-9._-]/g, "_")}`,
     folder: "/lms/course-thumbnails",
   });
 

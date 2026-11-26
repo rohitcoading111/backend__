@@ -1,16 +1,25 @@
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { ImagePlus, X } from "lucide-react";
 
 const ChatInput = ({ onSend, loading }) => {
     const [question, setQuestion] = useState("");
+    const [image, setImage] = useState(null);
+    const [attachmentError, setAttachmentError] = useState("");
+    const imageInputRef = useRef(null);
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        if (!question.trim() || loading) return;
+        if ((!question.trim() && !image) || loading) return;
 
-        onSend(question.trim());
+        onSend(question.trim(), image);
         setQuestion("");
+        setImage(null);
+        setAttachmentError("");
+        if (imageInputRef.current) {
+            imageInputRef.current.value = "";
+        }
     };
 
     return (
@@ -40,13 +49,61 @@ const ChatInput = ({ onSend, loading }) => {
 
                     <div className="flex items-center justify-between mt-2">
 
-                        <p className="text-xs text-slate-500 px-2">
-                            Shift + Enter for a new line
-                        </p>
+                        <div className="flex min-w-0 items-center gap-3">
+                            <input
+                                ref={imageInputRef}
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp"
+                                aria-label="Choose an image to send to LearnHub AI"
+                                className="hidden"
+                                disabled={loading}
+                                onChange={(event) => {
+                                    const file = event.target.files?.[0] || null;
+                                    setAttachmentError("");
+
+                                    if (file && file.size > 5 * 1024 * 1024) {
+                                        setImage(null);
+                                        setAttachmentError("Image must be 5 MB or smaller.");
+                                        event.target.value = "";
+                                        return;
+                                    }
+
+                                    setImage(file);
+                                }}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => imageInputRef.current?.click()}
+                                disabled={loading}
+                                aria-label="Attach image"
+                                title="Attach image"
+                                className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-700 hover:text-violet-300 disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                                <ImagePlus size={20} />
+                            </button>
+                            <p className="truncate text-xs text-slate-500">
+                                {image ? image.name : "Shift + Enter for a new line"}
+                            </p>
+                            {image && (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setImage(null);
+                                        if (imageInputRef.current) {
+                                            imageInputRef.current.value = "";
+                                        }
+                                    }}
+                                    aria-label="Remove attached image"
+                                    className="flex-shrink-0 text-slate-500 hover:text-white"
+                                >
+                                    <X size={16} />
+                                </button>
+                            )}
+                        </div>
 
                         <button
                             type="submit"
-                            disabled={!question.trim() || loading}
+                            disabled={(!question.trim() && !image) || loading}
                             className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                             ↑
@@ -55,6 +112,12 @@ const ChatInput = ({ onSend, loading }) => {
                     </div>
 
                 </form>
+
+                {attachmentError && (
+                    <p role="alert" className="mt-2 text-xs text-red-400">
+                        {attachmentError}
+                    </p>
+                )}
 
                 <p className="text-center text-[11px] text-slate-500 mt-3">
                     LearnHub AI can make mistakes. Verify important information.

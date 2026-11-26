@@ -2,6 +2,9 @@ import { useDispatch, useSelector } from "react-redux";
 import {
     addUserMessage,
     addAIChunk,
+    startAIRequest,
+    finishAIRequest,
+    setAIError,
 } from "../aiSclice/aiSlice.js";
 import api from "../../../services/api";
 
@@ -12,27 +15,36 @@ const useAIChat = () => {
         (state) => state.ai
     );
 
-    const sendMessage = async (question) => {
-        if (!question.trim() || loading) return;
+    const sendMessage = async (question, image = null) => {
+        const prompt = question.trim();
+        if ((!prompt && !image) || loading) return;
 
         try {
-            // Add user's message
-            dispatch(addUserMessage(question));
+            const userMessage = prompt || "Please describe the attached image.";
+            dispatch(addUserMessage(
+                image ? `${userMessage}\n\n[Image attached: ${image.name}]` : userMessage
+            ));
+            dispatch(startAIRequest());
 
-            // Send question to backend
+            const formData = new FormData();
+            formData.append("question", userMessage);
+            if (image) {
+                formData.append("image", image);
+            }
+
             const response = await fetch(
                 `${api.defaults.baseURL}/ai/chat`,
                 {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ question }),
+                    body: formData,
                 }
             );
 
             if (!response.ok) {
-                throw new Error("AI request failed");
+                const errorBody = await response.json().catch(() => null);
+                throw new Error(
+                    errorBody?.message || `AI request failed (${response.status})`
+                );
             }
 
             if (!response.body) {
@@ -65,6 +77,9 @@ const useAIChat = () => {
 
         } catch (err) {
             console.error("AI Chat Error:", err);
+            dispatch(setAIError(err.message || "AI response generation failed."));
+        } finally {
+            dispatch(finishAIRequest());
         }
     };
 

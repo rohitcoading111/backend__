@@ -52,6 +52,9 @@ const config = {
 
    GROQ_API_KEY:process.env.GROQ_API_KEY,
    GROQ_MODEL:process.env.GROQ_MODEL,
+   GROQ_VISION_MODEL:
+      process.env.GROQ_VISION_MODEL ||
+      "meta-llama/llama-4-scout-17b-16e-instruct",
 
    PINECONE_API_KEY:process.env.PINECONE_API_KEY,
    PINECONE_INDEX_NAME:process.env.PINECONE_INDEX_NAME,

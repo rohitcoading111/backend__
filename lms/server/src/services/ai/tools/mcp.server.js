@@ -1,9 +1,9 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { createCourseSchema } from "./create-course.tool.js";
-import { createCourse } from "../../courses/course.service.js";
+import { createCourse } from "../../course.services.js";
 
 export const createMcpServer = (data = {}) => {
-  const { userId, role, organizationId } = data;
+  const { userId, role, organizationId, file } = data;
 
   const server = new McpServer({
     name: "learnhub-tools",
@@ -39,7 +39,7 @@ export const createMcpServer = (data = {}) => {
           courseData: args,
           instructorId: userId,
           organizationId,
-          file: null,
+          file,
         });
 
         return {

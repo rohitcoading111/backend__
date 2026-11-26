@@ -1,6 +1,9 @@
 import ChatMessages from "../component/ChatMessages";
 import ChatInput from "../component/ChatInput";
+import CourseGenerator from "../component/CourseGenerator";
 import useAIChat from "../hooks/useAIChat";
+import { useSelector } from "react-redux";
+import { useState } from "react";
 
 const suggestions = [
     {
@@ -26,6 +29,8 @@ const suggestions = [
 ];
 
 const AIChat = () => {
+    const user = useSelector((state) => state.auth.user);
+    const [showCourseGenerator, setShowCourseGenerator] = useState(false);
     const {
         messages,
         loading,
@@ -61,14 +66,32 @@ const AIChat = () => {
 
                 </div>
 
-                <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span className="text-xs text-emerald-400 font-medium">
-                        Online
-                    </span>
+                <div className="flex items-center gap-3">
+                    {user?.role === "INSTRUCTOR" && (
+                        <button
+                            type="button"
+                            aria-expanded={showCourseGenerator}
+                            onClick={() => setShowCourseGenerator((visible) => !visible)}
+                            className="rounded-xl border border-violet-500/40 px-3 py-2 text-xs font-semibold text-violet-300 transition hover:bg-violet-500/10"
+                        >
+                            {showCourseGenerator ? "Close course builder" : "Create course with AI"}
+                        </button>
+                    )}
+                    <div className="flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-2">
+                        <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
+                        <span className="text-xs font-medium text-emerald-400">
+                            Online
+                        </span>
+                    </div>
                 </div>
 
             </header>
+
+            {showCourseGenerator && user?.role === "INSTRUCTOR" && (
+                <div className="px-5 pt-5 md:px-10">
+                    <CourseGenerator />
+                </div>
+            )}
 
             {/* Main Chat Area */}
             <main className="flex-1 flex flex-col min-h-0">

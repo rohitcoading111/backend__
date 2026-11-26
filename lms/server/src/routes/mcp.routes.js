@@ -13,6 +13,7 @@ router.post("/", async (req, res) => {
       userId: req.user?.id,
       role: req.user?.role,
       organizationId: req.organizationId ?? null,
+      file: req.file ?? null,
     });
 
     transport = new StreamableHTTPServerTransport({
